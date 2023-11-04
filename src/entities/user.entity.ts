@@ -1,5 +1,6 @@
-import { Entity, Column } from 'typeorm';
+import { Entity, Column, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
+import { CartEntity } from './cart.entity';
 
 @Entity()
 export class UserEntity extends CommonEntity {
@@ -14,4 +15,11 @@ export class UserEntity extends CommonEntity {
 
   @Column({ type: 'varchar', length: 16 })
   phone!: string;
+
+  /**
+   * relations
+   */
+
+  @OneToMany(() => CartEntity, (c) => c.userId)
+  carts!: CartEntity[];
 }
