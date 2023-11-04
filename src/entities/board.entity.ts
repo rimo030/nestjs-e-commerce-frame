@@ -1,17 +1,15 @@
-import { BaseEntity, Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { BoardStatus } from '../types/enums/board-status.enum';
+import { CommonEntity } from './common/common.entity';
 
 @Entity()
-export class Board extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class BoardEntity extends CommonEntity {
+  @Column({ type: 'varchar', length: 512 })
+  title!: string;
 
-  @Column()
-  title: string;
+  @Column('text')
+  descrition!: string;
 
-  @Column()
-  descrition: string;
-
-  @Column()
-  status: BoardStatus;
+  @Column('varchar')
+  status!: BoardStatus;
 }
