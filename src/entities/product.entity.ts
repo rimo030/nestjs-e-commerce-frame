@@ -4,6 +4,7 @@ import { CategoryEntity } from './category.entity';
 import { ProductBundleEntity } from './product-bundle.entity';
 import { ProductRequiredOptionEntity } from './product-required-option.entity';
 import { ProductOptionEntity } from './product-option.entity';
+import { CartEntity } from './cart.entity';
 
 @Entity()
 export class ProductEntity extends CommonEntity {
@@ -42,4 +43,7 @@ export class ProductEntity extends CommonEntity {
 
   @OneToMany(() => ProductOptionEntity, (po) => po.productId)
   productoptions!: ProductOptionEntity[];
+
+  @OneToMany(() => CartEntity, (c) => c.productId)
+  carts!: CartEntity[];
 }
