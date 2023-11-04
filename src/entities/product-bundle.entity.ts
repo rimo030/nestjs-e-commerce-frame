@@ -4,10 +4,12 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
 import { CalculationType } from 'src/types/enums/calculation-type.enum';
 import { SellerEntity } from './seller.entity';
+import { ProductEntity } from './product.entity';
 
 @Entity()
 export class ProductBundleEntity extends CommonEntity {
@@ -26,4 +28,7 @@ export class ProductBundleEntity extends CommonEntity {
   @ManyToOne(() => SellerEntity, (s) => s.productBundles)
   @JoinColumn({ name: 'sellerId', referencedColumnName: 'id' })
   seller!: SellerEntity;
+
+  @OneToMany(() => ProductEntity, (p) => p.bundleId)
+  products!: ProductEntity[];
 }

@@ -1,9 +1,14 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
 import { CategoryEntity } from './category.entity';
+import { ProductBundleEntity } from './product-bundle.entity';
+import { ProductRequiredOptionEntity } from './product-required-option.entity';
 
 @Entity()
 export class ProductEntity extends CommonEntity {
+  @Column()
+  bundleId!: number;
+
   @Column()
   categoryID!: number;
 
@@ -26,4 +31,11 @@ export class ProductEntity extends CommonEntity {
   @ManyToOne(() => CategoryEntity, (c) => c.products)
   @JoinColumn({ name: 'categoryID', referencedColumnName: 'id' })
   category!: CategoryEntity;
+
+  @ManyToOne(() => ProductBundleEntity, (pb) => pb.products)
+  @JoinColumn({ name: 'bundleId', referencedColumnName: 'id' })
+  bundle!: ProductBundleEntity;
+
+  @OneToMany(() => ProductRequiredOptionEntity, (pro) => pro.productId)
+  productrequiredoptions!: ProductRequiredOptionEntity[];
 }
