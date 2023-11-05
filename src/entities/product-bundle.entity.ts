@@ -1,34 +1,27 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  OneToMany,
-} from 'typeorm';
+import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
 import { CalculationType } from 'src/types/enums/calculation-type.enum';
-import { SellerEntity } from './seller.entity';
-import { ProductEntity } from './product.entity';
+import { Seller } from './seller.entity';
+import { Product } from './product.entity';
 
 @Entity()
-export class ProductBundleEntity extends CommonEntity {
+export class ProductBundle extends CommonEntity {
   @Column()
   sellerId!: number;
 
-  @Column({ name: 'shipping_fee', type: 'int' })
-  shippingFee!: number;
-
-  @Column({ name: 'shipping_calculation', type: 'varchar' })
+  @Column({ name: 'shipping_calculation', type: 'varchar', length: 128 })
   shippingCalculation!: keyof typeof CalculationType;
+
+  @Column({ name: 'shipping_fee_min', type: 'varchar', length: 128 })
+  shippingFeeMin!: string;
 
   /**
    * relations
    */
-  @ManyToOne(() => SellerEntity, (s) => s.productBundles)
+  @ManyToOne(() => Seller, (s) => s.productBundles)
   @JoinColumn({ name: 'sellerId', referencedColumnName: 'id' })
-  seller!: SellerEntity;
+  seller!: Seller;
 
-  @OneToMany(() => ProductEntity, (p) => p.bundleId)
-  products!: ProductEntity[];
+  @OneToMany(() => Product, (p) => p.bundleId)
+  products!: Product[];
 }

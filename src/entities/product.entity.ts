@@ -1,48 +1,60 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
-import { CategoryEntity } from './category.entity';
-import { ProductBundleEntity } from './product-bundle.entity';
-import { ProductRequiredOptionEntity } from './product-required-option.entity';
-import { ProductOptionEntity } from './product-option.entity';
+import { Category } from './category.entity';
+import { ProductBundle } from './product-bundle.entity';
+import { ProductRequiredOption } from './product-required-option.entity';
+import { ProductOption } from './product-option.entity';
 import { CartEntity } from './cart.entity';
+import { Company } from './company.entity';
 
 @Entity()
-export class ProductEntity extends CommonEntity {
+export class Product extends CommonEntity {
   @Column()
   bundleId!: number;
 
   @Column()
-  categoryID!: number;
+  categoryId!: number;
 
-  @Column({ type: 'varchar', length: 32 })
+  @Column()
+  companyId!: number;
+
+  @Column({ type: 'varchar', length: 128 })
   title!: string;
 
   @Column({ type: 'int' })
   price!: number;
 
-  @Column({ type: 'varchar', length: 128 })
+  @Column({ type: 'varchar', length: 255 })
   description!: string;
 
-  @Column({ type: 'text' })
-  company!: string;
+  @Column({ type: 'int' })
+  shipping_fee!: number;
+
+  // 이미지 컬럼
+  // @Column()
+  // img!: string;
 
   /**
    * relations
    */
 
-  @ManyToOne(() => CategoryEntity, (c) => c.products)
-  @JoinColumn({ name: 'categoryID', referencedColumnName: 'id' })
-  category!: CategoryEntity;
+  @ManyToOne(() => Category, (c) => c.products)
+  @JoinColumn({ name: 'categoryId', referencedColumnName: 'id' })
+  category!: Category;
 
-  @ManyToOne(() => ProductBundleEntity, (pb) => pb.products)
+  @ManyToOne(() => Company, (c) => c.products)
+  @JoinColumn({ name: 'companyId', referencedColumnName: 'id' })
+  company!: Company;
+
+  @ManyToOne(() => ProductBundle, (pb) => pb.products)
   @JoinColumn({ name: 'bundleId', referencedColumnName: 'id' })
-  bundle!: ProductBundleEntity;
+  bundle!: ProductBundle;
 
-  @OneToMany(() => ProductRequiredOptionEntity, (pro) => pro.productId)
-  productrequiredoptions!: ProductRequiredOptionEntity[];
+  @OneToMany(() => ProductRequiredOption, (pro) => pro.productId)
+  productRequiredOptions!: ProductRequiredOption[];
 
-  @OneToMany(() => ProductOptionEntity, (po) => po.productId)
-  productoptions!: ProductOptionEntity[];
+  @OneToMany(() => ProductOption, (po) => po.productId)
+  productOptions!: ProductOption[];
 
   @OneToMany(() => CartEntity, (c) => c.productId)
   carts!: CartEntity[];

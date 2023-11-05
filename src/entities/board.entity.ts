@@ -3,13 +3,13 @@ import { BoardStatus } from '../types/enums/board-status.enum';
 import { CommonEntity } from './common/common.entity';
 
 @Entity()
-export class BoardEntity extends CommonEntity {
+export class Board extends CommonEntity {
   @Column({ type: 'varchar', length: 512 })
   title!: string;
 
   @Column('text')
   descrition!: string;
 
-  @Column('varchar')
-  status!: BoardStatus;
+  @Column({ name: 'status', type: 'varchar', length: 128 })
+  status!: keyof typeof BoardStatus;
 }
