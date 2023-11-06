@@ -1,14 +1,14 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
-import { Category } from './category.entity';
-import { ProductBundle } from './product-bundle.entity';
-import { ProductRequiredOption } from './product-required-option.entity';
-import { ProductOption } from './product-option.entity';
+import { CategoryEntity } from './category.entity';
+import { ProductBundleEntity } from './product-bundle.entity';
+import { ProductRequiredOptionEntity } from './product-required-option.entity';
+import { ProductOptionEntity } from './product-option.entity';
 import { CartEntity } from './cart.entity';
-import { Company } from './company.entity';
+import { CompanyEntity } from './company.entity';
 
-@Entity()
-export class Product extends CommonEntity {
+@Entity({ name: 'product' })
+export class ProductEntity extends CommonEntity {
   @Column()
   bundleId!: number;
 
@@ -28,7 +28,7 @@ export class Product extends CommonEntity {
   description!: string;
 
   @Column({ type: 'int' })
-  shipping_fee!: number;
+  shippingFee!: number;
 
   // 이미지 컬럼
   // @Column()
@@ -38,23 +38,23 @@ export class Product extends CommonEntity {
    * relations
    */
 
-  @ManyToOne(() => Category, (c) => c.products)
+  @ManyToOne(() => CategoryEntity, (c) => c.products)
   @JoinColumn({ name: 'categoryId', referencedColumnName: 'id' })
-  category!: Category;
+  category!: CategoryEntity;
 
-  @ManyToOne(() => Company, (c) => c.products)
+  @ManyToOne(() => CompanyEntity, (c) => c.products)
   @JoinColumn({ name: 'companyId', referencedColumnName: 'id' })
-  company!: Company;
+  company!: CompanyEntity;
 
-  @ManyToOne(() => ProductBundle, (pb) => pb.products)
+  @ManyToOne(() => ProductBundleEntity, (pb) => pb.products)
   @JoinColumn({ name: 'bundleId', referencedColumnName: 'id' })
-  bundle!: ProductBundle;
+  bundle!: ProductBundleEntity;
 
-  @OneToMany(() => ProductRequiredOption, (pro) => pro.productId)
-  productRequiredOptions!: ProductRequiredOption[];
+  @OneToMany(() => ProductRequiredOptionEntity, (pro) => pro.productId)
+  productRequiredOptions!: ProductRequiredOptionEntity[];
 
-  @OneToMany(() => ProductOption, (po) => po.productId)
-  productOptions!: ProductOption[];
+  @OneToMany(() => ProductOptionEntity, (po) => po.productId)
+  productOptions!: ProductOptionEntity[];
 
   @OneToMany(() => CartEntity, (c) => c.productId)
   carts!: CartEntity[];

@@ -1,9 +1,9 @@
 import { Entity, Column, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
-import { Product } from './product.entity';
+import { ProductEntity } from './product.entity';
 
-@Entity()
-export class Company extends CommonEntity {
+@Entity({ name: 'company' })
+export class CompanyEntity extends CommonEntity {
   @Column({ type: 'varchar', length: 128 })
   name!: string;
 
@@ -11,6 +11,6 @@ export class Company extends CommonEntity {
    * relations
    */
 
-  @OneToMany(() => Product, (p) => p.companyId)
-  products!: Product[];
+  @OneToMany(() => ProductEntity, (p) => p.companyId)
+  products!: ProductEntity[];
 }

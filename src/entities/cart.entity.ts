@@ -1,7 +1,7 @@
 import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
 import { UserEntity } from './user.entity';
-import { Product } from './product.entity';
+import { ProductEntity } from './product.entity';
 import { CartProductRequiredOptionEntity } from './cart-product-required-option.entity';
 import { CartProductOptionEntity } from './cart-product-option.entity';
 
@@ -21,9 +21,9 @@ export class CartEntity extends CommonEntity {
   @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   user!: UserEntity;
 
-  @ManyToOne(() => Product, (p) => p.carts)
+  @ManyToOne(() => ProductEntity, (p) => p.carts)
   @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
-  product!: Product;
+  product!: ProductEntity;
 
   @OneToMany(() => CartProductRequiredOptionEntity, (cpro) => cpro.cartId)
   cartproductrequiredoptions!: CartProductRequiredOptionEntity[];
