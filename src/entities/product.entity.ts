@@ -6,6 +6,7 @@ import { ProductRequiredOptionEntity } from './product-required-option.entity';
 import { ProductOptionEntity } from './product-option.entity';
 import { CartEntity } from './cart.entity';
 import { CompanyEntity } from './company.entity';
+import { OrderProductEntity } from './order-product.entity';
 
 @Entity({ name: 'product' })
 export class ProductEntity extends CommonEntity {
@@ -58,4 +59,7 @@ export class ProductEntity extends CommonEntity {
 
   @OneToMany(() => CartEntity, (c) => c.productId)
   carts!: CartEntity[];
+
+  @OneToMany(() => OrderProductEntity, (op) => op.productId)
+  orderProducts!: OrderProductEntity[];
 }

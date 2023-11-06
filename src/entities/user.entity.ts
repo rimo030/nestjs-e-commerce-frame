@@ -1,6 +1,7 @@
 import { Entity, Column, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
 import { CartEntity } from './cart.entity';
+import { OrderEntity } from './order.entity';
 
 @Entity({ name: 'user' })
 export class UserEntity extends CommonEntity {
@@ -28,4 +29,7 @@ export class UserEntity extends CommonEntity {
 
   @OneToMany(() => CartEntity, (c) => c.userId)
   carts!: CartEntity[];
+
+  @OneToMany(() => OrderEntity, (o) => o.userId)
+  orders!: OrderEntity[];
 }
