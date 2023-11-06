@@ -40,15 +40,15 @@ export class ProductEntity extends CommonEntity {
    */
 
   @ManyToOne(() => CategoryEntity, (c) => c.products)
-  @JoinColumn({ name: 'categoryId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   category!: CategoryEntity;
 
   @ManyToOne(() => CompanyEntity, (c) => c.products)
-  @JoinColumn({ name: 'companyId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   company!: CompanyEntity;
 
   @ManyToOne(() => ProductBundleEntity, (pb) => pb.products)
-  @JoinColumn({ name: 'bundleId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   bundle!: ProductBundleEntity;
 
   @OneToMany(() => ProductRequiredOptionEntity, (pro) => pro.productId)

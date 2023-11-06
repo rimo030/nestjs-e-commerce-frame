@@ -19,7 +19,7 @@ export class ProductBundleEntity extends CommonEntity {
    * relations
    */
   @ManyToOne(() => SellerEntity, (s) => s.productBundles)
-  @JoinColumn({ name: 'sellerId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   seller!: SellerEntity;
 
   @OneToMany(() => ProductEntity, (p) => p.bundleId)

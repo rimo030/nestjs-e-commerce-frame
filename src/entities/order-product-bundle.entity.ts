@@ -34,6 +34,6 @@ export class OrderProductBundleEntity extends CommonEntity {
   orderProductOptions!: OrderProductOptionEntity[];
 
   @ManyToOne(() => OrderEntity, (o) => o.orderProductBundles)
-  @JoinColumn({ name: 'orderId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   user!: OrderEntity;
 }

@@ -25,10 +25,10 @@ export class CartInputOptionEntity extends CommonEntity {
    */
 
   @ManyToOne(() => CartRequiredOptionEntity, (cpro) => cpro.cartInputOptions)
-  @JoinColumn({ name: 'cartRequiredId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   cartRequiredOption!: CartRequiredOptionEntity;
 
   @ManyToOne(() => ProductInputOptionEntity, (pio) => pio.cartInputOptions)
-  @JoinColumn({ name: 'productInputOptionId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   productInputOption!: ProductInputOptionEntity;
 }

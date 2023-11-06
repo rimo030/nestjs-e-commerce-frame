@@ -16,14 +16,14 @@ export class OrderProductEntity extends CommonEntity {
   productId!: number;
 
   @ManyToOne(() => OrderProductBundleEntity, (o) => o.orderProducts)
-  @JoinColumn({ name: 'orderProductId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   orderProductBundle!: OrderProductBundleEntity;
 
   @ManyToOne(() => CartEntity, (c) => c.orderProducts)
-  @JoinColumn({ name: 'cartId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   cart!: CartEntity;
 
   @ManyToOne(() => ProductEntity, (p) => p.orderProducts)
-  @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   product!: ProductEntity;
 }

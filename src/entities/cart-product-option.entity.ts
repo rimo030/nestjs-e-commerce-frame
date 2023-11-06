@@ -19,10 +19,10 @@ export class CartOptionEntity extends CommonEntity {
    */
 
   @ManyToOne(() => CartEntity, (c) => c.cartOptions)
-  @JoinColumn({ name: 'cartId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   cart!: CartEntity;
 
   @ManyToOne(() => ProductOptionEntity, (po) => po.cartOptions)
-  @JoinColumn({ name: 'productOptionId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   productOption!: ProductOptionEntity;
 }

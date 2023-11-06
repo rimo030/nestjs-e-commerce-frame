@@ -22,11 +22,11 @@ export class CartEntity extends CommonEntity {
    */
 
   @ManyToOne(() => UserEntity, (u) => u.carts)
-  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   user!: UserEntity;
 
   @ManyToOne(() => ProductEntity, (p) => p.carts)
-  @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   product!: ProductEntity;
 
   @OneToMany(() => CartRequiredOptionEntity, (cpro) => cpro.cartId)

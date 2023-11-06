@@ -17,6 +17,6 @@ export class OrderProductOptionEntity extends CommonEntity {
   count!: number;
 
   @ManyToOne(() => OrderProductBundleEntity, (opb) => opb.orderProductOptions)
-  @JoinColumn({ name: 'OrderProductOptionId', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   orderProductBundle!: OrderProductBundleEntity;
 }

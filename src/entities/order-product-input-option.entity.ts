@@ -20,9 +20,6 @@ export class OrderProductInputOptionEntity extends CommonEntity {
     () => OrderProductRequiredOptionEntity,
     (opro) => opro.orderProductInputOptions,
   )
-  @JoinColumn({
-    name: 'orderProductRequiredOptionId',
-    referencedColumnName: 'id',
-  })
+  @JoinColumn({ referencedColumnName: 'id' })
   orderProductRequiredOption!: OrderProductRequiredOptionEntity;
 }
