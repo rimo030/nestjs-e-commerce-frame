@@ -2,8 +2,8 @@ import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
 import { UserEntity } from './user.entity';
 import { ProductEntity } from './product.entity';
-import { CartRequiredOptionEntity } from './cart-product-required-option.entity';
-import { CartOptionEntity } from './cart-product-option.entity';
+import { CartRequiredOptionEntity } from './cart-required-option.entity';
+import { CartOptionEntity } from './cart-option.entity';
 import { OrderProductEntity } from './order-product.entity';
 
 @Entity({ name: 'cart' })

@@ -1,7 +1,7 @@
 import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
 import { ProductRequiredOptionEntity } from './product-required-option.entity';
-import { CartInputOptionEntity } from './cart-product-input-option.entity';
+import { CartInputOptionEntity } from './cart-input-option.entity';
 
 @Entity({ name: 'product_input_option' })
 export class ProductInputOptionEntity extends CommonEntity {
