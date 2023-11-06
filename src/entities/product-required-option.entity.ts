@@ -2,9 +2,9 @@ import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
 import { ProductEntity } from './product.entity';
 import { ProductInputOptionEntity } from './product-input-option.entity';
-import { CartProductRequiredOptionEntity } from './cart-product-required-option.entity';
+import { CartRequiredOptionEntity } from './cart-product-required-option.entity';
 
-@Entity({ name: 'prodect_required_option' })
+@Entity({ name: 'product_required_option' })
 export class ProductRequiredOptionEntity extends CommonEntity {
   @Column()
   productId!: number;
@@ -33,11 +33,11 @@ export class ProductRequiredOptionEntity extends CommonEntity {
     () => ProductInputOptionEntity,
     (pio) => pio.productRequiredOptionId,
   )
-  productinputoptions!: ProductInputOptionEntity[];
+  productInputOptions!: ProductInputOptionEntity[];
 
   @OneToMany(
-    () => CartProductRequiredOptionEntity,
-    (cpro) => cpro.productrequiredoptionId,
+    () => CartRequiredOptionEntity,
+    (cpro) => cpro.productRequiredOptionId,
   )
-  cartproductrequiredoptions!: CartProductRequiredOptionEntity[];
+  cartRequiredOptions!: CartRequiredOptionEntity[];
 }
