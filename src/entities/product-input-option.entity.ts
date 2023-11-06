@@ -1,10 +1,10 @@
 import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
-import { ProductRequiredOption } from './product-required-option.entity';
-import { CartProductInputOptionEntity } from './cart-product-input-option.entity';
+import { ProductRequiredOptionEntity } from './product-required-option.entity';
+import { CartInputOptionEntity } from './cart-input-option.entity';
 
-@Entity()
-export class ProductInputOption extends CommonEntity {
+@Entity({ name: 'product_input_option' })
+export class ProductInputOptionEntity extends CommonEntity {
   @Column()
   productRequiredOptionId!: number;
 
@@ -24,13 +24,13 @@ export class ProductInputOption extends CommonEntity {
    * relations
    */
 
-  @ManyToOne(() => ProductRequiredOption, (pro) => pro.productinputoptions)
-  @JoinColumn({ name: 'productRequiredOptionId', referencedColumnName: 'id' })
-  productRequiredOption!: ProductRequiredOption;
-
-  @OneToMany(
-    () => CartProductInputOptionEntity,
-    (cpio) => cpio.productinputoptionId,
+  @ManyToOne(
+    () => ProductRequiredOptionEntity,
+    (pro) => pro.productInputOptions,
   )
-  cartproductinputoptions!: CartProductInputOptionEntity[];
+  @JoinColumn({ referencedColumnName: 'id' })
+  productRequiredOption!: ProductRequiredOptionEntity;
+
+  @OneToMany(() => CartInputOptionEntity, (cpio) => cpio.productInputOptionId)
+  cartInputOptions!: CartInputOptionEntity[];
 }

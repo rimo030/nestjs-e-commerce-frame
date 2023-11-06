@@ -1,10 +1,10 @@
 import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
-import { Product } from './product.entity';
-import { CartProductOptionEntity } from './cart-product-option.entity';
+import { ProductEntity } from './product.entity';
+import { CartOptionEntity } from './cart-option.entity';
 
-@Entity()
-export class ProductOption extends CommonEntity {
+@Entity({ name: 'product_option' })
+export class ProductOptionEntity extends CommonEntity {
   @Column()
   productId!: number;
 
@@ -24,10 +24,10 @@ export class ProductOption extends CommonEntity {
    * relations
    */
 
-  @ManyToOne(() => Product, (p) => p.productOptions)
-  @JoinColumn({ name: 'productId', referencedColumnName: 'id' })
-  product!: Product;
+  @ManyToOne(() => ProductEntity, (p) => p.productOptions)
+  @JoinColumn({ referencedColumnName: 'id' })
+  product!: ProductEntity;
 
-  @OneToMany(() => CartProductOptionEntity, (cpo) => cpo.productoptionId)
-  cartproductoptions!: CartProductOptionEntity[];
+  @OneToMany(() => CartOptionEntity, (cpo) => cpo.productOptionId)
+  cartOptions!: CartOptionEntity[];
 }

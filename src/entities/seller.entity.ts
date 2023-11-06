@@ -1,9 +1,9 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
-import { ProductBundle } from './product-bundle.entity';
+import { ProductBundleEntity } from './product-bundle.entity';
 
-@Entity()
-export class Seller extends CommonEntity {
+@Entity({ name: 'seller' })
+export class SellerEntity extends CommonEntity {
   @Column({ type: 'varchar', length: 512 })
   hashedPassword!: string;
 
@@ -18,11 +18,11 @@ export class Seller extends CommonEntity {
   phone!: string;
 
   @Column({ type: 'varchar', length: 128 })
-  business_number!: string;
+  businessNumber!: string;
 
   /**
    * relations
    */
-  @OneToMany(() => ProductBundle, (pb) => pb.sellerId)
-  productBundles!: ProductBundle[];
+  @OneToMany(() => ProductBundleEntity, (pb) => pb.sellerId)
+  productBundles!: ProductBundleEntity[];
 }
