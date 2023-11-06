@@ -6,6 +6,8 @@ import * as path from 'path';
 dotenv.config();
 
 const NODE_ENV = process.env.NODE_ENV;
+const SnakeNamingStrategy =
+  require('typeorm-naming-strategies').SnakeNamingStrategy;
 
 export default new DataSource({
   type: 'mysql',
@@ -20,4 +22,5 @@ export default new DataSource({
   ],
   synchronize: false,
   logging: true,
+  namingStrategy: new SnakeNamingStrategy(),
 });
