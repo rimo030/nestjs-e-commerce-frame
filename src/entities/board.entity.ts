@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity } from 'typeorm';
 import { BoardStatus } from '../types/enums/board-status.enum';
 import { CommonEntity } from './common/common.entity';
 
@@ -8,7 +8,7 @@ export class Board extends CommonEntity {
   title!: string;
 
   @Column('text')
-  descrition!: string;
+  description!: string;
 
   @Column({ name: 'status', type: 'varchar', length: 128 })
   status!: keyof typeof BoardStatus;

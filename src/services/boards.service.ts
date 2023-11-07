@@ -2,42 +2,87 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { BoardStatus } from '../types/enums/board-status.enum';
 import { v1 as uuid } from 'uuid';
 import { CreateBoardDto } from '../entities/dtos/create-board.dto';
-
-export type Board = any;
+import { BoardRespository } from 'src/repositories/board.repository';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Board } from 'src/entities/board.entity';
 
 @Injectable()
 export class BoardsService {
-  private boards: Board[] = [];
+  constructor(
+    @InjectRepository(BoardRespository)
+    private boardRespository: BoardRespository,
+  ) {}
 
-  getAllBoards(): Board[] {
-    return this.boards;
-  }
-
-  createBoard(createBoardDto: CreateBoardDto) {
-    // console.log('count', 'test');
-
+  // title,description을 받아 게시물 생성하기
+  async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
     const { title, description } = createBoardDto;
-
-    const board: Board = {
-      id: uuid(),
+    const board = this.boardRespository.create({
       title,
       description,
       status: BoardStatus.PUBLIC,
-    };
+    });
 
-    this.boards.push(board);
-
+    await this.boardRespository.save(board);
     return board;
   }
 
-  getBoardById(id: string): Board {
-    const found = this.boards.find((board) => board.id === id);
+  // id를 이용해 게시물 가져오기
+  async getBoardById(id: number): Promise<Board> {
+    const found = await this.boardRespository.findOneBy({ id });
 
     if (!found) {
       throw new NotFoundException(`Can't find Board with id ${id}`);
     }
     return found;
   }
+
+  // createBoard(createBoardDto: CreateBoardDto) {
+  //   // console.log('count', 'test');
+
+  //   const { title, description } = createBoardDto;
+
+  //   const board: Board = {
+  //     id: uuid(),
+  //     title,
+  //     description,
+  //     status: BoardStatus.PUBLIC,
+  //   };
+
+  //   this.boards.push(board);
+
+  //   return board;
+  // }
+
+  // getAllBoards(): Board[] {
+  //   return this.boards;
+  // }
+
+  // createBoard(createBoardDto: CreateBoardDto) {
+  //   // console.log('count', 'test');
+
+  //   const { title, description } = createBoardDto;
+
+  //   const board: Board = {
+  //     id: uuid(),
+  //     title,
+  //     description,
+  //     status: BoardStatus.PUBLIC,
+  //   };
+
+  //   this.boards.push(board);
+
+  //   return board;
+  // }
+
+  // getBoardById(id: string): Board {
+  //   const found = this.boards.find((board) => board.id === id);
+
+  //   if (!found) {
+  //     throw new NotFoundException(`Can't find Board with id ${id}`);
+  //   }
+  //   return found;
+  // }
+
   // deleteBoard(id: string): void {
   //   const found = this.getBoardById(id);
   //   this.boards = this.boards.filter((board) => board.id !== found.id);
