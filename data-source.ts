@@ -2,12 +2,11 @@
 import { DataSource } from 'typeorm';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 dotenv.config();
 
 const NODE_ENV = process.env.NODE_ENV;
-const SnakeNamingStrategy =
-  require('typeorm-naming-strategies').SnakeNamingStrategy;
 
 export default new DataSource({
   type: 'mysql',
