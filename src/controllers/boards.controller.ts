@@ -36,6 +36,14 @@ export class BoardsController {
     return this.boardsSevice.deleteBoard(id);
   }
 
+  @Patch('/:id/status')
+  updateBoardStatus(
+    @Param('id', ParseIntPipe) id: number,
+    @Body('status', BoardStatusValidationPipe) status: BoardStatus,
+  ) {
+    return this.boardsSevice.updateBoardStatus(id, status);
+  }
+
   // @Get('/')
   // getAllBoard(): Board[] {
   //   return this.boardsSevice.getAllBoards();

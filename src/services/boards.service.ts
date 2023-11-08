@@ -43,6 +43,15 @@ export class BoardsService {
     }
   }
 
+  // id를 이용해 특정 게시물 갱신하기
+  async updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
+    const board = await this.getBoardById(id);
+    board.status = status;
+    await this.boardRespository.save(board);
+
+    return board;
+  }
+
   // createBoard(createBoardDto: CreateBoardDto) {
   //   // console.log('count', 'test');
 
