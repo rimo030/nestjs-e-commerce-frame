@@ -14,7 +14,9 @@ export class BoardsService {
 
   // 모든 게시물 가져오기
   async getAllBoards(): Promise<Board[]> {
-    return await this.boardRespository.find();
+    return (await this.boardRespository.find()).filter(
+      (b) => b.deletedAt === null,
+    );
   }
 
   // title,description을 받아 게시물 생성하기
@@ -34,18 +36,23 @@ export class BoardsService {
   async getBoardById(id: number): Promise<Board> {
     const board = await this.boardRespository.findOneBy({ id });
 
-    if (!board) {
+    if (!board || board.deletedAt !== null) {
       throw new NotFoundException(`Can't find Board with id ${id}`);
     }
     return board;
   }
 
-  // id를 이용해 특정 게시물 삭제하기 (hard delete)
+  // id를 이용해 특정 게시물 삭제하기 (soft delete)
   async deleteBoard(id: number): Promise<void> {
-    const board = await this.boardRespository.delete(id);
-    if (board.affected === 0) {
-      throw new NotFoundException(`Can't find Board with id ${id}`);
-    }
+    const board = await this.getBoardById(id);
+    board.deletedAt = new Date();
+    await this.boardRespository.save(board);
+
+    // (hard delete)
+    // const board = await this.boardRespository.delete(id);
+    // if (board.affected === 0) {
+    //   throw new NotFoundException(`Can't find Board with id ${id}`);
+    // }
   }
 
   // id를 이용해 특정 게시물 갱신하기

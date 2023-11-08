@@ -32,7 +32,7 @@ export class BoardsController {
   }
 
   @Get('/:id')
-  getBoardById(@Param('id') id: number): Promise<Board> {
+  getBoardById(@Param('id', ParseIntPipe) id: number): Promise<Board> {
     return this.boardsSevice.getBoardById(id);
   }
 
