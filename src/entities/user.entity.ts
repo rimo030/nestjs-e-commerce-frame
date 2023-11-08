@@ -11,16 +11,16 @@ export class UserEntity extends CommonEntity {
   @Column({ type: 'varchar', length: 128 })
   name!: string;
 
-  @Column({ type: 'tinyint' })
+  @Column({ type: 'tinyint', nullable: true })
   gender!: number;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: true })
   age!: number;
 
-  @Column({ type: 'varchar', length: 128 })
+  @Column({ type: 'varchar', length: 128, nullable: true })
   email!: string;
 
-  @Column({ type: 'varchar', length: 11 })
+  @Column({ type: 'varchar', length: 11, nullable: true })
   phone!: string;
 
   /**
