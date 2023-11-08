@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BoardStatus } from '../types/enums/board-status.enum';
-import { v1 as uuid } from 'uuid';
 import { CreateBoardDto } from '../entities/dtos/create-board.dto';
 import { BoardRespository } from 'src/repositories/board.repository';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -26,7 +25,7 @@ export class BoardsService {
     return board;
   }
 
-  // id를 이용해 게시물 가져오기
+  // id를 이용해 특정 게시물 가져오기
   async getBoardById(id: number): Promise<Board> {
     const found = await this.boardRespository.findOneBy({ id });
 
@@ -34,6 +33,14 @@ export class BoardsService {
       throw new NotFoundException(`Can't find Board with id ${id}`);
     }
     return found;
+  }
+
+  // id를 이용해 특정 게시물 삭제하기 (hard delete)
+  async deleteBoard(id: number): Promise<void> {
+    const result = await this.boardRespository.delete(id);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Can't find Board with id ${id}`);
+    }
   }
 
   // createBoard(createBoardDto: CreateBoardDto) {
