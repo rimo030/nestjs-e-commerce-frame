@@ -12,6 +12,11 @@ export class BoardsService {
     private boardRespository: BoardRespository,
   ) {}
 
+  // 모든 게시물 가져오기
+  async getAllBoards(): Promise<Board[]> {
+    return await this.boardRespository.find();
+  }
+
   // title,description을 받아 게시물 생성하기
   async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
     const { title, description } = createBoardDto;

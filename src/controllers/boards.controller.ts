@@ -20,6 +20,11 @@ import { Board } from 'src/entities/board.entity';
 export class BoardsController {
   constructor(private boardsSevice: BoardsService) {}
 
+  @Get('/')
+  getAllBoard(): Promise<Board[]> {
+    return this.boardsSevice.getAllBoards();
+  }
+
   @Post('/')
   @UsePipes(ValidationPipe)
   createBoard(@Body() createBoardDto: CreateBoardDto): Promise<Board> {
