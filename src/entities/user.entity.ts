@@ -1,15 +1,16 @@
-import { Entity, Column, OneToMany } from 'typeorm';
+import { Entity, Column, OneToMany, Unique } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
 import { CartEntity } from './cart.entity';
 import { OrderEntity } from './order.entity';
 
 @Entity({ name: 'user' })
+@Unique(['name'])
 export class UserEntity extends CommonEntity {
   @Column({ type: 'varchar', length: 512 })
   hashedPassword!: string;
 
   @Column({ type: 'varchar', length: 128 })
-  name!: string;
+  username!: string;
 
   @Column({ type: 'tinyint', nullable: true })
   gender!: number;
