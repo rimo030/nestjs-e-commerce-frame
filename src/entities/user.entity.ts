@@ -10,7 +10,7 @@ export class UserEntity extends CommonEntity {
   hashedPassword!: string;
 
   @Column({ type: 'varchar', length: 128 })
-  username!: string;
+  name!: string;
 
   @Column({ type: 'tinyint', nullable: true })
   gender!: number;
