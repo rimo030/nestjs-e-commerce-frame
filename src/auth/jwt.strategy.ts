@@ -4,6 +4,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UserEntity } from 'src/entities/user.entity';
 import { UserRespository } from 'src/repositories/user.repository';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -12,7 +15,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     private userRespository: UserRespository,
   ) {
     super({
-      secretOrKey: 'secretNumber',
+      secretOrKey: process.env.JWT_SECRET,
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     });
   }
@@ -26,7 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException();
     }
-    console.log(payload);
+    console.log(process.env.JWT_EXPIRATION_TIME);
     return user;
   }
 }

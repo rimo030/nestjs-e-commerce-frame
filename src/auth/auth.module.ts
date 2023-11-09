@@ -6,14 +6,17 @@ import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
+import * as dotenv from 'dotenv';
+
+dotenv.config();
 
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: 'secretNumber',
+      secret: process.env.JWT_SECRET,
       signOptions: {
-        expiresIn: 60 * 60,
+        expiresIn: process.env.JWT_EXPIRATION_TIME,
       },
     }),
     CustomTypeOrmModule.forCustomRepository([UserRespository]),
