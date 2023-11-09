@@ -5,6 +5,7 @@ import { UserRespository } from 'src/repositories/user.repository';
 import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { PassportModule } from '@nestjs/passport';
     CustomTypeOrmModule.forCustomRepository([UserRespository]),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, JwtStrategy],
+  exports: [JwtStrategy, PassportModule],
 })
 export class AuthModule {}
