@@ -13,9 +13,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   ) {
     super({
       secretOrKey: 'secretNumber',
-      jwtFromResquest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     });
   }
+
+  // payload를 받아서 user Entitiy를 찾고 반환
   async validate(payload) {
     const { email } = payload;
     const user: UserEntity | null = await this.userRespository.findOneBy({
@@ -24,6 +26,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException();
     }
+    console.log(payload);
     return user;
   }
 }
