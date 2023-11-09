@@ -4,12 +4,15 @@ import { CartEntity } from './cart.entity';
 import { OrderEntity } from './order.entity';
 
 @Entity({ name: 'user' })
-@Unique(['name'])
+@Unique(['email'])
 export class UserEntity extends CommonEntity {
+  @Column({ type: 'varchar', length: 128 })
+  email!: string;
+
   @Column({ type: 'varchar', length: 512 })
   hashedPassword!: string;
 
-  @Column({ type: 'varchar', length: 128 })
+  @Column({ type: 'varchar', length: 128, nullable: true })
   name!: string;
 
   @Column({ type: 'tinyint', nullable: true })
@@ -17,9 +20,6 @@ export class UserEntity extends CommonEntity {
 
   @Column({ type: 'int', nullable: true })
   age!: number;
-
-  @Column({ type: 'varchar', length: 128, nullable: true })
-  email!: string;
 
   @Column({ type: 'varchar', length: 11, nullable: true })
   phone!: string;

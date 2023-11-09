@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 
 export class CommonEntity extends BaseEntity {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn({ type: 'bigint' })
   id!: number;
 
   @CreateDateColumn()
