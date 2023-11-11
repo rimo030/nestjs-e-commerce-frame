@@ -24,10 +24,7 @@ export class ProductInputOptionEntity extends CommonEntity {
    * relations
    */
 
-  @ManyToOne(
-    () => ProductRequiredOptionEntity,
-    (pro) => pro.productInputOptions,
-  )
+  @ManyToOne(() => ProductRequiredOptionEntity, (pro) => pro.productInputOptions)
   @JoinColumn({ referencedColumnName: 'id' })
   productRequiredOption!: ProductRequiredOptionEntity;
 

@@ -29,15 +29,9 @@ export class ProductRequiredOptionEntity extends CommonEntity {
   @JoinColumn({ referencedColumnName: 'id' })
   product!: ProductEntity;
 
-  @OneToMany(
-    () => ProductInputOptionEntity,
-    (pio) => pio.productRequiredOptionId,
-  )
+  @OneToMany(() => ProductInputOptionEntity, (pio) => pio.productRequiredOptionId)
   productInputOptions!: ProductInputOptionEntity[];
 
-  @OneToMany(
-    () => CartRequiredOptionEntity,
-    (cpro) => cpro.productRequiredOptionId,
-  )
+  @OneToMany(() => CartRequiredOptionEntity, (cpro) => cpro.productRequiredOptionId)
   cartRequiredOptions!: CartRequiredOptionEntity[];
 }

@@ -24,10 +24,7 @@ export class OrderProductBundleEntity extends CommonEntity {
   @OneToMany(() => OrderProductEntity, (op) => op.orderProductId)
   orderProducts!: OrderProductEntity[];
 
-  @OneToMany(
-    () => OrderProductRequiredOptionEntity,
-    (opro) => opro.OrderProductBundleId,
-  )
+  @OneToMany(() => OrderProductRequiredOptionEntity, (opro) => opro.OrderProductBundleId)
   orderProductRequiredOptions!: OrderProductRequiredOptionEntity[];
 
   @OneToMany(() => OrderProductOptionEntity, (opo) => opo.OrderProductOptionId)
