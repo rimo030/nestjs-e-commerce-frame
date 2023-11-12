@@ -14,8 +14,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot(typeORMConfig),
     BoardsModule,
+    TypeOrmModule.forRoot(typeORMConfig),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -24,7 +24,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         return {
           secret: configService.get('JWT_SECRET'),
           signOptions: {
-            // expiresIn: '1d',
             expiresIn: configService.get('JWT_EXPIRATION_TIME'),
           },
         };

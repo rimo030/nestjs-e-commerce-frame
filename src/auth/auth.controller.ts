@@ -1,7 +1,7 @@
 import { Body, Controller, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
-import { UserId } from './get-user.decorator';
+import { UserId } from './userid.decorator';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { AccessToken } from 'src/interfaces/access-token';
 
