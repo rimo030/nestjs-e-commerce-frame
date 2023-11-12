@@ -16,10 +16,7 @@ export class OrderProductInputOptionEntity extends CommonEntity {
   @Column({ type: 'int' })
   count!: number;
 
-  @ManyToOne(
-    () => OrderProductRequiredOptionEntity,
-    (opro) => opro.orderProductInputOptions,
-  )
+  @ManyToOne(() => OrderProductRequiredOptionEntity, (opro) => opro.orderProductInputOptions)
   @JoinColumn({ referencedColumnName: 'id' })
   orderProductRequiredOption!: OrderProductRequiredOptionEntity;
 }

@@ -4,9 +4,9 @@ import { CartEntity } from './cart.entity';
 import { OrderEntity } from './order.entity';
 
 @Entity({ name: 'user' })
-@Unique(['email'])
+// @Unique(['email'])
 export class UserEntity extends CommonEntity {
-  @Column({ type: 'varchar', length: 128 })
+  @Column({ type: 'varchar', length: 128, unique: true })
   email!: string;
 
   @Column({ type: 'varchar', length: 512 })

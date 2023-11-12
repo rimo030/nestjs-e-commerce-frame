@@ -3,26 +3,36 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserRespository } from 'src/repositories/user.repository';
 import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
-import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { JwtStrategy } from './jwt.strategy';
-import * as dotenv from 'dotenv';
-
-dotenv.config();
+import { JwtModule } from '@nestjs/jwt';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { typeORMConfig } from 'src/configs/typeorm.config';
+import { BoardsModule } from 'src/modules/boards.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+// import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
   imports: [
+    BoardsModule,
+    TypeOrmModule.forRoot(typeORMConfig),
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: {
-        expiresIn: process.env.JWT_EXPIRATION_TIME,
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return {
+          secret: configService.get('JWT_SECRET'),
+          signOptions: {
+            expiresIn: configService.get('JWT_EXPIRATION_TIME'),
+          },
+        };
       },
     }),
     CustomTypeOrmModule.forCustomRepository([UserRespository]),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
-  exports: [JwtStrategy, PassportModule],
+  exports: [JwtStrategy],
 })
 export class AuthModule {}

@@ -1,38 +1,28 @@
-import {
-  Body,
-  Controller,
-  Post,
-  Req,
-  UseGuards,
-  ValidationPipe,
-} from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
-import { AuthGuard } from '@nestjs/passport';
-import { GetUser } from './get-user.decorator';
-import { UserEntity } from 'src/entities/user.entity';
+import { UserId } from './userid.decorator';
+import { JwtAuthGuard } from './guards/jwt.guard';
+import { AccessToken } from 'src/interfaces/access-token';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('/signup')
-  signUp(
-    @Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto,
-  ): Promise<void> {
-    return this.authService.signUp(authCredentialsDto);
+  async signUp(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<void> {
+    await this.authService.signUp(authCredentialsDto);
   }
 
   @Post('/signin')
-  signIn(
-    @Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto,
-  ): Promise<{ accessToken: string }> {
-    return this.authService.signIn(authCredentialsDto);
+  async signIn(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<AccessToken> {
+    return await this.authService.signIn(authCredentialsDto);
   }
 
-  @Post('/')
-  @UseGuards(AuthGuard())
-  test(@GetUser() user: UserEntity) {
-    console.log('user', user);
+  @UseGuards(JwtAuthGuard)
+  @Post('jwt')
+  test1(@UserId() id: number) {
+    // 인증이 완료된 user의 id를 반환
+    return id;
   }
 }

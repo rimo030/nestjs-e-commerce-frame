@@ -17,16 +17,10 @@ export class OrderProductRequiredOptionEntity extends CommonEntity {
   @Column({ type: 'int' })
   count!: number;
 
-  @ManyToOne(
-    () => OrderProductBundleEntity,
-    (opb) => opb.orderProductRequiredOptions,
-  )
+  @ManyToOne(() => OrderProductBundleEntity, (opb) => opb.orderProductRequiredOptions)
   @JoinColumn({ referencedColumnName: 'id' })
   orderProductBundle!: OrderProductBundleEntity;
 
-  @OneToMany(
-    () => OrderProductInputOptionEntity,
-    (opio) => opio.orderProductRequiredOptionId,
-  )
+  @OneToMany(() => OrderProductInputOptionEntity, (opio) => opio.orderProductRequiredOptionId)
   orderProductInputOptions!: OrderProductInputOptionEntity[];
 }

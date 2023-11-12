@@ -27,5 +27,11 @@ module.exports = {
         endOfLine: 'auto',
       },
     ],
+    'max-len': [
+      'warn',
+      {
+        code: 120,
+      },
+    ],
   },
 };
