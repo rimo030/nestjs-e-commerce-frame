@@ -10,6 +10,7 @@ import {
   ValidationPipe,
   ParseIntPipe,
   UseGuards,
+  Logger,
 } from '@nestjs/common';
 import { BoardsService } from '../services/boards.service';
 import { BoardStatus } from '../types/enums/board-status.enum';
@@ -22,6 +23,7 @@ import { UserId } from 'src/auth/userid.decorator';
 @UseGuards(JwtAuthGuard)
 @Controller('boards')
 export class BoardsController {
+  private logger = new Logger('Board');
   constructor(private readonly boardsSevice: BoardsService) {}
 
   // @Get('/')
@@ -31,12 +33,14 @@ export class BoardsController {
 
   @Get('/')
   async getBoardByUserId(@UserId() id: number): Promise<Board[]> {
+    this.logger.verbose(`User ${id} trying to get all boards`);
     return await this.boardsSevice.getBoardByUserId(id);
   }
 
   @Post('/')
   @UsePipes(ValidationPipe)
   async createBoard(@Body() createBoardDto: CreateBoardDto, @UserId() id: number): Promise<Board> {
+    this.logger.verbose(`User ${id} creating a new board. Payload: ${JSON.stringify(createBoardDto)}`);
     return await this.boardsSevice.createBoard(createBoardDto, id);
   }
 
