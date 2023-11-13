@@ -9,7 +9,7 @@ import { Board } from 'src/entities/board.entity';
 export class BoardsService {
   constructor(
     @InjectRepository(BoardRespository)
-    private boardRespository: BoardRespository,
+    private readonly boardRespository: BoardRespository,
   ) {}
 
   // 모든 게시물 가져오기

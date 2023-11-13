@@ -22,7 +22,7 @@ import { UserId } from 'src/auth/userid.decorator';
 @UseGuards(JwtAuthGuard)
 @Controller('boards')
 export class BoardsController {
-  constructor(private boardsSevice: BoardsService) {}
+  constructor(private readonly boardsSevice: BoardsService) {}
 
   // @Get('/')
   // async getAllBoard(): Promise<Board[]> {
