@@ -17,13 +17,14 @@ export class BoardsService {
     return await this.boardRespository.find();
   }
 
-  // title,description을 받아 게시물 생성하기
-  async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
+  // userid, title,description을 받아 게시물 생성하기
+  async createBoard(createBoardDto: CreateBoardDto, id: number): Promise<Board> {
     const { title, description } = createBoardDto;
     const board = this.boardRespository.create({
       title,
       description,
       status: BoardStatus.PUBLIC,
+      userId: id,
     });
 
     await this.boardRespository.save(board);

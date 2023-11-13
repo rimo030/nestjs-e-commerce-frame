@@ -17,6 +17,10 @@ export class Board extends CommonEntity {
   @Column({ name: 'status', type: 'varchar', length: 128 })
   status!: keyof typeof BoardStatus;
 
+  /**
+   * relations
+   */
+
   @ManyToOne(() => UserEntity, (u) => u.boards)
   @JoinColumn({ referencedColumnName: 'id' })
   user!: UserEntity;
