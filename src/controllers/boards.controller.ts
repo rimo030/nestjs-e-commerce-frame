@@ -24,9 +24,14 @@ import { UserId } from 'src/auth/userid.decorator';
 export class BoardsController {
   constructor(private boardsSevice: BoardsService) {}
 
+  // @Get('/')
+  // async getAllBoard(): Promise<Board[]> {
+  //   return await this.boardsSevice.getAllBoards();
+  // }
+
   @Get('/')
-  async getAllBoard(): Promise<Board[]> {
-    return await this.boardsSevice.getAllBoards();
+  async getBoardByUserId(@UserId() id: number): Promise<Board[]> {
+    return await this.boardsSevice.getBoardByUserId(id);
   }
 
   @Post('/')
@@ -41,7 +46,7 @@ export class BoardsController {
   }
 
   @Delete('/:id')
-  async deleteBoard(@Param('id', ParseIntPipe) id): Promise<void> {
+  async deleteBoard(@Param('id', ParseIntPipe) id: number): Promise<void> {
     return await this.boardsSevice.deleteBoard(id);
   }
 

@@ -17,6 +17,19 @@ export class BoardsService {
     return await this.boardRespository.find();
   }
 
+  // User id를 이용해 특정 게시물 가져오기
+  // Query Builder 사용
+  async getBoardByUserId(id: number): Promise<Board[]> {
+    const query = this.boardRespository.createQueryBuilder('board');
+    query.where('board.userId = :userId', { userId: id });
+
+    const boards = await query.getMany(); // 검색된 쿼리 결과를 전부 가져와라
+    if (!boards) {
+      throw new NotFoundException(`Can't find Board with User ${id}`);
+    }
+    return boards;
+  }
+
   // userid, title,description을 받아 게시물 생성하기
   async createBoard(createBoardDto: CreateBoardDto, id: number): Promise<Board> {
     const { title, description } = createBoardDto;
