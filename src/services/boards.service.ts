@@ -32,14 +32,11 @@ export class BoardsService {
 
   // userid, title,description을 받아 게시물 생성하기
   async createBoard(createBoardDto: CreateBoardDto, id: number): Promise<BoardEntity> {
-    const board = this.boardRespository.create({
+    return await this.boardRespository.save({
       ...createBoardDto,
       status: BoardStatus.PUBLIC,
       userId: id,
     });
-
-    await this.boardRespository.save(board);
-    return board;
   }
 
   // id를 이용해 특정 게시물 가져오기
