@@ -17,21 +17,27 @@ import { CreateBoardDto } from '../entities/dtos/create-board.dto';
 import { BoardStatusValidationPipe } from '../pipes/board-status-vaildation.pipe';
 import { Board } from 'src/entities/board.entity';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { UserId } from 'src/auth/userid.decorator';
 
 @UseGuards(JwtAuthGuard)
 @Controller('boards')
 export class BoardsController {
-  constructor(private boardsSevice: BoardsService) {}
+  constructor(private readonly boardsSevice: BoardsService) {}
+
+  // @Get('/')
+  // async getAllBoard(): Promise<Board[]> {
+  //   return await this.boardsSevice.getAllBoards();
+  // }
 
   @Get('/')
-  async getAllBoard(): Promise<Board[]> {
-    return await this.boardsSevice.getAllBoards();
+  async getBoardByUserId(@UserId() id: number): Promise<Board[]> {
+    return await this.boardsSevice.getBoardByUserId(id);
   }
 
   @Post('/')
   @UsePipes(ValidationPipe)
-  async createBoard(@Body() createBoardDto: CreateBoardDto): Promise<Board> {
-    return await this.boardsSevice.createBoard(createBoardDto);
+  async createBoard(@Body() createBoardDto: CreateBoardDto, @UserId() id: number): Promise<Board> {
+    return await this.boardsSevice.createBoard(createBoardDto, id);
   }
 
   @Get('/:id')
@@ -40,8 +46,8 @@ export class BoardsController {
   }
 
   @Delete('/:id')
-  async deleteBoard(@Param('id', ParseIntPipe) id): Promise<void> {
-    return await this.boardsSevice.deleteBoard(id);
+  async deleteBoard(@Param('id', ParseIntPipe) boardId: number, @UserId() userId: number): Promise<void> {
+    return await this.boardsSevice.deleteBoard(boardId, userId);
   }
 
   @Patch('/:id/status')

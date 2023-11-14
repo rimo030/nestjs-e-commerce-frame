@@ -9,7 +9,7 @@ import { Board } from 'src/entities/board.entity';
 export class BoardsService {
   constructor(
     @InjectRepository(BoardRespository)
-    private boardRespository: BoardRespository,
+    private readonly boardRespository: BoardRespository,
   ) {}
 
   // 모든 게시물 가져오기
@@ -17,13 +17,27 @@ export class BoardsService {
     return await this.boardRespository.find();
   }
 
-  // title,description을 받아 게시물 생성하기
-  async createBoard(createBoardDto: CreateBoardDto): Promise<Board> {
+  // User id를 이용해 특정 게시물 가져오기
+  // Query Builder 사용
+  async getBoardByUserId(id: number): Promise<Board[]> {
+    const query = this.boardRespository.createQueryBuilder('board');
+    query.where('board.userId = :userId', { userId: id });
+
+    const boards = await query.getMany(); // 검색된 쿼리 결과를 전부 가져와라
+    if (!boards) {
+      throw new NotFoundException(`Can't find Board with User ${id}`);
+    }
+    return boards;
+  }
+
+  // userid, title,description을 받아 게시물 생성하기
+  async createBoard(createBoardDto: CreateBoardDto, id: number): Promise<Board> {
     const { title, description } = createBoardDto;
     const board = this.boardRespository.create({
       title,
       description,
       status: BoardStatus.PUBLIC,
+      userId: id,
     });
 
     await this.boardRespository.save(board);
@@ -40,9 +54,9 @@ export class BoardsService {
     return board;
   }
 
-  // id를 이용해 특정 게시물 삭제하기 (soft delete)
-  async deleteBoard(id: number): Promise<void> {
-    await this.boardRespository.softDelete(id);
+  // id를 이용해 특정 자신의 게시물 삭제하기 (soft delete)
+  async deleteBoard(boardId: number, userId: number): Promise<void> {
+    await this.boardRespository.softDelete({ id: boardId, userId });
 
     // (hard delete)
     // const board = await this.boardRespository.delete(id);

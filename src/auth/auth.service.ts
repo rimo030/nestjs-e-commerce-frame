@@ -10,8 +10,8 @@ import { AccessToken } from 'src/interfaces/access-token';
 export class AuthService {
   constructor(
     @InjectRepository(UserRespository)
-    private userRespository: UserRespository,
-    private jwtService: JwtService,
+    private readonly userRespository: UserRespository,
+    private readonly jwtService: JwtService,
   ) {}
 
   // email-password를 받아 회원 가입

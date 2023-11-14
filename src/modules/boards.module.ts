@@ -8,6 +8,5 @@ import { CustomTypeOrmModule } from '../configs/custom-typeorm.module';
   imports: [CustomTypeOrmModule.forCustomRepository([BoardRespository])],
   controllers: [BoardsController],
   providers: [BoardsService],
-  exports: [BoardsModule],
 })
 export class BoardsModule {}

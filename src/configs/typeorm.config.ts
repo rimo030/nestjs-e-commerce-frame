@@ -8,7 +8,6 @@ export const typeORMConfig: TypeOrmModuleOptions = {
   username: 'root',
   password: 'password',
   database: 'board_app',
-  // entities: [__dirname + '/../**/*.entitiy.{js, ts}'],
   entities: [__dirname + '/../entities/*.entity.{js, ts}'],
   synchronize: true,
   namingStrategy: new SnakeNamingStrategy(),
