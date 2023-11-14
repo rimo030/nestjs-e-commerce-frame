@@ -2,7 +2,7 @@ import { Entity, Column, OneToMany, Unique } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
 import { CartEntity } from './cart.entity';
 import { OrderEntity } from './order.entity';
-import { Board } from './board.entity';
+import { BoardEntity } from './board.entity';
 
 @Entity({ name: 'user' })
 // @Unique(['email'])
@@ -29,8 +29,8 @@ export class UserEntity extends CommonEntity {
    * relations
    */
 
-  @OneToMany(() => Board, (b) => b.userId)
-  boards!: Board[];
+  @OneToMany(() => BoardEntity, (b) => b.userId)
+  boards!: BoardEntity[];
 
   @OneToMany(() => CartEntity, (c) => c.userId)
   carts!: CartEntity[];

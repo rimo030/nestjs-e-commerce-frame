@@ -16,7 +16,7 @@ import { BoardsService } from '../services/boards.service';
 import { BoardStatus } from '../types/enums/board-status.enum';
 import { CreateBoardDto } from '../entities/dtos/create-board.dto';
 import { BoardStatusValidationPipe } from '../pipes/board-status-vaildation.pipe';
-import { Board } from 'src/entities/board.entity';
+import { BoardEntity } from 'src/entities/board.entity';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { UserId } from 'src/auth/userid.decorator';
 
@@ -32,20 +32,20 @@ export class BoardsController {
   // }
 
   @Get('/')
-  async getBoardByUserId(@UserId() id: number): Promise<Board[]> {
+  async getBoardByUserId(@UserId() id: number): Promise<BoardEntity[]> {
     this.logger.verbose(`User ${id} trying to get all boards`);
     return await this.boardsSevice.getBoardByUserId(id);
   }
 
   @Post('/')
   @UsePipes(ValidationPipe)
-  async createBoard(@Body() createBoardDto: CreateBoardDto, @UserId() id: number): Promise<Board> {
+  async createBoard(@Body() createBoardDto: CreateBoardDto, @UserId() id: number): Promise<BoardEntity> {
     this.logger.verbose(`User ${id} creating a new board. Payload: ${JSON.stringify(createBoardDto)}`);
     return await this.boardsSevice.createBoard(createBoardDto, id);
   }
 
   @Get('/:id')
-  async getBoardById(@Param('id', ParseIntPipe) id: number): Promise<Board> {
+  async getBoardById(@Param('id', ParseIntPipe) id: number): Promise<BoardEntity> {
     return await this.boardsSevice.getBoardById(id);
   }
 
