@@ -49,15 +49,14 @@ export class BoardsService {
     return board;
   }
 
-  // id를 이용해 특정 자신의 게시물 삭제하기 (soft delete)
-  async deleteBoard(boardId: number, userId: number): Promise<void> {
-    await this.boardRespository.softDelete({ id: boardId, userId });
-
-    // (hard delete)
-    // const board = await this.boardRespository.delete(id);
-    // if (board.affected === 0) {
-    //   throw new NotFoundException(`Can't find Board with id ${id}`);
-    // }
+  // id를 이용해 특정 자신의 게시물 삭제하기
+  async deleteBoard(boardId: number, userId: number): Promise<boolean> {
+    try {
+      await this.boardRespository.softDelete({ id: boardId, userId });
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 
   // id를 이용해 특정 게시물 갱신하기

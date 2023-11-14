@@ -50,7 +50,7 @@ export class BoardsController {
   }
 
   @Delete('/:id')
-  async deleteBoard(@Param('id', ParseIntPipe) boardId: number, @UserId() userId: number): Promise<void> {
+  async deleteBoard(@Param('id', ParseIntPipe) boardId: number, @UserId() userId: number): Promise<boolean> {
     return await this.boardsSevice.deleteBoard(boardId, userId);
   }
 
