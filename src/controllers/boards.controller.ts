@@ -26,11 +26,6 @@ export class BoardsController {
   private logger = new Logger('Board');
   constructor(private readonly boardsSevice: BoardsService) {}
 
-  // @Get('/')
-  // async getAllBoard(): Promise<Board[]> {
-  //   return await this.boardsSevice.getAllBoards();
-  // }
-
   @Get('/')
   async getBoardByUserId(@UserId() id: number): Promise<BoardEntity[]> {
     this.logger.verbose(`User ${id} trying to get all boards`);

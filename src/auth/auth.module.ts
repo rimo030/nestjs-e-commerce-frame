@@ -10,7 +10,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from 'src/configs/typeorm.config';
 import { BoardsModule } from 'src/modules/boards.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-// import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
   imports: [
