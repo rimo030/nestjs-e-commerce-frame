@@ -3,7 +3,7 @@ import { BoardStatus } from '../types/enums/board-status.enum';
 import { CreateBoardDto } from '../entities/dtos/create-board.dto';
 import { BoardRespository } from 'src/repositories/board.repository';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Board } from 'src/entities/board.entity';
+import { BoardEntity } from 'src/entities/board.entity';
 
 @Injectable()
 export class BoardsService {
@@ -13,13 +13,13 @@ export class BoardsService {
   ) {}
 
   // 모든 게시물 가져오기
-  async getAllBoards(): Promise<Board[]> {
+  async getAllBoards(): Promise<BoardEntity[]> {
     return await this.boardRespository.find();
   }
 
   // User id를 이용해 특정 게시물 가져오기
   // Query Builder 사용
-  async getBoardByUserId(id: number): Promise<Board[]> {
+  async getBoardByUserId(id: number): Promise<BoardEntity[]> {
     const query = this.boardRespository.createQueryBuilder('board');
     query.where('board.userId = :userId', { userId: id });
 
@@ -31,21 +31,16 @@ export class BoardsService {
   }
 
   // userid, title,description을 받아 게시물 생성하기
-  async createBoard(createBoardDto: CreateBoardDto, id: number): Promise<Board> {
-    const { title, description } = createBoardDto;
-    const board = this.boardRespository.create({
-      title,
-      description,
+  async createBoard(createBoardDto: CreateBoardDto, id: number): Promise<BoardEntity> {
+    return await this.boardRespository.save({
+      ...createBoardDto,
       status: BoardStatus.PUBLIC,
       userId: id,
     });
-
-    await this.boardRespository.save(board);
-    return board;
   }
 
   // id를 이용해 특정 게시물 가져오기
-  async getBoardById(id: number): Promise<Board> {
+  async getBoardById(id: number): Promise<BoardEntity> {
     const board = await this.boardRespository.findOneBy({ id });
 
     if (!board) {
@@ -54,19 +49,18 @@ export class BoardsService {
     return board;
   }
 
-  // id를 이용해 특정 자신의 게시물 삭제하기 (soft delete)
-  async deleteBoard(boardId: number, userId: number): Promise<void> {
-    await this.boardRespository.softDelete({ id: boardId, userId });
-
-    // (hard delete)
-    // const board = await this.boardRespository.delete(id);
-    // if (board.affected === 0) {
-    //   throw new NotFoundException(`Can't find Board with id ${id}`);
-    // }
+  // id를 이용해 특정 자신의 게시물 삭제하기
+  async deleteBoard(boardId: number, userId: number): Promise<boolean> {
+    try {
+      await this.boardRespository.softDelete({ id: boardId, userId });
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 
   // id를 이용해 특정 게시물 갱신하기
-  async updateBoardStatus(id: number, status: BoardStatus): Promise<Board> {
+  async updateBoardStatus(id: number, status: BoardStatus): Promise<BoardEntity> {
     const board = await this.getBoardById(id);
     board.status = status;
     await this.boardRespository.save(board);

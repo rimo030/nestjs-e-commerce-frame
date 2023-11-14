@@ -4,7 +4,7 @@ import { CommonEntity } from './common/common.entity';
 import { UserEntity } from './user.entity';
 
 @Entity({ name: 'board' })
-export class Board extends CommonEntity {
+export class BoardEntity extends CommonEntity {
   @Column()
   userId!: number;
 

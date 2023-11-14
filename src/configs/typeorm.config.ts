@@ -1,3 +1,4 @@
+import * as path from 'path';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
@@ -8,7 +9,7 @@ export const typeORMConfig: TypeOrmModuleOptions = {
   username: 'root',
   password: 'password',
   database: 'board_app',
-  entities: [__dirname + '/../entities/*.entity.{js, ts}'],
+  entities: [path.join(__dirname, '/../entities/*.entity.{js, ts}')],
   synchronize: true,
   namingStrategy: new SnakeNamingStrategy(),
 };
