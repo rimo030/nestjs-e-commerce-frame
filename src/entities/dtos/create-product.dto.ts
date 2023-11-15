@@ -1,6 +1,6 @@
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
-export class CreateBoardDto {
+export class CreateProductDto {
   @IsNotEmpty()
   bundleId!: number;
 
@@ -16,7 +16,7 @@ export class CreateBoardDto {
   @IsNotEmpty()
   price!: number;
 
-  @IsNotEmpty()
+  @IsOptional()
   description!: string;
 
   @IsNotEmpty()
