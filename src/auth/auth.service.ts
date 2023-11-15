@@ -16,7 +16,7 @@ export class AuthService {
 
   // email-password를 받아 회원 가입
   async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    const { email, password } = authCredentialsDto;
+    const { email, hashedPassword: password } = authCredentialsDto;
     const user = await this.userRespository.findOneBy({ email });
     if (user) {
       // 등록된 유저라면 error
@@ -31,7 +31,7 @@ export class AuthService {
 
   // email-password을 받아 등록된 유저인지 확인후 토큰 반환
   async signIn(authCredentialsDto: AuthCredentialsDto): Promise<AccessToken> {
-    const { email, password } = authCredentialsDto;
+    const { email, hashedPassword: password } = authCredentialsDto;
     const user = await this.userRespository.findOneBy({ email });
 
     // 등록된 유저인지 확인
