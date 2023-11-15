@@ -7,6 +7,12 @@ export class CompanyEntity extends CommonEntity {
   @Column({ type: 'varchar', length: 128 })
   name!: string;
 
+  @Column({ type: 'varchar', length: 128, unique: true })
+  email!: string;
+
+  @Column({ type: 'varchar', length: 11, nullable: true })
+  phone!: string;
+
   /**
    * relations
    */
