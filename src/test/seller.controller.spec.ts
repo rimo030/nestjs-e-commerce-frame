@@ -31,25 +31,29 @@ describe('SellerController', () => {
   판매자는 email, 비밀번호, 이름, 핸드폰번호, 사업자 번호을 입력해야 회원가입 할 수 있다.
   판매자는 email과 비밀번호로 로그인된다.
   email은 중복되면 안된다.
-  핸드폰, 사업자번호는 실제 있는 번호인지 검증이 필요
+  핸드폰, 사업자번호는 실제 있는 번호인지 검증이 필요...
 
 */
 
   it('판매자는 email, 비밀번호, 이름, 핸드폰번호, 사업자 번호를 입력해야 회원가입 할 수 있다.', async () => {
-    const response = await controller.createSeller();
-    expect(response.email).toBe(String);
-    expect(response.hashedPassword).toBe(String);
-    expect(response.name).toBe(String);
-    expect(response.phone).toBe(String);
-    expect(response.businessNumber).toBe(String);
+    const createSellerDto = new CreateSellerDto();
+    createSellerDto.email = 'abc123@gmail.com';
+    createSellerDto.hashedPassword = 'abc000!';
+    createSellerDto.name = 'abc';
+    createSellerDto.phone = '00011110000';
+    createSellerDto.businessNumber = '000000000';
+
+    await controller.createSeller(createSellerDto);
   });
 
   /*
     판매자 조회
   판매자는 자신의 email, 이름, 핸드폰번호, 사업자 번호를 열람 할 수 있어야 한다.
 */
-  it('판매자는 자신의 email, 이름, 핸드폰번호, 사업자 번호를 열람 할 수 있어야 한다.', async () => {
-    const response = await controller.getSeller();
+
+  it('판매자는 id로 자신의 email, 이름, 핸드폰번호, 사업자 번호를 열람 할 수 있어야 한다.', async () => {
+    const id = 0;
+    const response = await controller.getSeller(id);
     expect(response.email).toBe(String);
     expect(response.name).toBe(String);
     expect(response.phone).toBe(String);
