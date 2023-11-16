@@ -29,7 +29,7 @@ import { SellersRespository } from 'src/repositories/sellers.repository';
         };
       },
     }),
-    CustomTypeOrmModule.forCustomRepository([UsersRespository]),
+    CustomTypeOrmModule.forCustomRepository([UsersRespository, SellersRespository]),
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy],
