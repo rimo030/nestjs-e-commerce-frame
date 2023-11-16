@@ -9,5 +9,5 @@ export class AuthCredentialsDto {
   @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/, {
     message: '비밀번호 조건에 맞지 않음',
   })
-  password!: string;
+  hashedPassword!: string;
 }
