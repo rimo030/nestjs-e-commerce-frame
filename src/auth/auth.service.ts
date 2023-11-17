@@ -16,7 +16,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
+  async buyerSignUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
     const user = await this.userRespository.findOneBy({ email: authCredentialsDto.email });
     if (user) {
       throw new UnauthorizedException('this email already exists');

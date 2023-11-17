@@ -13,8 +13,8 @@ export class AuthController {
 
   // buyer 회원가입
   @Post('/signup')
-  async signUp(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    await this.authService.signUp(authCredentialsDto);
+  async buyerSignUp(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<void> {
+    await this.authService.buyerSignUp(authCredentialsDto);
   }
 
   // buyer 로그인 (토큰 발행)

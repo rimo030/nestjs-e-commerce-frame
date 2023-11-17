@@ -11,7 +11,7 @@ import { typeORMConfig } from 'src/configs/typeorm.config';
 import { BoardsModule } from 'src/modules/boards.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SellersRespository } from 'src/repositories/sellers.repository';
-import { BuyerLocalStrategy } from './strategies/local.strategy';
+import { BuyerLocalStrategy } from './strategies/buyer.local.strategy';
 
 @Module({
   imports: [
