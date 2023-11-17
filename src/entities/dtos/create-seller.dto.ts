@@ -6,9 +6,6 @@ export class CreateSellerDto extends AuthCredentialsDto {
   name!: string;
 
   @Optional()
-  gender!: number;
-
-  @Optional()
   age!: number;
 
   @Optional()

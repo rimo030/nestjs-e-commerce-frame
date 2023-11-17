@@ -16,7 +16,7 @@ import { SellerLocalStrategy } from './strategies/seller.local.strategy';
 
 @Module({
   imports: [
-    BoardsModule,
+    //BoardsModule,
     TypeOrmModule.forRoot(typeORMConfig),
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({

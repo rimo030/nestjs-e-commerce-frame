@@ -5,7 +5,6 @@ import { OrderEntity } from './order.entity';
 import { BoardEntity } from './board.entity';
 
 @Entity({ name: 'user' })
-// @Unique(['email'])
 export class UserEntity extends CommonEntity {
   @Column({ type: 'varchar', length: 128, unique: true })
   email!: string;
