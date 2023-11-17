@@ -3,14 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { BuyerEntity } from 'src/entities/user.entity';
-import { BuyersRespository } from 'src/repositories/users.repository';
+import { BuyersRespository } from 'src/repositories/buyers.repository';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
+export class BuyerJwtStrategy extends PassportStrategy(Strategy, 'buyer-jwt') {
   constructor(
     @InjectRepository(BuyersRespository)
-    private readonly userRespository: BuyersRespository,
+    private readonly buyersRespository: BuyersRespository,
     readonly configService: ConfigService,
   ) {
     super({
@@ -19,17 +18,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  // payload를 받아서 user Entity를 찾고 반환
-  async validate(payload) {
-    const { id } = payload; // 페이로드에서 id 추출
-
-    // DB에서 등록되어있는지 확인
-    const member: BuyerEntity | null = await this.userRespository.findOneBy({
-      id,
-    });
-    if (!member) {
+  async validate(payload: any) {
+    const { id } = payload;
+    const member = await this.buyersRespository.findOneBy({ id });
+    if (member) {
+      return { id };
+    } else {
       throw new UnauthorizedException();
     }
-    return member;
   }
 }

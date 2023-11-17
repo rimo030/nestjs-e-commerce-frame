@@ -1,8 +1,8 @@
-import { Body, Controller, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
 import { UserId } from './userid.decorator';
-import { JwtAuthGuard } from './guards/jwt.guard';
+import { BuyerJwtAuthGuard } from './guards/buyer.jwt.guard';
 import { AccessToken } from 'src/interfaces/access-token';
 import { BuyerLocalAuthGuard } from './guards/buyer-local.auth.guard';
 import { AuthGuard } from '@nestjs/passport';
@@ -10,6 +10,7 @@ import { SellerLocalAuthGuard } from './guards/seller-local.auth.guard';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
+import { SellerJwtAuthGuard } from './guards/seller.jwt.guard';
 
 @Controller('auth')
 @ApiTags('로그인 API')
@@ -46,10 +47,15 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
-  // @UseGuards(JwtAuthGuard)
-  // @Post('jwt')
-  // test1(@UserId() id: number) {
-  //   // 인증이 완료된 user의 id를 반환
-  //   return id;
-  // }
+  @UseGuards(BuyerJwtAuthGuard)
+  @Get('/mypage')
+  getMyPage(@Req() req) {
+    return req.user;
+  }
+
+  @UseGuards(SellerJwtAuthGuard)
+  @Get('/seller-page')
+  getSellerPage(@Req() req) {
+    return req.user;
+  }
 }
