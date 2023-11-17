@@ -6,6 +6,8 @@ import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { AccessToken } from 'src/interfaces/access-token';
 import { SellersRespository } from 'src/repositories/sellers.repository';
+import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
+import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 
 @Injectable()
 export class AuthService {
@@ -16,31 +18,28 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async buyerSignUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    const user = await this.userRespository.findOneBy({ email: authCredentialsDto.email });
+  async buyerSignUp(createUserDto: CreateBuyerDto): Promise<void> {
+    const user = await this.userRespository.findOneBy({ email: createUserDto.email });
     if (user) {
       throw new UnauthorizedException('this email already exists');
     }
     const salt = await bcrypt.genSalt();
-    authCredentialsDto.password = await bcrypt.hash(authCredentialsDto.password, salt);
-    await this.userRespository.save({ ...authCredentialsDto });
+    createUserDto.hashedPassword = await bcrypt.hash(createUserDto.hashedPassword, salt);
+    await this.userRespository.save({ ...createUserDto });
   }
 
-  async sellerSignUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    const user = await this.sellersRespository.findOneBy({ email: authCredentialsDto.email });
+  async sellerSignUp(createSellerDto: CreateSellerDto): Promise<void> {
+    const user = await this.sellersRespository.findOneBy({ email: createSellerDto.email });
     if (user) {
       throw new UnauthorizedException('this email already exists');
     }
     const salt = await bcrypt.genSalt();
-    authCredentialsDto.password = await bcrypt.hash(authCredentialsDto.password, salt);
-    await this.sellersRespository.save({
-      email: authCredentialsDto.email,
-      hashedPassword: authCredentialsDto.password,
-    });
+    createSellerDto.hashedPassword = await bcrypt.hash(createSellerDto.hashedPassword, salt);
+    await this.sellersRespository.save({ ...createSellerDto });
   }
 
   async validateUser(authCredentialsDto: AuthCredentialsDto): Promise<any> {
-    const { email, password } = authCredentialsDto;
+    const { email, hashedPassword: password } = authCredentialsDto;
     const user = await this.userRespository.findOneBy({ email });
     if (user) {
       const isRightPassword = await bcrypt.compare(password, user.hashedPassword);
@@ -53,7 +52,7 @@ export class AuthService {
   }
 
   async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<any> {
-    const { email, password } = authCredentialsDto;
+    const { email, hashedPassword: password } = authCredentialsDto;
     const user = await this.sellersRespository.findOneBy({ email });
     if (user) {
       const isRightPassword = await bcrypt.compare(password, user.hashedPassword);
