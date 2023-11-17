@@ -4,8 +4,9 @@ import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
 import { UserId } from './userid.decorator';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { AccessToken } from 'src/interfaces/access-token';
-import { BuyerLocalAuthGuard } from './guards/local-auth.guard';
+import { BuyerLocalAuthGuard } from './guards/buyer-local.auth.guard';
 import { AuthGuard } from '@nestjs/passport';
+import { SellerLocalAuthGuard } from './guards/seller-local.auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -20,21 +21,22 @@ export class AuthController {
   // buyer 로그인 (토큰 발행)
   @UseGuards(BuyerLocalAuthGuard)
   @Post('/signin')
-  signIn(@Req() req) {
+  buyerSignIn(@Req() req) {
     return this.authService.login(req.user);
   }
 
   // 판매자 회원가입
   @Post('/signup-seller')
-  async signUpSeller(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    await this.authService.signUpSeller(authCredentialsDto);
+  async sellerSignUp(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<void> {
+    await this.authService.sellerSignUp(authCredentialsDto);
   }
 
   // 판매자 로그인
-  // @Post('/signin-seller')
-  // async signInSeller(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<void> {
-  //   await this.authService.signInSeller(authCredentialsDto);
-  // }
+  @UseGuards(SellerLocalAuthGuard)
+  @Post('/signin-seller')
+  sellerSignIn(@Req() req) {
+    return this.authService.login(req.user);
+  }
 
   // @UseGuards(JwtAuthGuard)
   // @Post('jwt')

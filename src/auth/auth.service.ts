@@ -26,17 +26,19 @@ export class AuthService {
     await this.userRespository.save({ ...authCredentialsDto });
   }
 
-  async signUpSeller(authCredentialsDto: AuthCredentialsDto): Promise<void> {
+  async sellerSignUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
     const user = await this.sellersRespository.findOneBy({ email: authCredentialsDto.email });
     if (user) {
       throw new UnauthorizedException('this email already exists');
     }
     const salt = await bcrypt.genSalt();
     authCredentialsDto.password = await bcrypt.hash(authCredentialsDto.password, salt);
-    await this.sellersRespository.save({ ...authCredentialsDto });
+    await this.sellersRespository.save({
+      email: authCredentialsDto.email,
+      hashedPassword: authCredentialsDto.password,
+    });
   }
 
-  // 비밀번호 확인
   async validateUser(authCredentialsDto: AuthCredentialsDto): Promise<any> {
     const { email, password } = authCredentialsDto;
     const user = await this.userRespository.findOneBy({ email });
@@ -50,8 +52,22 @@ export class AuthService {
     return null;
   }
 
+  async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<any> {
+    const { email, password } = authCredentialsDto;
+    const user = await this.sellersRespository.findOneBy({ email });
+    if (user) {
+      const isRightPassword = await bcrypt.compare(password, user.hashedPassword);
+      if (isRightPassword) {
+        const { hashedPassword, ...result } = user;
+        return result;
+      }
+    }
+    return null;
+  }
+
   // 토큰 발행
   async login(user: any) {
+    console.log(user.id);
     const payload = { id: user.id };
     return {
       access_token: this.jwtService.sign(payload),

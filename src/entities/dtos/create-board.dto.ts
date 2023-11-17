@@ -1,9 +1,4 @@
 import { IsNotEmpty } from 'class-validator';
+import { AuthCredentialsDto } from './auth-credentials.dto';
 
-export class CreateBoardDto {
-  @IsNotEmpty()
-  title!: string;
-
-  @IsNotEmpty()
-  description!: string;
-}
+export class CreateBoardDto extends AuthCredentialsDto {}

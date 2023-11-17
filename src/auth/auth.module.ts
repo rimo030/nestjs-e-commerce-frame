@@ -12,6 +12,7 @@ import { BoardsModule } from 'src/modules/boards.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SellersRespository } from 'src/repositories/sellers.repository';
 import { BuyerLocalStrategy } from './strategies/buyer.local.strategy';
+import { SellerLocalStrategy } from './strategies/seller.local.strategy';
 
 @Module({
   imports: [
@@ -33,7 +34,7 @@ import { BuyerLocalStrategy } from './strategies/buyer.local.strategy';
     CustomTypeOrmModule.forCustomRepository([UsersRespository, SellersRespository]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, BuyerLocalStrategy, JwtStrategy],
+  providers: [AuthService, BuyerLocalStrategy, SellerLocalStrategy, JwtStrategy],
   exports: [JwtStrategy],
 })
 export class AuthModule {}
