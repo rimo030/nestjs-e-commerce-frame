@@ -4,21 +4,21 @@ import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
 import { UserId } from './userid.decorator';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { AccessToken } from 'src/interfaces/access-token';
-import { LocalAuthGuard } from './guards/local-auth.guard';
+import { BuyerLocalAuthGuard } from './guards/local-auth.guard';
 import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // 유저 회원가입
+  // buyer 회원가입
   @Post('/signup')
   async signUp(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<void> {
     await this.authService.signUp(authCredentialsDto);
   }
 
-  // 유저 로그인
-  @UseGuards(LocalAuthGuard)
+  // buyer 로그인
+  @UseGuards(BuyerLocalAuthGuard)
   @Post('/signin')
   signIn(@Req() req) {
     return req.user;
