@@ -3,14 +3,14 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { UserEntity } from 'src/entities/user.entity';
-import { UsersRespository } from 'src/repositories/users.repository';
+import { BuyerEntity } from 'src/entities/user.entity';
+import { BuyersRespository } from 'src/repositories/users.repository';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(
-    @InjectRepository(UsersRespository)
-    private readonly userRespository: UsersRespository,
+    @InjectRepository(BuyersRespository)
+    private readonly userRespository: BuyersRespository,
     readonly configService: ConfigService,
   ) {
     super({
@@ -24,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     const { id } = payload; // 페이로드에서 id 추출
 
     // DB에서 등록되어있는지 확인
-    const member: UserEntity | null = await this.userRespository.findOneBy({
+    const member: BuyerEntity | null = await this.userRespository.findOneBy({
       id,
     });
     if (!member) {

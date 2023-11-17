@@ -1,7 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
-import { UsersRespository } from 'src/repositories/users.repository';
+import { BuyersRespository } from 'src/repositories/users.repository';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { AccessToken } from 'src/interfaces/access-token';
@@ -12,20 +12,21 @@ import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(UsersRespository)
-    private readonly userRespository: UsersRespository,
+    @InjectRepository(BuyersRespository)
+    private readonly buyersRespository: BuyersRespository,
+    @InjectRepository(SellersRespository)
     private readonly sellersRespository: SellersRespository,
     private readonly jwtService: JwtService,
   ) {}
 
   async buyerSignUp(createUserDto: CreateBuyerDto): Promise<void> {
-    const user = await this.userRespository.findOneBy({ email: createUserDto.email });
+    const user = await this.buyersRespository.findOneBy({ email: createUserDto.email });
     if (user) {
       throw new UnauthorizedException('this email already exists');
     }
     const salt = await bcrypt.genSalt();
     createUserDto.hashedPassword = await bcrypt.hash(createUserDto.hashedPassword, salt);
-    await this.userRespository.save({ ...createUserDto });
+    await this.buyersRespository.save({ ...createUserDto });
   }
 
   async sellerSignUp(createSellerDto: CreateSellerDto): Promise<void> {
@@ -40,7 +41,7 @@ export class AuthService {
 
   async validateUser(authCredentialsDto: AuthCredentialsDto): Promise<any> {
     const { email, hashedPassword: password } = authCredentialsDto;
-    const user = await this.userRespository.findOneBy({ email });
+    const user = await this.buyersRespository.findOneBy({ email });
     if (user) {
       const isRightPassword = await bcrypt.compare(password, user.hashedPassword);
       if (isRightPassword) {

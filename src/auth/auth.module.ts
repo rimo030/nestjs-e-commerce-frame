@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { UsersRespository } from 'src/repositories/users.repository';
+import { BuyersRespository } from 'src/repositories/users.repository';
 import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
@@ -31,7 +31,7 @@ import { SellerLocalStrategy } from './strategies/seller.local.strategy';
         };
       },
     }),
-    CustomTypeOrmModule.forCustomRepository([UsersRespository, SellersRespository]),
+    CustomTypeOrmModule.forCustomRepository([BuyersRespository, SellersRespository]),
   ],
   controllers: [AuthController],
   providers: [AuthService, BuyerLocalStrategy, SellerLocalStrategy, JwtStrategy],

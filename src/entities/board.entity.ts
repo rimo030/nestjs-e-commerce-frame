@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BoardStatus } from '../types/enums/board-status.enum';
 import { CommonEntity } from './common/common.entity';
-import { UserEntity } from './user.entity';
+import { BuyerEntity } from './user.entity';
 
 @Entity({ name: 'board' })
 export class BoardEntity extends CommonEntity {
@@ -21,7 +21,7 @@ export class BoardEntity extends CommonEntity {
    * relations
    */
 
-  @ManyToOne(() => UserEntity, (u) => u.boards)
+  @ManyToOne(() => BuyerEntity, (u) => u.boards)
   @JoinColumn({ referencedColumnName: 'id' })
-  user!: UserEntity;
+  user!: BuyerEntity;
 }
