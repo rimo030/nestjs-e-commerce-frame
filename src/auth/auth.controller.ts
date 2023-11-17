@@ -17,11 +17,11 @@ export class AuthController {
     await this.authService.signUp(authCredentialsDto);
   }
 
-  // buyer 로그인
+  // buyer 로그인 (토큰 발행)
   @UseGuards(BuyerLocalAuthGuard)
   @Post('/signin')
   signIn(@Req() req) {
-    return req.user;
+    return this.authService.login(req.user);
   }
 
   // 판매자 회원가입
