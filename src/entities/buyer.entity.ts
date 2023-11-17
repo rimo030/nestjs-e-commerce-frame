@@ -4,7 +4,7 @@ import { CartEntity } from './cart.entity';
 import { OrderEntity } from './order.entity';
 import { BoardEntity } from './board.entity';
 
-@Entity({ name: 'user' })
+@Entity({ name: 'buyer' })
 export class BuyerEntity extends CommonEntity {
   @Column({ type: 'varchar', length: 128, unique: true })
   email!: string;
@@ -28,12 +28,12 @@ export class BuyerEntity extends CommonEntity {
    * relations
    */
 
-  @OneToMany(() => BoardEntity, (b) => b.userId)
+  @OneToMany(() => BoardEntity, (b) => b.buyerId)
   boards!: BoardEntity[];
 
-  @OneToMany(() => CartEntity, (c) => c.userId)
+  @OneToMany(() => CartEntity, (c) => c.buyerId)
   carts!: CartEntity[];
 
-  @OneToMany(() => OrderEntity, (o) => o.userId)
+  @OneToMany(() => OrderEntity, (o) => o.buyerId)
   orders!: OrderEntity[];
 }
