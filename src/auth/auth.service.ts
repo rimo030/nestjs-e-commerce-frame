@@ -22,7 +22,7 @@ export class AuthService {
       throw new UnauthorizedException('this email already exists');
     }
     const salt = await bcrypt.genSalt();
-    authCredentialsDto.hashedPassword = await bcrypt.hash(authCredentialsDto.hashedPassword, salt);
+    authCredentialsDto.password = await bcrypt.hash(authCredentialsDto.password, salt);
     await this.userRespository.save({ ...authCredentialsDto });
   }
 
@@ -32,24 +32,21 @@ export class AuthService {
       throw new UnauthorizedException('this email already exists');
     }
     const salt = await bcrypt.genSalt();
-    authCredentialsDto.hashedPassword = await bcrypt.hash(authCredentialsDto.hashedPassword, salt);
+    authCredentialsDto.password = await bcrypt.hash(authCredentialsDto.password, salt);
     await this.sellersRespository.save({ ...authCredentialsDto });
   }
 
-  // email-password을 받아 등록된 유저인지 확인후 토큰 반환
-  async signIn(authCredentialsDto: AuthCredentialsDto): Promise<AccessToken> {
-    const { email, hashedPassword: password } = authCredentialsDto;
+  // 비밀번호 확인
+  async validateUser(authCredentialsDto: AuthCredentialsDto): Promise<any> {
+    const { email, password } = authCredentialsDto;
     const user = await this.userRespository.findOneBy({ email });
-
-    // 등록된 유저인지 확인
     if (user) {
       const isRightPassword = await bcrypt.compare(password, user.hashedPassword);
       if (isRightPassword) {
-        const payload = { id: user.id };
-        const accessToken = await this.jwtService.sign(payload); // 유저 id로 토큰 생성 (Secret + payload)
-        return { accessToken }; // 토큰 반환
+        const { hashedPassword, ...result } = user;
+        return result;
       }
     }
-    throw new UnauthorizedException('login faild');
+    return null;
   }
 }

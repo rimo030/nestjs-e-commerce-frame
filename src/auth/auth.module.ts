@@ -11,6 +11,7 @@ import { typeORMConfig } from 'src/configs/typeorm.config';
 import { BoardsModule } from 'src/modules/boards.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SellersRespository } from 'src/repositories/sellers.repository';
+import { LocalStrategy } from './strategies/local.strategy';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { SellersRespository } from 'src/repositories/sellers.repository';
     CustomTypeOrmModule.forCustomRepository([UsersRespository, SellersRespository]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy],
   exports: [JwtStrategy],
 })
 export class AuthModule {}

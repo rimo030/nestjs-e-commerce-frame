@@ -4,6 +4,8 @@ import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
 import { UserId } from './userid.decorator';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { AccessToken } from 'src/interfaces/access-token';
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -16,9 +18,10 @@ export class AuthController {
   }
 
   // 유저 로그인
+  @UseGuards(LocalAuthGuard)
   @Post('/signin')
-  async signIn(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<AccessToken> {
-    return await this.authService.signIn(authCredentialsDto);
+  signIn(@Req() req) {
+    return req.user;
   }
 
   // 판매자 회원가입
@@ -28,15 +31,15 @@ export class AuthController {
   }
 
   // 판매자 로그인
-  @Post('/signin-seller')
-  async signInSeller(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    await this.authService.signInSeller(authCredentialsDto);
-  }
+  // @Post('/signin-seller')
+  // async signInSeller(@Body(ValidationPipe) authCredentialsDto: AuthCredentialsDto): Promise<void> {
+  //   await this.authService.signInSeller(authCredentialsDto);
+  // }
 
-  @UseGuards(JwtAuthGuard)
-  @Post('jwt')
-  test1(@UserId() id: number) {
-    // 인증이 완료된 user의 id를 반환
-    return id;
-  }
+  // @UseGuards(JwtAuthGuard)
+  // @Post('jwt')
+  // test1(@UserId() id: number) {
+  //   // 인증이 완료된 user의 id를 반환
+  //   return id;
+  // }
 }
