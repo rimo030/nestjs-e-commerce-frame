@@ -2,11 +2,16 @@ import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
+import { AccessToken } from 'src/interfaces/access-token';
+import { BuyerAuthResult } from 'src/interfaces/buyer-auth-result';
+import { Payload } from 'src/interfaces/payload';
+import { SellerAuthResult } from 'src/interfaces/seller-auth-result';
 import { AuthService } from './auth.service';
 import { BuyerLocalAuthGuard } from './guards/buyer-local.auth.guard';
 import { BuyerJwtAuthGuard } from './guards/buyer.jwt.guard';
 import { SellerLocalAuthGuard } from './guards/seller-local.auth.guard';
 import { SellerJwtAuthGuard } from './guards/seller.jwt.guard';
+import { User } from './user.decorator';
 
 @Controller('auth')
 @ApiTags('로그인 API')
@@ -24,9 +29,8 @@ export class AuthController {
   @UseGuards(BuyerLocalAuthGuard)
   @Post('/signin')
   @ApiOperation({ summary: 'buyer 로그인 API', description: 'buyer 비밀번호 매칭' })
-  buyerSignIn(@Req() req) {
-    // console.log(req.user);
-    return this.authService.buyerLogin(req.user);
+  buyerSignIn(@User() user: BuyerAuthResult) {
+    return this.authService.buyerLogin(user);
   }
 
   // 판매자 회원가입
@@ -40,20 +44,19 @@ export class AuthController {
   @UseGuards(SellerLocalAuthGuard)
   @Post('/signin-seller')
   @ApiOperation({ summary: 'seller 로그인 API', description: 'seller 비밀번호 매칭' })
-  sellerSignIn(@Req() req) {
-    console.log(req.user);
-    return this.authService.sellrLogin(req.user);
+  sellerSignIn(@User() user: SellerAuthResult) {
+    return this.authService.sellrLogin(user);
   }
 
   @UseGuards(BuyerJwtAuthGuard)
   @Get('/mypage')
-  getMyPage(@Req() req) {
-    return req.user;
+  getMyPage(@User() user: BuyerAuthResult) {
+    return user;
   }
 
   @UseGuards(SellerJwtAuthGuard)
   @Get('/seller-page')
-  getSellerPage(@Req() req) {
-    return req.user;
+  getSellerPage(@User() user: SellerAuthResult) {
+    return user;
   }
 }
