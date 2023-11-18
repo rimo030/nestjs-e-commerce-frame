@@ -29,7 +29,8 @@ export class AuthController {
   @Post('/signin')
   @ApiOperation({ summary: 'buyer 로그인 API', description: 'buyer 비밀번호 매칭' })
   buyerSignIn(@Req() req) {
-    return this.authService.login(req.user);
+    // console.log(req.user);
+    return this.authService.buyerLogin(req.user);
   }
 
   // 판매자 회원가입
@@ -44,7 +45,8 @@ export class AuthController {
   @Post('/signin-seller')
   @ApiOperation({ summary: 'seller 로그인 API', description: 'seller 비밀번호 매칭' })
   sellerSignIn(@Req() req) {
-    return this.authService.login(req.user);
+    console.log(req.user);
+    return this.authService.sellrLogin(req.user);
   }
 
   @UseGuards(BuyerJwtAuthGuard)

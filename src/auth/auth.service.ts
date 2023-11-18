@@ -6,6 +6,8 @@ import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
 import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 import { AccessToken } from 'src/interfaces/access-token';
+import { BuyerAuthResult } from 'src/interfaces/buyer-auth-result';
+import { SellerAuthResult } from 'src/interfaces/seller-auth-result';
 import { BuyersRespository } from 'src/repositories/buyers.repository';
 import { SellersRespository } from 'src/repositories/sellers.repository';
 
@@ -25,7 +27,6 @@ export class AuthService {
       withDeleted: true,
       take: 1,
     });
-    console.log(user);
     if (user) {
       throw new UnauthorizedException('this email already exists');
     }
@@ -51,7 +52,7 @@ export class AuthService {
     await this.sellersRespository.save({ hashedPassword, ...other });
   }
 
-  async validateUser(authCredentialsDto: AuthCredentialsDto): Promise<any> {
+  async validateBuyer(authCredentialsDto: AuthCredentialsDto): Promise<BuyerAuthResult> {
     const user = await this.buyersRespository.findOneBy({ email: authCredentialsDto.email });
     if (user) {
       const isRightPassword = await bcrypt.compare(authCredentialsDto.password, user.hashedPassword);
@@ -64,7 +65,7 @@ export class AuthService {
     throw new UnauthorizedException('this email does not exists');
   }
 
-  async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<any> {
+  async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<SellerAuthResult> {
     const user = await this.sellersRespository.findOneBy({ email: authCredentialsDto.password });
     if (user) {
       const isRightPassword = await bcrypt.compare(authCredentialsDto.password, user.hashedPassword);
@@ -77,9 +78,14 @@ export class AuthService {
     throw new UnauthorizedException('this email does not exists');
   }
 
-  // 토큰 발행
-  async login(user: any) {
-    console.log(user.id);
+  async buyerLogin(user: BuyerAuthResult) {
+    const payload = { id: user.id };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
+  }
+
+  async sellrLogin(user: SellerAuthResult) {
     const payload = { id: user.id };
     return {
       access_token: this.jwtService.sign(payload),
