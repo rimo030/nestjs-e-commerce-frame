@@ -19,7 +19,7 @@ import { SellerLocalStrategy } from './strategies/seller.local.strategy';
   imports: [
     //BoardsModule,
     TypeOrmModule.forRoot(typeORMConfig),
-    PassportModule.register({ defaultStrategy: 'jwt' }),
+    PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
