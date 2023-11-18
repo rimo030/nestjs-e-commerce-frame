@@ -1,5 +1,5 @@
 import * as bcrypt from 'bcryptjs';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
@@ -28,7 +28,7 @@ export class AuthService {
       take: 1,
     });
     if (user) {
-      throw new UnauthorizedException('this email already exists');
+      throw new HttpException('this email already exists', HttpStatus.UNAUTHORIZED);
     }
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
@@ -43,7 +43,7 @@ export class AuthService {
       take: 1,
     });
     if (user) {
-      throw new UnauthorizedException('this email already exists');
+      throw new HttpException('this email already exists', HttpStatus.UNAUTHORIZED);
     }
 
     const salt = await bcrypt.genSalt();
@@ -60,35 +60,33 @@ export class AuthService {
         const { hashedPassword, ...result } = user;
         return result;
       }
-      throw new UnauthorizedException('password is incorrect');
+      throw new HttpException('password is incorrect', HttpStatus.UNAUTHORIZED);
     }
-    throw new UnauthorizedException('this email does not exists');
+    throw new HttpException('this email does not exists', HttpStatus.UNAUTHORIZED);
   }
 
   async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<SellerAuthResult> {
-    const user = await this.sellersRespository.findOneBy({ email: authCredentialsDto.password });
+    const user = await this.sellersRespository.findOneBy({ email: authCredentialsDto.email });
     if (user) {
       const isRightPassword = await bcrypt.compare(authCredentialsDto.password, user.hashedPassword);
       if (isRightPassword) {
         const { hashedPassword, ...result } = user;
         return result;
       }
-      throw new UnauthorizedException('password is incorrect');
+      throw new HttpException('password is incorrect', HttpStatus.UNAUTHORIZED);
     }
-    throw new UnauthorizedException('this email does not exists');
+    throw new HttpException('this email does not exists', HttpStatus.UNAUTHORIZED);
   }
 
-  async buyerLogin(user: BuyerAuthResult) {
-    const payload = { id: user.id };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+  async buyerLogin(buyerAuthResult: BuyerAuthResult): Promise<AccessToken> {
+    const payload = { id: buyerAuthResult.id };
+    const accessToken = await this.jwtService.sign(payload);
+    return { accessToken };
   }
 
-  async sellrLogin(user: SellerAuthResult) {
-    const payload = { id: user.id };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
+  async sellrLogin(sellerAuthResult: SellerAuthResult): Promise<AccessToken> {
+    const payload = { id: sellerAuthResult.id };
+    const accessToken = await this.jwtService.sign(payload);
+    return { accessToken };
   }
 }

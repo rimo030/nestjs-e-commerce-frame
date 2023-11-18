@@ -3,6 +3,7 @@ import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@n
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Payload } from 'src/interfaces/payload';
 import { BuyersRespository } from 'src/repositories/buyers.repository';
 
 @Injectable()
@@ -18,13 +19,12 @@ export class BuyerJwtStrategy extends PassportStrategy(Strategy, 'buyer-jwt') {
     });
   }
 
-  async validate(payload: any) {
+  async validate(payload: Payload) {
     const { id } = payload;
     const member = await this.buyersRespository.findOneBy({ id });
     if (member) {
       return { id };
-    } else {
-      throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
     }
+    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
   }
 }
