@@ -20,7 +20,11 @@ export class AuthService {
   ) {}
 
   async buyerSignUp(createUserDto: CreateBuyerDto): Promise<void> {
-    const user = await this.buyersRespository.findOneBy({ email: createUserDto.email });
+    const user = await this.buyersRespository.find({
+      where: { email: createUserDto.email },
+      withDeleted: true,
+    });
+
     if (user) {
       throw new UnauthorizedException('this email already exists');
     }
@@ -30,7 +34,10 @@ export class AuthService {
   }
 
   async sellerSignUp(createSellerDto: CreateSellerDto): Promise<void> {
-    const user = await this.sellersRespository.findOneBy({ email: createSellerDto.email });
+    const user = await this.sellersRespository.find({
+      where: { email: createSellerDto.email },
+      withDeleted: true,
+    });
     if (user) {
       throw new UnauthorizedException('this email already exists');
     }
