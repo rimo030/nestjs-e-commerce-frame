@@ -20,37 +20,41 @@ export class AuthService {
   ) {}
 
   async buyerSignUp(createUserDto: CreateBuyerDto): Promise<void> {
-    const user = await this.buyersRespository.find({
+    const [user] = await this.buyersRespository.find({
       where: { email: createUserDto.email },
       withDeleted: true,
+      take: 1,
     });
-
+    console.log(user);
     if (user) {
       throw new UnauthorizedException('this email already exists');
     }
     const salt = await bcrypt.genSalt();
-    createUserDto.hashedPassword = await bcrypt.hash(createUserDto.hashedPassword, salt);
-    await this.buyersRespository.save({ ...createUserDto });
+    const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
+    const { password, ...other } = createUserDto;
+    await this.buyersRespository.save({ hashedPassword, ...other });
   }
 
   async sellerSignUp(createSellerDto: CreateSellerDto): Promise<void> {
-    const user = await this.sellersRespository.find({
+    const [user] = await this.sellersRespository.find({
       where: { email: createSellerDto.email },
       withDeleted: true,
+      take: 1,
     });
     if (user) {
       throw new UnauthorizedException('this email already exists');
     }
+
     const salt = await bcrypt.genSalt();
-    createSellerDto.hashedPassword = await bcrypt.hash(createSellerDto.hashedPassword, salt);
-    await this.sellersRespository.save({ ...createSellerDto });
+    const hashedPassword = await bcrypt.hash(createSellerDto.password, salt);
+    const { password, ...other } = createSellerDto;
+    await this.sellersRespository.save({ hashedPassword, ...other });
   }
 
   async validateUser(authCredentialsDto: AuthCredentialsDto): Promise<any> {
-    const { email, hashedPassword: password } = authCredentialsDto;
-    const user = await this.buyersRespository.findOneBy({ email });
+    const user = await this.buyersRespository.findOneBy({ email: authCredentialsDto.email });
     if (user) {
-      const isRightPassword = await bcrypt.compare(password, user.hashedPassword);
+      const isRightPassword = await bcrypt.compare(authCredentialsDto.password, user.hashedPassword);
       if (isRightPassword) {
         const { hashedPassword, ...result } = user;
         return result;
@@ -60,10 +64,9 @@ export class AuthService {
   }
 
   async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<any> {
-    const { email, hashedPassword: password } = authCredentialsDto;
-    const user = await this.sellersRespository.findOneBy({ email });
+    const user = await this.sellersRespository.findOneBy({ email: authCredentialsDto.password });
     if (user) {
-      const isRightPassword = await bcrypt.compare(password, user.hashedPassword);
+      const isRightPassword = await bcrypt.compare(authCredentialsDto.password, user.hashedPassword);
       if (isRightPassword) {
         const { hashedPassword, ...result } = user;
         return result;
