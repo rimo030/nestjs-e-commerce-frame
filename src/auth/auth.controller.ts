@@ -1,5 +1,6 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
 import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 import { AccessToken } from 'src/interfaces/access-token';
@@ -29,7 +30,7 @@ export class AuthController {
   @UseGuards(BuyerLocalAuthGuard)
   @Post('/signin')
   @ApiOperation({ summary: 'buyer 로그인 API', description: 'buyer 비밀번호 매칭' })
-  buyerSignIn(@User() user: BuyerAuthResult) {
+  buyerSignIn(@Body() authCredentialsDto: AuthCredentialsDto, @User() user: BuyerAuthResult) {
     return this.authService.buyerLogin(user);
   }
 
@@ -44,7 +45,7 @@ export class AuthController {
   @UseGuards(SellerLocalAuthGuard)
   @Post('/signin-seller')
   @ApiOperation({ summary: 'seller 로그인 API', description: 'seller 비밀번호 매칭' })
-  sellerSignIn(@User() user: SellerAuthResult) {
+  sellerSignIn(@Body() authCredentialsDto: AuthCredentialsDto, @User() user: SellerAuthResult) {
     return this.authService.sellrLogin(user);
   }
 
