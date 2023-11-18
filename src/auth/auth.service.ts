@@ -59,8 +59,9 @@ export class AuthService {
         const { hashedPassword, ...result } = user;
         return result;
       }
+      throw new UnauthorizedException('password is incorrect');
     }
-    return null;
+    throw new UnauthorizedException('this email does not exists');
   }
 
   async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<any> {
@@ -71,8 +72,9 @@ export class AuthService {
         const { hashedPassword, ...result } = user;
         return result;
       }
+      throw new UnauthorizedException('password is incorrect');
     }
-    return null;
+    throw new UnauthorizedException('this email does not exists');
   }
 
   // 토큰 발행
