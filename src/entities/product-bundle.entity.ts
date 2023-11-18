@@ -1,8 +1,8 @@
-import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
-import { CommonEntity } from './common/common.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { CalculationType } from 'src/types/enums/calculation-type.enum';
-import { SellerEntity } from './seller.entity';
+import { CommonEntity } from './common/common.entity';
 import { ProductEntity } from './product.entity';
+import { SellerEntity } from './seller.entity';
 
 @Entity({ name: 'product_bundle' })
 export class ProductBundleEntity extends CommonEntity {

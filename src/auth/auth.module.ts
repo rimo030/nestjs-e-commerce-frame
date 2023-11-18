@@ -1,20 +1,19 @@
 import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { BuyersRespository } from 'src/repositories/buyers.repository';
-import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
-import { PassportModule } from '@nestjs/passport';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-
+import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
 import { typeORMConfig } from 'src/configs/typeorm.config';
 import { BoardsModule } from 'src/modules/boards.module';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { BuyersRespository } from 'src/repositories/buyers.repository';
 import { SellersRespository } from 'src/repositories/sellers.repository';
-import { BuyerLocalStrategy } from './strategies/buyer.local.strategy';
-import { SellerLocalStrategy } from './strategies/seller.local.strategy';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
 import { BuyerJwtStrategy } from './strategies/buyer.jwt.strategy';
+import { BuyerLocalStrategy } from './strategies/buyer.local.strategy';
 import { SellerJwtStrategy } from './strategies/seller.jwt.strategy';
+import { SellerLocalStrategy } from './strategies/seller.local.strategy';
 
 @Module({
   imports: [

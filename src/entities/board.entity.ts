@@ -1,12 +1,12 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BoardStatus } from '../types/enums/board-status.enum';
+import { BuyerEntity } from './buyer.entity';
 import { CommonEntity } from './common/common.entity';
-import { BuyerEntity } from './user.entity';
 
 @Entity({ name: 'board' })
 export class BoardEntity extends CommonEntity {
   @Column()
-  userId!: number;
+  buyerId!: number;
 
   @Column({ type: 'varchar', length: 512 })
   title!: string;
@@ -21,7 +21,7 @@ export class BoardEntity extends CommonEntity {
    * relations
    */
 
-  @ManyToOne(() => BuyerEntity, (u) => u.boards)
+  @ManyToOne(() => BuyerEntity, (b) => b.boards)
   @JoinColumn({ referencedColumnName: 'id' })
-  user!: BuyerEntity;
+  buyer!: BuyerEntity;
 }

@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { BoardStatus } from '../types/enums/board-status.enum';
-import { CreateBoardDto } from '../entities/dtos/create-board.dto';
-import { BoardRespository } from 'src/repositories/board.repository';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardEntity } from 'src/entities/board.entity';
+import { BoardRespository } from 'src/repositories/board.repository';
+import { CreateBoardDto } from '../entities/dtos/create-board.dto';
+import { BoardStatus } from '../types/enums/board-status.enum';
 
 @Injectable()
 export class BoardsService {
@@ -52,7 +52,7 @@ export class BoardsService {
   // id를 이용해 특정 자신의 게시물 삭제하기
   async deleteBoard(boardId: number, userId: number): Promise<boolean> {
     try {
-      await this.boardRespository.softDelete({ id: boardId, userId });
+      await this.boardRespository.softDelete({ id: boardId, buyerId: userId });
       return true;
     } catch (err) {
       return false;

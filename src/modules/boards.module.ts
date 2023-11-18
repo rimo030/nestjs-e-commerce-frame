@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { BoardsController } from '../controllers/boards.controller';
-import { BoardsService } from '../services/boards.service';
-import { BoardRespository } from '../repositories/board.repository';
 import { CustomTypeOrmModule } from '../configs/custom-typeorm.module';
+import { BoardsController } from '../controllers/boards.controller';
+import { BoardRespository } from '../repositories/board.repository';
+import { BoardsService } from '../services/boards.service';
 
 @Module({
   imports: [CustomTypeOrmModule.forCustomRepository([BoardRespository])],

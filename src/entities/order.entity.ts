@@ -1,20 +1,20 @@
-import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { BuyerEntity } from './buyer.entity';
 import { CommonEntity } from './common/common.entity';
-import { BuyerEntity } from './user.entity';
 import { OrderProductBundleEntity } from './order-product-bundle.entity';
 
 @Entity({ name: 'order' })
 export class OrderEntity extends CommonEntity {
   @Column()
-  userId!: number;
+  buyerId!: number;
 
   /**
    * relations
    */
 
-  @ManyToOne(() => BuyerEntity, (u) => u.orders)
+  @ManyToOne(() => BuyerEntity, (b) => b.orders)
   @JoinColumn({ referencedColumnName: 'id' })
-  user!: BuyerEntity;
+  buyer!: BuyerEntity;
 
   @OneToMany(() => OrderProductBundleEntity, (opb) => opb.orderId)
   orderProductBundles!: OrderProductBundleEntity[];
