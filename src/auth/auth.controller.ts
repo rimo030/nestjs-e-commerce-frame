@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, UseGuards, ValidationPipe } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
@@ -16,7 +16,7 @@ export class AuthController {
   // buyer 회원가입
   @Post('/signup')
   @ApiOperation({ summary: 'buyer 생성 API', description: 'buyer를 생성한다.' })
-  async buyerSignUp(@Body(ValidationPipe) createUserDto: CreateBuyerDto): Promise<void> {
+  async buyerSignUp(@Body() createUserDto: CreateBuyerDto): Promise<void> {
     await this.authService.buyerSignUp(createUserDto);
   }
 
@@ -32,7 +32,7 @@ export class AuthController {
   // 판매자 회원가입
   @Post('/signup-seller')
   @ApiOperation({ summary: 'seller 생성 API', description: 'seller 생성한다.' })
-  async sellerSignUp(@Body(ValidationPipe) createSellerDto: CreateSellerDto): Promise<void> {
+  async sellerSignUp(@Body() createSellerDto: CreateSellerDto): Promise<void> {
     await this.authService.sellerSignUp(createSellerDto);
   }
 
