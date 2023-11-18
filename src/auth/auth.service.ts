@@ -1,48 +1,76 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
-import { UserRespository } from 'src/repositories/user.repository';
+import { BuyersRespository } from 'src/repositories/buyers.repository';
 import * as bcrypt from 'bcryptjs';
 import { JwtService } from '@nestjs/jwt';
 import { AccessToken } from 'src/interfaces/access-token';
+import { SellersRespository } from 'src/repositories/sellers.repository';
+import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
+import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(UserRespository)
-    private readonly userRespository: UserRespository,
+    @InjectRepository(BuyersRespository)
+    private readonly buyersRespository: BuyersRespository,
+    @InjectRepository(SellersRespository)
+    private readonly sellersRespository: SellersRespository,
     private readonly jwtService: JwtService,
   ) {}
 
-  // email-password를 받아 회원 가입
-  async signUp(authCredentialsDto: AuthCredentialsDto): Promise<void> {
-    const { email, password } = authCredentialsDto;
-    const user = await this.userRespository.findOneBy({ email });
+  async buyerSignUp(createUserDto: CreateBuyerDto): Promise<void> {
+    const user = await this.buyersRespository.findOneBy({ email: createUserDto.email });
     if (user) {
-      // 등록된 유저라면 error
       throw new UnauthorizedException('this email already exists');
     }
-
     const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt); // 비밀번호 암호화
-    const member = this.userRespository.create({ email, hashedPassword });
-    await this.userRespository.save(member);
+    createUserDto.hashedPassword = await bcrypt.hash(createUserDto.hashedPassword, salt);
+    await this.buyersRespository.save({ ...createUserDto });
   }
 
-  // email-password을 받아 등록된 유저인지 확인후 토큰 반환
-  async signIn(authCredentialsDto: AuthCredentialsDto): Promise<AccessToken> {
-    const { email, password } = authCredentialsDto;
-    const user = await this.userRespository.findOneBy({ email });
+  async sellerSignUp(createSellerDto: CreateSellerDto): Promise<void> {
+    const user = await this.sellersRespository.findOneBy({ email: createSellerDto.email });
+    if (user) {
+      throw new UnauthorizedException('this email already exists');
+    }
+    const salt = await bcrypt.genSalt();
+    createSellerDto.hashedPassword = await bcrypt.hash(createSellerDto.hashedPassword, salt);
+    await this.sellersRespository.save({ ...createSellerDto });
+  }
 
-    // 등록된 유저인지 확인
+  async validateUser(authCredentialsDto: AuthCredentialsDto): Promise<any> {
+    const { email, hashedPassword: password } = authCredentialsDto;
+    const user = await this.buyersRespository.findOneBy({ email });
     if (user) {
       const isRightPassword = await bcrypt.compare(password, user.hashedPassword);
       if (isRightPassword) {
-        const payload = { id: user.id };
-        const accessToken = await this.jwtService.sign(payload); // 유저 id로 토큰 생성 (Secret + payload)
-        return { accessToken }; // 토큰 반환
+        const { hashedPassword, ...result } = user;
+        return result;
       }
     }
-    throw new UnauthorizedException('login faild');
+    return null;
+  }
+
+  async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<any> {
+    const { email, hashedPassword: password } = authCredentialsDto;
+    const user = await this.sellersRespository.findOneBy({ email });
+    if (user) {
+      const isRightPassword = await bcrypt.compare(password, user.hashedPassword);
+      if (isRightPassword) {
+        const { hashedPassword, ...result } = user;
+        return result;
+      }
+    }
+    return null;
+  }
+
+  // 토큰 발행
+  async login(user: any) {
+    console.log(user.id);
+    const payload = { id: user.id };
+    return {
+      access_token: this.jwtService.sign(payload),
+    };
   }
 }

@@ -17,10 +17,10 @@ import { BoardStatus } from '../types/enums/board-status.enum';
 import { CreateBoardDto } from '../entities/dtos/create-board.dto';
 import { BoardStatusValidationPipe } from '../pipes/board-status-vaildation.pipe';
 import { BoardEntity } from 'src/entities/board.entity';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { BuyerJwtAuthGuard } from 'src/auth/guards/buyer.jwt.guard';
 import { UserId } from 'src/auth/userid.decorator';
 
-@UseGuards(JwtAuthGuard)
+@UseGuards(BuyerJwtAuthGuard)
 @Controller('boards')
 export class BoardsController {
   private logger = new Logger('Board');
