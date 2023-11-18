@@ -1,5 +1,5 @@
 import { Strategy } from 'passport-local';
-import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { BuyerAuthResult } from 'src/interfaces/buyer-auth-result';
 import { AuthService } from '../auth.service';

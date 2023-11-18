@@ -1,5 +1,5 @@
-import * as bcrypt from 'bcryptjs';
-import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import bcrypt from 'bcryptjs';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
