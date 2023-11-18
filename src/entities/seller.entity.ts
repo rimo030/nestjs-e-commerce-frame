@@ -10,14 +10,13 @@ export class SellerEntity extends CommonEntity {
   @Column({ type: 'varchar', length: 512 })
   hashedPassword!: string;
 
-  @Column({ type: 'varchar', length: 32, nullable: true })
+  @Column({ type: 'varchar', length: 32 })
   name!: string;
 
-  /* - 기호는 포함하지 않습니다 */
-  @Column({ type: 'varchar', length: 11, nullable: true })
+  @Column({ type: 'varchar', length: 11 })
   phone!: string;
 
-  @Column({ type: 'varchar', length: 128, nullable: true })
+  @Column({ type: 'varchar', length: 128 })
   businessNumber!: string;
 
   /**
