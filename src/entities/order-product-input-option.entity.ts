@@ -1,4 +1,4 @@
-import { Entity, Column, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
 import { OrderProductRequiredOptionEntity } from './order-product-riquired-option.entity';
 

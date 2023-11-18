@@ -12,13 +12,13 @@ import {
   UseGuards,
   Logger,
 } from '@nestjs/common';
-import { BoardsService } from '../services/boards.service';
-import { BoardStatus } from '../types/enums/board-status.enum';
-import { CreateBoardDto } from '../entities/dtos/create-board.dto';
-import { BoardStatusValidationPipe } from '../pipes/board-status-vaildation.pipe';
-import { BoardEntity } from 'src/entities/board.entity';
 import { BuyerJwtAuthGuard } from 'src/auth/guards/buyer.jwt.guard';
 import { UserId } from 'src/auth/userid.decorator';
+import { BoardEntity } from 'src/entities/board.entity';
+import { CreateBoardDto } from '../entities/dtos/create-board.dto';
+import { BoardStatusValidationPipe } from '../pipes/board-status-vaildation.pipe';
+import { BoardsService } from '../services/boards.service';
+import { BoardStatus } from '../types/enums/board-status.enum';
 
 @UseGuards(BuyerJwtAuthGuard)
 @Controller('boards')

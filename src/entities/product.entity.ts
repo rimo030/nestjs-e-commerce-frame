@@ -1,12 +1,12 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { CommonEntity } from './common/common.entity';
-import { CategoryEntity } from './category.entity';
-import { ProductBundleEntity } from './product-bundle.entity';
-import { ProductRequiredOptionEntity } from './product-required-option.entity';
-import { ProductOptionEntity } from './product-option.entity';
 import { CartEntity } from './cart.entity';
+import { CategoryEntity } from './category.entity';
+import { CommonEntity } from './common/common.entity';
 import { CompanyEntity } from './company.entity';
 import { OrderProductEntity } from './order-product.entity';
+import { ProductBundleEntity } from './product-bundle.entity';
+import { ProductOptionEntity } from './product-option.entity';
+import { ProductRequiredOptionEntity } from './product-required-option.entity';
 
 @Entity({ name: 'product' })
 export class ProductEntity extends CommonEntity {

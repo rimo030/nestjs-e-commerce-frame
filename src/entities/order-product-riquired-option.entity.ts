@@ -1,4 +1,4 @@
-import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
 import { OrderProductBundleEntity } from './order-product-bundle.entity';
 import { OrderProductInputOptionEntity } from './order-product-input-option.entity';

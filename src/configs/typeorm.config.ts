@@ -1,6 +1,6 @@
 import * as path from 'path';
-import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
+import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 
 export const typeORMConfig: TypeOrmModuleOptions = {
   type: 'mysql',

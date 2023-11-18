@@ -1,5 +1,9 @@
 {
   "singleQuote": true,
   "trailingComma": "all",
-  "printWidth": 120
+  "printWidth": 120,
+  "semi": true,
+  "plugins": ["@trivago/prettier-plugin-sort-imports"],
+  "importOrder": ["^@nestjs/(.*)$", "^src/(.*)$", "^[./]"],
+  "importOrderParserPlugins": ["typescript", "decorators-legacy"]
 }

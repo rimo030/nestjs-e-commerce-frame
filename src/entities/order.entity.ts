@@ -1,6 +1,6 @@
-import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
-import { CommonEntity } from './common/common.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { BuyerEntity } from './buyer.entity';
+import { CommonEntity } from './common/common.entity';
 import { OrderProductBundleEntity } from './order-product-bundle.entity';
 
 @Entity({ name: 'order' })

@@ -1,7 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { BoardStatus } from '../types/enums/board-status.enum';
-import { CommonEntity } from './common/common.entity';
 import { BuyerEntity } from './buyer.entity';
+import { CommonEntity } from './common/common.entity';
 
 @Entity({ name: 'board' })
 export class BoardEntity extends CommonEntity {

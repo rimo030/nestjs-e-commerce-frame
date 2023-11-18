@@ -1,8 +1,8 @@
-import { Entity, Column, OneToMany, Unique } from 'typeorm';
-import { CommonEntity } from './common/common.entity';
-import { CartEntity } from './cart.entity';
-import { OrderEntity } from './order.entity';
+import { Column, Entity, OneToMany, Unique } from 'typeorm';
 import { BoardEntity } from './board.entity';
+import { CartEntity } from './cart.entity';
+import { CommonEntity } from './common/common.entity';
+import { OrderEntity } from './order.entity';
 
 @Entity({ name: 'buyer' })
 export class BuyerEntity extends CommonEntity {

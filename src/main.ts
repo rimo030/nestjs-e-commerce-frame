@@ -1,6 +1,6 @@
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger } from '@nestjs/common';
 import { setupSwagger } from './util/swagger';
 
 async function bootstrap() {

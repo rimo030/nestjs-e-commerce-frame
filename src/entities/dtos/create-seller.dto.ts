@@ -1,6 +1,6 @@
 import { Optional } from '@nestjs/common';
-import { AuthCredentialsDto } from './auth-credentials.dto';
 import { ApiProperty } from '@nestjs/swagger';
+import { AuthCredentialsDto } from './auth-credentials.dto';
 
 export class CreateSellerDto extends AuthCredentialsDto {
   @ApiProperty({ description: '이름' })

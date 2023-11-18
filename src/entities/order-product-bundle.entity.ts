@@ -1,10 +1,10 @@
-import { Entity, Column, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { CommonEntity } from './common/common.entity';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { CalculationType } from 'src/types/enums/calculation-type.enum';
-import { OrderEntity } from './order.entity';
-import { OrderProductEntity } from './order-product.entity';
-import { OrderProductRequiredOptionEntity } from './order-product-riquired-option.entity';
+import { CommonEntity } from './common/common.entity';
 import { OrderProductOptionEntity } from './order-product-option.entity';
+import { OrderProductRequiredOptionEntity } from './order-product-riquired-option.entity';
+import { OrderProductEntity } from './order-product.entity';
+import { OrderEntity } from './order.entity';
 
 @Entity({ name: 'order_product_bundle' })
 export class OrderProductBundleEntity extends CommonEntity {

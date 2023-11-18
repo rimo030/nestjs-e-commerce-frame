@@ -1,13 +1,13 @@
+import * as bcrypt from 'bcryptjs';
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
-import { BuyersRespository } from 'src/repositories/buyers.repository';
-import * as bcrypt from 'bcryptjs';
-import { JwtService } from '@nestjs/jwt';
-import { AccessToken } from 'src/interfaces/access-token';
-import { SellersRespository } from 'src/repositories/sellers.repository';
 import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
+import { AccessToken } from 'src/interfaces/access-token';
+import { BuyersRespository } from 'src/repositories/buyers.repository';
+import { SellersRespository } from 'src/repositories/sellers.repository';
 
 @Injectable()
 export class AuthService {
