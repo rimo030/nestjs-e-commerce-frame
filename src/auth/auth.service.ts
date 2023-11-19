@@ -7,6 +7,7 @@ import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 import { AccessToken } from 'src/interfaces/access-token';
 import { BuyerAuthResult } from 'src/interfaces/buyer-auth-result';
+import { Payload } from 'src/interfaces/payload';
 import { SellerAuthResult } from 'src/interfaces/seller-auth-result';
 import { BuyersRespository } from 'src/repositories/buyers.repository';
 import { SellersRespository } from 'src/repositories/sellers.repository';
@@ -79,13 +80,13 @@ export class AuthService {
   }
 
   async buyerLogin(buyerAuthResult: BuyerAuthResult): Promise<AccessToken> {
-    const payload = { id: buyerAuthResult.id };
+    const payload: Payload = { id: buyerAuthResult.id };
     const accessToken = await this.jwtService.sign(payload);
     return { accessToken };
   }
 
   async sellrLogin(sellerAuthResult: SellerAuthResult): Promise<AccessToken> {
-    const payload = { id: sellerAuthResult.id };
+    const payload: Payload = { id: sellerAuthResult.id };
     const accessToken = await this.jwtService.sign(payload);
     return { accessToken };
   }
