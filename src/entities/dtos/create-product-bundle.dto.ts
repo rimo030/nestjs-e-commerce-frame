@@ -3,10 +3,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { feeStandard } from 'src/types/enums/fee-standard.enum';
 
 export class CreateProductBundleDto {
-  @ApiProperty({ description: 'seller id' })
-  @IsNotEmpty()
-  sellerId!: number;
-
   @ApiProperty({ description: '묶음 배송 이름' })
   @IsNotEmpty()
   bundleName!: string;
