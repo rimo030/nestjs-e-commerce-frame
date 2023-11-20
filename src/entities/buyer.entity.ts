@@ -12,16 +12,16 @@ export class BuyerEntity extends CommonEntity {
   @Column({ type: 'varchar', length: 512 })
   hashedPassword!: string;
 
-  @Column({ type: 'varchar', length: 128, nullable: true })
+  @Column({ type: 'varchar', length: 128 })
   name!: string;
 
-  @Column({ type: 'tinyint', nullable: true })
+  @Column({ type: 'tinyint' })
   gender!: number;
 
-  @Column({ type: 'int', nullable: true })
+  @Column({ type: 'int' })
   age!: number;
 
-  @Column({ type: 'varchar', length: 11, nullable: true })
+  @Column({ type: 'varchar', length: 11 })
   phone!: string;
 
   /**
