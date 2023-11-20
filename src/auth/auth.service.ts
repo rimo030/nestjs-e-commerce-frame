@@ -81,14 +81,14 @@ export class AuthService {
     throw new HttpException('this email does not exists', HttpStatus.UNAUTHORIZED);
   }
 
-  async buyerLogin(buyerAuthResult: BuyerAuthResult): Promise<AccessToken> {
-    const payload: Payload = { id: buyerAuthResult.id };
+  async buyerLogin(buyerId: number): Promise<AccessToken> {
+    const payload: Payload = { id: buyerId };
     const accessToken = await this.jwtService.sign(payload);
     return { accessToken };
   }
 
-  async sellrLogin(sellerAuthResult: SellerAuthResult): Promise<AccessToken> {
-    const payload: Payload = { id: sellerAuthResult.id };
+  async sellrLogin(sellerId: number): Promise<AccessToken> {
+    const payload: Payload = { id: sellerId };
     const accessToken = await this.jwtService.sign(payload);
     return { accessToken };
   }

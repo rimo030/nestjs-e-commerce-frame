@@ -16,8 +16,8 @@ export class SellerService {
     private readonly productsRespository: ProductsRespository,
   ) {}
 
-  async createProductBundle(seller: SellerAuthResult, createProductBundleDto: CreateProductBundleDto): Promise<void> {
-    await this.productsBundleRespository.save({ sellerId: seller.id, ...createProductBundleDto });
+  async createProductBundle(sellerId: number, createProductBundleDto: CreateProductBundleDto): Promise<void> {
+    await this.productsBundleRespository.save({ sellerId, ...createProductBundleDto });
   }
 
   async createProduct(createProductDto: CreateProductDto): Promise<void> {
