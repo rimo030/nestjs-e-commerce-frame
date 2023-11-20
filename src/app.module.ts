@@ -2,6 +2,7 @@ import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_PIPE } from '@nestjs/core';
 import { AuthModule } from './auth/auth.module';
+import { ProductModule } from './product/product.module';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { AuthModule } from './auth/auth.module';
       cache: true,
       isGlobal: true,
     }),
+    ProductModule,
   ],
   providers: [
     {

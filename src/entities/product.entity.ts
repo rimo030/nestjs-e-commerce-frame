@@ -22,18 +22,14 @@ export class ProductEntity extends CommonEntity {
   @Column({ type: 'varchar', length: 128 })
   title!: string;
 
-  @Column({ type: 'int' })
-  price!: number;
-
   @Column({ type: 'varchar', length: 255 })
   description!: string;
 
   @Column({ type: 'int' })
   shippingFee!: number;
 
-  // 이미지 컬럼
-  // @Column()
-  // img!: string;
+  @Column()
+  img!: string;
 
   /**
    * relations
