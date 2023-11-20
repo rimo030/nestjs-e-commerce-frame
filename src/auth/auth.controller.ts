@@ -54,10 +54,4 @@ export class AuthController {
   getMyPage(@User() user: BuyerAuthResult) {
     return user;
   }
-
-  @UseGuards(SellerJwtAuthGuard)
-  @Get('/seller-page')
-  getSellerPage(@User() user: SellerAuthResult) {
-    return user;
-  }
 }

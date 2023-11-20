@@ -17,8 +17,10 @@ export class AuthService {
   constructor(
     @InjectRepository(BuyersRespository)
     private readonly buyersRespository: BuyersRespository,
+
     @InjectRepository(SellersRespository)
     private readonly sellersRespository: SellersRespository,
+
     private readonly jwtService: JwtService,
   ) {}
 

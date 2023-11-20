@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { CalculationType } from 'src/types/enums/calculation-type.enum';
+import { feeStandard } from 'src/types/enums/fee-standard.enum';
 import { CommonEntity } from './common/common.entity';
 import { ProductEntity } from './product.entity';
 import { SellerEntity } from './seller.entity';
@@ -9,11 +9,11 @@ export class ProductBundleEntity extends CommonEntity {
   @Column()
   sellerId!: number;
 
-  @Column({ name: 'shipping_calculation', type: 'varchar', length: 128 })
-  shippingCalculation!: keyof typeof CalculationType;
+  @Column({ type: 'varchar', length: 128 })
+  bundleName!: string;
 
-  @Column({ name: 'shipping_fee_min', type: 'varchar', length: 128 })
-  shippingFeeMin!: string;
+  @Column({ type: 'varchar', length: 128 })
+  feeStandard!: keyof typeof feeStandard;
 
   /**
    * relations

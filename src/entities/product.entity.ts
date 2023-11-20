@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { feeType } from 'src/types/enums/fee-type.enum';
 import { CartEntity } from './cart.entity';
 import { CategoryEntity } from './category.entity';
 import { CommonEntity } from './common/common.entity';
@@ -19,11 +20,17 @@ export class ProductEntity extends CommonEntity {
   @Column()
   companyId!: number;
 
-  @Column({ type: 'varchar', length: 128 })
-  title!: string;
+  @Column({ type: 'tinyint' })
+  isSale!: number;
 
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 128 })
+  name!: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
   description!: string;
+
+  @Column({ type: 'varchar', length: 128 })
+  feeType!: keyof typeof feeType;
 
   @Column({ type: 'int' })
   shippingFee!: number;
