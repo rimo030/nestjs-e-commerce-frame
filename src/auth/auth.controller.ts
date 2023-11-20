@@ -30,8 +30,8 @@ export class AuthController {
   @UseGuards(BuyerLocalAuthGuard)
   @Post('/signin')
   @ApiOperation({ summary: 'buyer 로그인 API', description: 'buyer 비밀번호 매칭' })
-  buyerSignIn(@Body() authCredentialsDto: AuthCredentialsDto, @User() user: BuyerAuthResult) {
-    return this.authService.buyerLogin(user);
+  buyerSignIn(@Body() authCredentialsDto: AuthCredentialsDto, @User() buyer: BuyerAuthResult) {
+    return this.authService.buyerLogin(buyer);
   }
 
   // 판매자 회원가입
@@ -45,13 +45,13 @@ export class AuthController {
   @UseGuards(SellerLocalAuthGuard)
   @Post('/signin-seller')
   @ApiOperation({ summary: 'seller 로그인 API', description: 'seller 비밀번호 매칭' })
-  sellerSignIn(@Body() authCredentialsDto: AuthCredentialsDto, @User() user: SellerAuthResult) {
-    return this.authService.sellrLogin(user);
+  sellerSignIn(@Body() authCredentialsDto: AuthCredentialsDto, @User() seller: SellerAuthResult) {
+    return this.authService.sellrLogin(seller);
   }
 
   @UseGuards(BuyerJwtAuthGuard)
   @Get('/mypage')
-  getMyPage(@User() user: BuyerAuthResult) {
-    return user;
+  getMyPage(@User() buyer: BuyerAuthResult) {
+    return buyer;
   }
 }
