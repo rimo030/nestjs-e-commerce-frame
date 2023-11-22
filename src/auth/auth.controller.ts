@@ -11,7 +11,7 @@ import { SellerLocalAuthGuard } from './guards/seller-local.auth.guard';
 import { UserId } from './userid.decorator';
 
 @Controller('auth')
-@ApiTags('로그인 API')
+@ApiTags('Auth API')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 

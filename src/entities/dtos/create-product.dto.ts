@@ -29,7 +29,7 @@ export class CreateProductDto {
 
   @ApiProperty({ description: '배송 타입', type: 'enum', enum: deliveryType })
   @IsEnum(deliveryType)
-  feeType!: keyof typeof deliveryType;
+  deliveryType!: keyof typeof deliveryType;
 
   @ApiProperty({ description: '무료 배송 기준' })
   @IsOptional()
@@ -37,7 +37,7 @@ export class CreateProductDto {
 
   @ApiProperty({ description: '배송비' })
   @IsNotEmpty()
-  shippingFee!: number;
+  deliveryCharge!: number;
 
   @ApiProperty({ description: '상품이미지' })
   @IsNotEmpty()

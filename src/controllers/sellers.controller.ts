@@ -13,7 +13,7 @@ export class SellerController {
   constructor(private readonly sellerservice: SellerService) {}
 
   @Post('/product-bundle')
-  @ApiOperation({ summary: '묶음 배송 등록 API', description: 'seller는 묶음배송을 등록할 수 있다.' })
+  @ApiOperation({ summary: '묶음 배송 그룹 등록 API', description: 'seller는 묶음배송그룹을 등록할 수 있다.' })
   async createProductBundle(
     @UserId() sellerId: number,
     @Body() createProductBundleDto: CreateProductBundleDto,

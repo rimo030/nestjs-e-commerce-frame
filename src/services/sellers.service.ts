@@ -21,6 +21,7 @@ export class SellerService {
   }
 
   async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<void> {
+    console.log(createProductDto);
     await this.productsRespository.save(createProductDto);
   }
 }
