@@ -110,7 +110,7 @@ describe('ProductController', () => {
         /**
          * 순서대로, 무료, 무조건 유료, 몇 개 이상 무료, 개수 당 배송비 부과 방식을 의미한다.
          */
-        feeType: 'Free' | 'Charge' | 'OverFree' | 'OverQuantity' | 'Quantity';
+        deliveryType: 'Free' | 'Charge' | 'OverFree' | 'OverQuantity' | 'Quantity';
 
         /**
          * 몇 개 이상, 또는 얼마 이상을 의미하는 말로, feeType과 함께 해석해야 한다.

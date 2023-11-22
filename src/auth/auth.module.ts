@@ -29,7 +29,6 @@ import { SellerLocalStrategy } from './strategies/seller.local.strategy';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         return {
-          secret: configService.get('JWT_SECRET'),
           signOptions: {
             expiresIn: configService.get('JWT_EXPIRATION_TIME'),
           },

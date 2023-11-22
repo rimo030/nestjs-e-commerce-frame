@@ -20,7 +20,7 @@ export class SellerService {
     await this.productsBundleRespository.save({ sellerId, ...createProductBundleDto });
   }
 
-  async createProduct(createProductDto: CreateProductDto): Promise<void> {
+  async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<void> {
     await this.productsRespository.save(createProductDto);
   }
 }

@@ -1,9 +1,14 @@
-// 순서대로, 무료, 무조건 유료, 몇 개 이상 무료, 개수 당 배송비 부과 방식을 의미한다.
+/**
+ * 배송비 종류
+ *  - FREE : 무료
+ *  - NOT_FREE : 유료
+ *  - COUNT_FREE : 몇 개 이상 무료 (deliveryFreeOver에 기준 수량 입력)
+ *  - PRICE_FREE : 가격 이상 무료 (deliveryFreeOver에 기준 가격 입력)
+ */
 
-export enum feeType {
+export enum deliveryType {
   FREE = 'FREE',
-  CHARGE = 'CHARGE',
-  OVERFREE = 'OVERFREE',
-  OVERQUANTITY = 'OVERQUANTITY',
-  QUANTITY = 'QUANTITY',
+  NOT_FREE = 'NOT_FREE',
+  COUNT_FREE = 'OVER_FREE',
+  PRICE_FREE = 'PRICE_FREE',
 }

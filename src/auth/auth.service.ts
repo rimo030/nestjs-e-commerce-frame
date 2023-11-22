@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
@@ -22,6 +23,7 @@ export class AuthService {
     private readonly sellersRespository: SellersRespository,
 
     private readonly jwtService: JwtService,
+    readonly configService: ConfigService,
   ) {}
 
   async buyerSignUp(createUserDto: CreateBuyerDto): Promise<void> {
@@ -83,13 +85,13 @@ export class AuthService {
 
   async buyerLogin(buyerId: number): Promise<AccessToken> {
     const payload: Payload = { id: buyerId };
-    const accessToken = await this.jwtService.sign(payload);
+    const accessToken = await this.jwtService.sign(payload, { secret: this.configService.get('JWT_SECRET_BUYER') });
     return { accessToken };
   }
 
   async sellrLogin(sellerId: number): Promise<AccessToken> {
     const payload: Payload = { id: sellerId };
-    const accessToken = await this.jwtService.sign(payload);
+    const accessToken = await this.jwtService.sign(payload, { secret: this.configService.get('JWT_SECRET_SELLER') });
     return { accessToken };
   }
 }

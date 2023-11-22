@@ -10,10 +10,10 @@ export class ProductBundleEntity extends CommonEntity {
   sellerId!: number;
 
   @Column({ type: 'varchar', length: 128 })
-  bundleName!: string;
+  name!: string;
 
   @Column({ type: 'varchar', length: 128 })
-  feeStandard!: keyof typeof feeStandard;
+  chargeStandard!: keyof typeof feeStandard;
 
   /**
    * relations

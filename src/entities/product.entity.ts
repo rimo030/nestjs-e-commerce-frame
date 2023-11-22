@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { feeType } from 'src/types/enums/fee-type.enum';
+import { deliveryType } from 'src/types/enums/fee-type.enum';
 import { CartEntity } from './cart.entity';
 import { CategoryEntity } from './category.entity';
 import { CommonEntity } from './common/common.entity';
@@ -11,7 +11,7 @@ import { ProductRequiredOptionEntity } from './product-required-option.entity';
 
 @Entity({ name: 'product' })
 export class ProductEntity extends CommonEntity {
-  @Column()
+  @Column({ nullable: true })
   bundleId!: number;
 
   @Column()
@@ -30,10 +30,13 @@ export class ProductEntity extends CommonEntity {
   description!: string;
 
   @Column({ type: 'varchar', length: 128 })
-  feeType!: keyof typeof feeType;
+  deliveryType!: keyof typeof deliveryType;
 
   @Column({ type: 'int' })
-  shippingFee!: number;
+  deliveryFreeOver!: number;
+
+  @Column({ type: 'int' })
+  deliveryCharge!: number;
 
   @Column()
   img!: string;

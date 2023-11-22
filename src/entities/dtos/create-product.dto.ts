@@ -1,11 +1,11 @@
 import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { feeType } from 'src/types/enums/fee-type.enum';
+import { deliveryType } from 'src/types/enums/fee-type.enum';
 
 export class CreateProductDto {
   @ApiProperty({ description: '묶음 배송 그룹 id' })
   @IsOptional()
-  bundleId!: number;
+  bundleId!: number | undefined;
 
   @ApiProperty({ description: '상품 카테고리 id' })
   @IsNotEmpty()
@@ -27,9 +27,13 @@ export class CreateProductDto {
   @IsOptional()
   description!: string;
 
-  @ApiProperty({ description: '배송 타입', type: 'enum', enum: feeType })
-  @IsEnum(feeType)
-  feeType!: keyof typeof feeType;
+  @ApiProperty({ description: '배송 타입', type: 'enum', enum: deliveryType })
+  @IsEnum(deliveryType)
+  feeType!: keyof typeof deliveryType;
+
+  @ApiProperty({ description: '무료 배송 기준' })
+  @IsOptional()
+  deliveryFreeOver!: number;
 
   @ApiProperty({ description: '배송비' })
   @IsNotEmpty()

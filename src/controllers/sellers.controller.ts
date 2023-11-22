@@ -23,7 +23,7 @@ export class SellerController {
 
   @Post('/product')
   @ApiOperation({ summary: 'product 등록 API', description: 'seller는 상품을 등록할 수 있다.' })
-  async createProduct(@Body() createProductDto: CreateProductDto): Promise<void> {
-    await this.sellerservice.createProduct(createProductDto);
+  async createProduct(@UserId() sellerId: number, @Body() createProductDto: CreateProductDto): Promise<void> {
+    await this.sellerservice.createProduct(sellerId, createProductDto);
   }
 }
