@@ -5,7 +5,8 @@ commerce의 형태는 오픈마켓입니다.
 
 
 ## 구조도
-![image](https://github.com/rimo030/nestjs-e-commerce-frame/assets/109577985/6495e0d1-7b70-40cc-a0d4-f3715b079ec6)
+![image](https://github.com/rimo030/nestjs-e-commerce-frame/assets/109577985/00723166-126a-47b1-943a-ad3f242241ab)
+
 
 
 ## 주요 API (예정포함)
