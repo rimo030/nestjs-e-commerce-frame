@@ -6,6 +6,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
 import { typeORMConfig } from 'src/configs/typeorm.config';
 import { BoardsModule } from 'src/modules/boards.module';
+import { ProductModule } from 'src/modules/products.module';
+import { SellerModule } from 'src/modules/sellers.module';
 import { BuyersRespository } from 'src/repositories/buyers.repository';
 import { SellersRespository } from 'src/repositories/sellers.repository';
 import { AuthController } from './auth.controller';
@@ -18,6 +20,8 @@ import { SellerLocalStrategy } from './strategies/seller.local.strategy';
 @Module({
   imports: [
     //BoardsModule,
+    ProductModule,
+    SellerModule,
     TypeOrmModule.forRoot(typeORMConfig),
     PassportModule,
     JwtModule.registerAsync({
@@ -25,7 +29,6 @@ import { SellerLocalStrategy } from './strategies/seller.local.strategy';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
         return {
-          secret: configService.get('JWT_SECRET'),
           signOptions: {
             expiresIn: configService.get('JWT_EXPIRATION_TIME'),
           },

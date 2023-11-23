@@ -1,4 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { deliveryType } from 'src/types/enums/fee-type.enum';
 import { CartEntity } from './cart.entity';
 import { CategoryEntity } from './category.entity';
 import { CommonEntity } from './common/common.entity';
@@ -10,7 +11,7 @@ import { ProductRequiredOptionEntity } from './product-required-option.entity';
 
 @Entity({ name: 'product' })
 export class ProductEntity extends CommonEntity {
-  @Column()
+  @Column({ nullable: true })
   bundleId!: number;
 
   @Column()
@@ -19,21 +20,26 @@ export class ProductEntity extends CommonEntity {
   @Column()
   companyId!: number;
 
+  @Column({ type: 'tinyint' })
+  isSale!: number;
+
   @Column({ type: 'varchar', length: 128 })
-  title!: string;
+  name!: string;
 
-  @Column({ type: 'int' })
-  price!: number;
-
-  @Column({ type: 'varchar', length: 255 })
+  @Column({ type: 'varchar', length: 255, nullable: true })
   description!: string;
 
-  @Column({ type: 'int' })
-  shippingFee!: number;
+  @Column({ type: 'varchar', length: 128 })
+  deliveryType!: keyof typeof deliveryType;
 
-  // 이미지 컬럼
-  // @Column()
-  // img!: string;
+  @Column({ type: 'int' })
+  deliveryFreeOver!: number;
+
+  @Column({ type: 'int' })
+  deliveryCharge!: number;
+
+  @Column()
+  img!: string;
 
   /**
    * relations
