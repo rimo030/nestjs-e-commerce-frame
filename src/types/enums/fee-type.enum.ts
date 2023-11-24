@@ -9,6 +9,6 @@
 export enum deliveryType {
   FREE = 'FREE',
   NOT_FREE = 'NOT_FREE',
-  COUNT_FREE = 'OVER_FREE',
+  COUNT_FREE = 'COUNT_FREE',
   PRICE_FREE = 'PRICE_FREE',
 }

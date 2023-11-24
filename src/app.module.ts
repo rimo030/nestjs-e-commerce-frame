@@ -11,11 +11,5 @@ import { AuthModule } from './auth/auth.module';
       isGlobal: true,
     }),
   ],
-  providers: [
-    {
-      provide: APP_PIPE,
-      useClass: ValidationPipe,
-    },
-  ],
 })
 export class AppModule {}
