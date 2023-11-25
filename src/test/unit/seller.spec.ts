@@ -1,15 +1,17 @@
 import { v4 } from 'uuid';
+import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppModule } from 'src/app.module';
 import { AuthController } from 'src/auth/auth.controller';
 import { AuthService } from 'src/auth/auth.service';
-import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
-import { typeORMConfig } from 'src/configs/typeorm.config';
+import { ProductController } from 'src/controllers/products.controller';
 import { SellerController } from 'src/controllers/sellers.controller';
+import { CategoryEntity } from 'src/entities/category.entity';
+import { CompanyEntity } from 'src/entities/company.entity';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
-import { SellerEntity } from 'src/entities/seller.entity';
 import { AccessToken } from 'src/interfaces/access-token';
+import { Payload } from 'src/interfaces/payload';
+import { ProductsRespository } from 'src/repositories/products.repository';
 import { SellersRespository } from 'src/repositories/sellers.repository';
 import { SellerService } from 'src/services/sellers.service';
 
@@ -19,15 +21,19 @@ describe('SellerController', () => {
   let authController: AuthController;
   let authService: AuthService;
   let sellersRespository: SellersRespository;
+  let productsRespository: ProductsRespository;
+
+  let jwtService: JwtService;
+
+  /**
+   * 구매자 사이드
+   */
+
+  let productController: ProductController;
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
-      imports: [
-        CustomTypeOrmModule.forCustomRepository([SellersRespository]),
-        TypeOrmModule.forFeature([SellerEntity]),
-        TypeOrmModule.forRoot(typeORMConfig({ get: () => null } as any)),
-        AppModule,
-      ],
+      imports: [AppModule],
     }).compile();
 
     service = module.get<SellerService>(SellerService);
@@ -37,6 +43,11 @@ describe('SellerController', () => {
     authService = module.get<AuthService>(AuthService);
 
     sellersRespository = module.get<SellersRespository>(SellersRespository);
+    productsRespository = module.get<ProductsRespository>(ProductsRespository);
+
+    jwtService = module.get<JwtService>(JwtService);
+
+    productController = module.get<ProductController>(ProductController);
   });
 
   it('should be defined.', async () => {
@@ -105,8 +116,28 @@ describe('SellerController', () => {
         expect(accessToken !== null).toBe(true);
       });
 
-      it.skip('상품이 존재한다는 것이 데이터베이스 레벨에서 증명된다.', async () => {
-        // controller.createProduct();
+      it('상품이 존재한다는 것이 데이터베이스 레벨에서 증명된다.', async () => {
+        /**
+         * 상품을 만든다.
+         */
+        const decoded: Payload = jwtService.decode(accessToken!);
+        const product = await controller.createProduct(decoded.id, {
+          categoryId: (await new CategoryEntity({ name: 'name' }).save()).id,
+          companyId: (await new CompanyEntity({ name: 'name' }).save()).id,
+          deliveryCharge: 3000,
+          deliveryFreeOver: 30000,
+          deliveryType: 'COUNT_FREE',
+          description: 'description',
+          img: 'img.jpg',
+          isSale: 1,
+          name: 'name',
+        });
+
+        /**
+         * 데이터베이스에 있음을 검증
+         */
+        const createdInDatabase = await productsRespository.findOne({ where: { id: product.id } });
+        expect(createdInDatabase).toBeDefined();
       });
 
       it.skip('상품이 존재한다는 것이 판매자 사이드에서 증명되어야 한다.', () => {});
@@ -117,13 +148,35 @@ describe('SellerController', () => {
        *
        * 이 부분은 추후 구매자 플로우에서 증명을 다시 한다.
        */
-      it.skip('상품이 존재한다는 것이 구매자 사이드에서 증명되어야 한다.', async () => {
+      it('상품이 존재한다는 것이 구매자 사이드에서 증명되어야 한다.', async () => {
         /**
-         * 상품을 생성하는 함수를 호출한다.
+         * 상품을 만든다.
          */
+        const decoded: Payload = jwtService.decode(accessToken!);
+        const product = await controller.createProduct(decoded.id, {
+          categoryId: (await new CategoryEntity({ name: 'name' }).save()).id,
+          companyId: (await new CompanyEntity({ name: 'name' }).save()).id,
+          deliveryCharge: 3000,
+          deliveryFreeOver: 30000,
+          deliveryType: 'COUNT_FREE',
+          description: 'description',
+          img: 'img.jpg',
+          isSale: 0,
+          name: 'name',
+        });
+
         /**
          * 상품이 있다면 유저 쪽에서 조회 API를 했을 때 나와야 한다.
          */
+        const productList = await productController.getProductList({
+          limit: 1,
+          page: 1,
+          search: null,
+          sellerId: decoded.id,
+          categoryId: null,
+        });
+
+        expect(productList?.length).toBe(1);
       });
     });
   });

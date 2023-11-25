@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
+import { ProductEntity } from 'src/entities/product.entity';
 import { ProductsBundleRespository } from 'src/repositories/products.bundle.repository';
 import { ProductsRespository } from 'src/repositories/products.repository';
 
@@ -19,8 +20,7 @@ export class SellerService {
     await this.productsBundleRespository.save({ sellerId, ...createProductBundleDto });
   }
 
-  async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<void> {
-    console.log(createProductDto);
-    await this.productsRespository.save(createProductDto);
+  async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductEntity> {
+    return await this.productsRespository.save(createProductDto);
   }
 }
