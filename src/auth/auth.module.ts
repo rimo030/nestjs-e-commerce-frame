@@ -35,7 +35,7 @@ import { SellerLocalStrategy } from './strategies/seller.local.strategy';
       useFactory: (configService: ConfigService) => {
         return {
           signOptions: {
-            expiresIn: configService.get('JWT_EXPIRATION_TIME'),
+            expiresIn: configService.get('JWT_EXPIRATION_TIME') ?? '1h',
           },
         };
       },

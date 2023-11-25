@@ -1,27 +1,51 @@
+import { v4 } from 'uuid';
 import { Test } from '@nestjs/testing';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppModule } from 'src/app.module';
+import { AuthController } from 'src/auth/auth.controller';
+import { AuthService } from 'src/auth/auth.service';
+import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
+import { typeORMConfig } from 'src/configs/typeorm.config';
 import { SellerController } from 'src/controllers/sellers.controller';
+import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
+import { SellerEntity } from 'src/entities/seller.entity';
+import { AccessToken } from 'src/interfaces/access-token';
+import { SellersRespository } from 'src/repositories/sellers.repository';
 import { SellerService } from 'src/services/sellers.service';
 
 describe('SellerController', () => {
   let controller: SellerController;
   let service: SellerService;
+  let authController: AuthController;
+  let authService: AuthService;
+  let sellersRespository: SellersRespository;
 
-  beforeEach(async () => {
+  beforeAll(async () => {
     const module = await Test.createTestingModule({
-      imports: [AppModule],
+      imports: [
+        CustomTypeOrmModule.forCustomRepository([SellersRespository]),
+        TypeOrmModule.forFeature([SellerEntity]),
+        TypeOrmModule.forRoot(typeORMConfig({ get: () => null } as any)),
+        AppModule,
+      ],
     }).compile();
 
     service = module.get<SellerService>(SellerService);
     controller = module.get<SellerController>(SellerController);
+
+    authController = module.get<AuthController>(AuthController);
+    authService = module.get<AuthService>(AuthService);
+
+    sellersRespository = module.get<SellersRespository>(SellersRespository);
   });
 
   it('should be defined.', async () => {
     expect(controller).toBeDefined();
     expect(service).toBeDefined();
+    expect(authController).toBeDefined();
   });
 
-  describe('POST /product (상품 생성하기)', () => {
+  describe.only('POST /product (상품 생성하기)', () => {
     /**
      * 백엔드 시점
      *
@@ -50,6 +74,57 @@ describe('SellerController', () => {
      *
      * 여기서는 상품에, 이미지 1개에 옵션 1개가 있다는 가정으로 생성한다.
      */
-    it.only('상품이 등록되어야 한다.', async () => {});
+    describe('상품 등록 시 상품이 추가되는 것을 검증한다.', () => {
+      let accessToken: string | null = null;
+      beforeAll(async () => {
+        const randomStringForTest = v4();
+        const createSellerDto: CreateSellerDto = {
+          businessNumber: randomStringForTest,
+          email: randomStringForTest,
+          name: randomStringForTest.slice(0, 32),
+          password: randomStringForTest,
+          phone: randomStringForTest.slice(0, 11),
+        };
+
+        await authController.sellerSignUp(createSellerDto);
+        const createdSeller = await sellersRespository.findOne({
+          select: {
+            id: true,
+          },
+          where: {
+            email: randomStringForTest,
+          },
+        });
+
+        const tokenDto: AccessToken = await authService.sellerLogin(createdSeller?.id as number);
+        accessToken = tokenDto.accessToken;
+      });
+
+      it('테스트 시작 전에 토큰이 만들어졌는지 체크한다.', () => {
+        expect(accessToken).toBeDefined();
+        expect(accessToken !== null).toBe(true);
+      });
+
+      it.skip('상품이 존재한다는 것이 데이터베이스 레벨에서 증명된다.', async () => {
+        // controller.createProduct();
+      });
+
+      it.skip('상품이 존재한다는 것이 판매자 사이드에서 증명되어야 한다.', () => {});
+
+      /**
+       * 여기서 말하는 구매자는 구매자 API를 호출했을 때를 의미하며,
+       * 이 API는 로그인과 무관하게 동작해야 한다.
+       *
+       * 이 부분은 추후 구매자 플로우에서 증명을 다시 한다.
+       */
+      it.skip('상품이 존재한다는 것이 구매자 사이드에서 증명되어야 한다.', async () => {
+        /**
+         * 상품을 생성하는 함수를 호출한다.
+         */
+        /**
+         * 상품이 있다면 유저 쪽에서 조회 API를 했을 때 나와야 한다.
+         */
+      });
+    });
   });
 });
