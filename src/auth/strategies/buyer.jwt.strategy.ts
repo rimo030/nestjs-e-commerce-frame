@@ -14,7 +14,7 @@ export class BuyerJwtStrategy extends PassportStrategy(Strategy, 'buyer-jwt') {
     readonly configService: ConfigService,
   ) {
     super({
-      secretOrKey: configService.get('JWT_SECRET_BUYER'),
+      secretOrKey: configService.get('JWT_SECRET_BUYER') ?? 'JWT_SECRET_BUYER',
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     });
   }

@@ -1,5 +1,5 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { HttpException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,7 +14,7 @@ export class SellerJwtStrategy extends PassportStrategy(Strategy, 'seller-jwt') 
     readonly configService: ConfigService,
   ) {
     super({
-      secretOrKey: configService.get('JWT_SECRET_SELLER'),
+      secretOrKey: configService.get('JWT_SECRET_SELLER') ?? 'JWT_SECRET_SELLER',
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
     });
   }
