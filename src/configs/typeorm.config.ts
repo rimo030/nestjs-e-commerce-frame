@@ -15,7 +15,7 @@ export const typeORMConfig = (configService: ConfigService): TypeOrmModuleOption
     username: configService.get(`${NODE_ENV}_DB_USERNAME`) ?? 'root',
     password: configService.get(`${NODE_ENV}_DB_PASSWORD`) ?? 'password',
     database: configService.get(`${NODE_ENV}_DB_DATABASE`) ?? 'commerce',
-    entities: [path.join(__dirname, '/../entities/*.entity.{js, ts}')],
+    entities: [path.join(__dirname, '/../entities/*.entity.{js,ts}')],
     synchronize: true,
     namingStrategy: new SnakeNamingStrategy(),
   };
