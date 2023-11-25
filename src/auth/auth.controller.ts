@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
 import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
@@ -46,7 +46,7 @@ export class AuthController {
   @Post('/signin-seller')
   @ApiOperation({ summary: 'seller 로그인 API', description: 'seller 비밀번호 매칭' })
   sellerSignIn(@Body() authCredentialsDto: AuthCredentialsDto, @UserId() sellerId: number): Promise<AccessToken> {
-    return this.authService.sellrLogin(sellerId);
+    return this.authService.sellerLogin(sellerId);
   }
 
   /** buyer Guard 테스트

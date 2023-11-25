@@ -89,7 +89,7 @@ export class AuthService {
     return { accessToken };
   }
 
-  async sellrLogin(sellerId: number): Promise<AccessToken> {
+  async sellerLogin(sellerId: number): Promise<AccessToken> {
     const payload: Payload = { id: sellerId };
     const accessToken = await this.jwtService.sign(payload, { secret: this.configService.get('JWT_SECRET_SELLER') });
     return { accessToken };
