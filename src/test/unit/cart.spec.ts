@@ -31,12 +31,12 @@ describe('CartController', () => {
   });
 
   it('should be defined.', async () => {
-    expect(CartController).toBeDefined();
-    expect(CartService).toBeDefined();
-    expect(CartRespository).toBeDefined();
-    expect(AuthController).toBeDefined();
-    expect(BuyersRespository).toBeDefined();
-    expect(ProductsRespository).toBeDefined();
+    expect(Controller).toBeDefined();
+    expect(Service).toBeDefined();
+    expect(respository).toBeDefined();
+    expect(authController).toBeDefined();
+    expect(buyersRespository).toBeDefined();
+    expect(productRespository).toBeDefined();
   });
 
   /**
@@ -46,45 +46,43 @@ describe('CartController', () => {
    * product(상품) DB에는 1개 이상의 상품 데이터가 있다고 가정한다.
    */
 
-  beforeAll(async () => {
-    it('장바구니 기능은 구매자 계정 id가 있어야 사용 가능하다', async () => {
-      /**
-       * 판매자 계정 생성
-       */
-      const randomStringForTest = v4();
-      const createBuyerDto: CreateBuyerDto = {
+  it('장바구니 기능은 구매자 계정 id가 있어야 사용 가능하다', async () => {
+    /**
+     * 판매자 계정 생성
+     */
+    const randomStringForTest = v4();
+    const createBuyerDto: CreateBuyerDto = {
+      email: randomStringForTest,
+      password: randomStringForTest,
+      name: randomStringForTest,
+      gender: 1,
+      age: 1,
+      phone: randomStringForTest.slice(0, 11),
+    };
+
+    await authController.buyerSignUp(createBuyerDto);
+
+    /**
+     * 계정 생성 확인
+     */
+    const buyer = await buyersRespository.findOne({
+      select: {
+        id: true,
+      },
+      where: {
         email: randomStringForTest,
-        password: randomStringForTest,
-        name: randomStringForTest,
-        gender: 1,
-        age: 1,
-        phone: randomStringForTest.slice(0, 11),
-      };
-
-      await authController.buyerSignUp(createBuyerDto);
-
-      /**
-       * 계정 생성 확인
-       */
-      const buyer = await buyersRespository.findOne({
-        select: {
-          id: true,
-        },
-        where: {
-          email: randomStringForTest,
-        },
-      });
-
-      expect(buyer).toBeDefined();
+      },
     });
 
-    it('product(상품) DB에는 1개 이상의 상품 데이터가 있다.', async () => {
-      const products = await productRespository.find();
+    expect(buyer).toBeDefined();
+  });
 
-      console.log('================');
-      console.log(products);
-      expect(products.length > 0).toBe(true);
-    });
+  it('product(상품) DB에는 1개 이상의 상품 데이터가 있다.', async () => {
+    const products = await productRespository.find();
+
+    console.log('================');
+    console.log(products);
+    expect(products.length > 0).toBe(true);
   });
 
   todo('');
