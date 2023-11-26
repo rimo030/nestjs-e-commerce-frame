@@ -5,6 +5,7 @@ import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
 import { typeORMConfig } from 'src/configs/typeorm.config';
+import { CartModule } from 'src/modules/cart.module';
 import { ProductModule } from 'src/modules/products.module';
 import { SellerModule } from 'src/modules/sellers.module';
 import { BuyersRespository } from 'src/repositories/buyers.repository';
@@ -19,6 +20,7 @@ import { SellerLocalStrategy } from './strategies/seller.local.strategy';
 @Module({
   imports: [
     //BoardsModule,
+    CartModule,
     ProductModule,
     SellerModule,
     TypeOrmModule.forRootAsync({
