@@ -19,7 +19,7 @@ export class ProductRequiredOptionEntity extends CommonEntity {
   stock!: number;
 
   @Column({ type: 'tinyint' })
-  status!: number;
+  isSale!: number;
 
   /**
    * relations

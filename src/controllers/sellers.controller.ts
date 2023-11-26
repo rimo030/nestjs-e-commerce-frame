@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SellerJwtAuthGuard } from 'src/auth/guards/seller.jwt.guard';
 import { UserId } from 'src/auth/userid.decorator';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
+import { ProductEntity } from 'src/entities/product.entity';
 import { SellerService } from 'src/services/sellers.service';
 
 @Controller('seller')
@@ -23,7 +24,7 @@ export class SellerController {
 
   @Post('/product')
   @ApiOperation({ summary: 'product 등록 API', description: 'seller는 상품을 등록할 수 있다.' })
-  async createProduct(@UserId() sellerId: number, @Body() createProductDto: CreateProductDto): Promise<void> {
-    await this.sellerservice.createProduct(sellerId, createProductDto);
+  async createProduct(@UserId() sellerId: number, @Body() createProductDto: CreateProductDto): Promise<ProductEntity> {
+    return await this.sellerservice.createProduct(sellerId, createProductDto);
   }
 }

@@ -1,11 +1,11 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { deliveryType } from 'src/types/enums/fee-type.enum';
 
 export class CreateProductDto {
   @ApiProperty({ description: '묶음 배송 그룹 id' })
   @IsOptional()
-  bundleId!: number | undefined;
+  bundleId?: number;
 
   @ApiProperty({ description: '상품 카테고리 id' })
   @IsNotEmpty()
