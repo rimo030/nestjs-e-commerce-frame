@@ -1,6 +1,7 @@
 import { todo } from 'node:test';
 import { v4 } from 'uuid';
 import { Test } from '@nestjs/testing';
+import { AppModule } from 'src/app.module';
 import { AuthController } from 'src/auth/auth.controller';
 import { AuthService } from 'src/auth/auth.service';
 import { CartController } from 'src/controllers/cart.controller';
@@ -22,12 +23,15 @@ describe('CartController', () => {
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      controllers: [CartController],
-      providers: [CartService],
+      imports: [AppModule],
     }).compile();
 
     Controller = module.get<CartController>(CartController);
     Service = module.get<CartService>(CartService);
+    respository = module.get<CartRespository>(CartRespository);
+    authController = module.get<AuthController>(AuthController);
+    buyersRespository = module.get<BuyersRespository>(BuyersRespository);
+    productRespository = module.get<ProductsRespository>(ProductsRespository);
   });
 
   it('should be defined.', async () => {
@@ -79,9 +83,6 @@ describe('CartController', () => {
 
   it('product(상품) DB에는 1개 이상의 상품 데이터가 있다.', async () => {
     const products = await productRespository.find();
-
-    console.log('================');
-    console.log(products);
     expect(products.length > 0).toBe(true);
   });
 
