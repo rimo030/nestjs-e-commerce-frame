@@ -1,9 +1,7 @@
-import { todo } from 'node:test';
 import { v4 } from 'uuid';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { AuthController } from 'src/auth/auth.controller';
-import { AuthService } from 'src/auth/auth.service';
 import { CartController } from 'src/controllers/cart.controller';
 import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
 import { BuyersRespository } from 'src/repositories/buyers.repository';
@@ -52,7 +50,7 @@ describe('CartController', () => {
 
   it('장바구니 기능은 구매자 계정 id가 있어야 사용 가능하다', async () => {
     /**
-     * 판매자 계정 생성
+     * 구매자 계정 생성
      */
     const randomStringForTest = v4();
     const createBuyerDto: CreateBuyerDto = {
@@ -86,5 +84,5 @@ describe('CartController', () => {
     expect(products.length > 0).toBe(true);
   });
 
-  todo('');
+  it.todo('');
 });
