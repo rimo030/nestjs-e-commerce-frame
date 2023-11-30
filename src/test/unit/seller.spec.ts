@@ -28,6 +28,8 @@ describe('SellerController', () => {
   let productController: ProductController;
   let productsRespository: ProductsRespository;
 
+  let accessToken: string | null = null;
+
   /**
    * 구매자 사이드
    */
@@ -48,12 +50,43 @@ describe('SellerController', () => {
     productsRespository = module.get<ProductsRespository>(ProductsRespository);
 
     jwtService = module.get<JwtService>(JwtService);
+
+    /**
+     * 판매자 계정생성 및 로그인
+     */
+    const randomStringForTest = v4();
+    const createSellerDto: CreateSellerDto = {
+      email: randomStringForTest,
+      password: randomStringForTest,
+      name: randomStringForTest.slice(0, 32),
+      phone: randomStringForTest.slice(0, 11),
+      businessNumber: randomStringForTest,
+    };
+
+    await authController.sellerSignUp(createSellerDto);
+
+    const createdSeller = await sellersRespository.findOne({
+      select: {
+        id: true,
+      },
+      where: {
+        email: randomStringForTest,
+      },
+    });
+
+    const tokenDto: AccessToken = await authService.sellerLogin(createdSeller?.id as number);
+    accessToken = tokenDto.accessToken;
   });
 
   it('should be defined.', async () => {
     expect(sellercontroller).toBeDefined();
     expect(sellerservice).toBeDefined();
     expect(authController).toBeDefined();
+  });
+
+  it('테스트 시작 전에 토큰이 만들어졌는지 체크한다.', () => {
+    expect(accessToken).toBeDefined();
+    expect(accessToken !== null).toBe(true);
   });
 
   describe.only('POST /product (상품 생성하기)', () => {
@@ -86,41 +119,6 @@ describe('SellerController', () => {
      * 여기서는 상품에, 이미지 1개에 옵션 1개가 있다는 가정으로 생성한다.
      */
     describe('상품 등록 시 상품이 추가되는 것을 검증한다.', () => {
-      let accessToken: string | null = null;
-
-      beforeAll(async () => {
-        /**
-         * 판매자 계정생성 및 로그인
-         */
-        const randomStringForTest = v4();
-        const createSellerDto: CreateSellerDto = {
-          email: randomStringForTest,
-          password: randomStringForTest,
-          name: randomStringForTest.slice(0, 32),
-          phone: randomStringForTest.slice(0, 11),
-          businessNumber: randomStringForTest,
-        };
-
-        await authController.sellerSignUp(createSellerDto);
-
-        const createdSeller = await sellersRespository.findOne({
-          select: {
-            id: true,
-          },
-          where: {
-            email: randomStringForTest,
-          },
-        });
-
-        const tokenDto: AccessToken = await authService.sellerLogin(createdSeller?.id as number);
-        accessToken = tokenDto.accessToken;
-      });
-
-      it('테스트 시작 전에 토큰이 만들어졌는지 체크한다.', () => {
-        expect(accessToken).toBeDefined();
-        expect(accessToken !== null).toBe(true);
-      });
-
       it('상품이 존재한다는 것이 데이터베이스 레벨에서 증명된다.', async () => {
         /**
          * 상품을 만든다.
@@ -200,6 +198,6 @@ describe('SellerController', () => {
      * 판매자는 id가 발급된 옵션에 대하여 입력 옵션을 추가/조회/삭제 할 수 있다.
      *
      */
-    describe('등록된 상품에 대하여 옵션, 선택옵션이 추가되는 것을 검증한다.', () => {});
+    describe('등록된 상품에 대하여 옵션이 추가되는 것을 검증한다.', () => {});
   });
 });
