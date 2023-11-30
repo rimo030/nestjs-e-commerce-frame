@@ -1,9 +1,7 @@
-import { todo } from 'node:test';
 import { v4 } from 'uuid';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { AuthController } from 'src/auth/auth.controller';
-import { AuthService } from 'src/auth/auth.service';
 import { CartController } from 'src/controllers/cart.controller';
 import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
 import { BuyersRespository } from 'src/repositories/buyers.repository';
@@ -85,6 +83,4 @@ describe('CartController', () => {
     const products = await productRespository.find();
     expect(products.length > 0).toBe(true);
   });
-
-  todo('');
 });
