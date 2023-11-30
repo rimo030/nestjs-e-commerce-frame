@@ -16,43 +16,43 @@ import { SellersRespository } from 'src/repositories/sellers.repository';
 import { SellerService } from 'src/services/sellers.service';
 
 describe('SellerController', () => {
-  let controller: SellerController;
-  let service: SellerService;
+  let jwtService: JwtService;
+
+  let sellercontroller: SellerController;
+  let sellerservice: SellerService;
+  let sellersRespository: SellersRespository;
+
   let authController: AuthController;
   let authService: AuthService;
-  let sellersRespository: SellersRespository;
-  let productsRespository: ProductsRespository;
 
-  let jwtService: JwtService;
+  let productController: ProductController;
+  let productsRespository: ProductsRespository;
 
   /**
    * 구매자 사이드
    */
-
-  let productController: ProductController;
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    service = module.get<SellerService>(SellerService);
-    controller = module.get<SellerController>(SellerController);
+    sellercontroller = module.get<SellerController>(SellerController);
+    sellerservice = module.get<SellerService>(SellerService);
+    sellersRespository = module.get<SellersRespository>(SellersRespository);
 
     authController = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(AuthService);
 
-    sellersRespository = module.get<SellersRespository>(SellersRespository);
+    productController = module.get<ProductController>(ProductController);
     productsRespository = module.get<ProductsRespository>(ProductsRespository);
 
     jwtService = module.get<JwtService>(JwtService);
-
-    productController = module.get<ProductController>(ProductController);
   });
 
   it('should be defined.', async () => {
-    expect(controller).toBeDefined();
-    expect(service).toBeDefined();
+    expect(sellercontroller).toBeDefined();
+    expect(sellerservice).toBeDefined();
     expect(authController).toBeDefined();
   });
 
@@ -87,17 +87,22 @@ describe('SellerController', () => {
      */
     describe('상품 등록 시 상품이 추가되는 것을 검증한다.', () => {
       let accessToken: string | null = null;
+
       beforeAll(async () => {
+        /**
+         * 판매자 계정생성 및 로그인
+         */
         const randomStringForTest = v4();
         const createSellerDto: CreateSellerDto = {
-          businessNumber: randomStringForTest,
           email: randomStringForTest,
-          name: randomStringForTest.slice(0, 32),
           password: randomStringForTest,
+          name: randomStringForTest.slice(0, 32),
           phone: randomStringForTest.slice(0, 11),
+          businessNumber: randomStringForTest,
         };
 
         await authController.sellerSignUp(createSellerDto);
+
         const createdSeller = await sellersRespository.findOne({
           select: {
             id: true,
@@ -121,16 +126,16 @@ describe('SellerController', () => {
          * 상품을 만든다.
          */
         const decoded: Payload = jwtService.decode(accessToken!);
-        const product = await controller.createProduct(decoded.id, {
+        const product = await sellercontroller.createProduct(decoded.id, {
           categoryId: (await new CategoryEntity({ name: 'name' }).save()).id,
           companyId: (await new CompanyEntity({ name: 'name' }).save()).id,
+          isSale: 1,
+          name: 'name',
+          description: 'description',
           deliveryCharge: 3000,
           deliveryFreeOver: 30000,
           deliveryType: 'COUNT_FREE',
-          description: 'description',
           img: 'img.jpg',
-          isSale: 1,
-          name: 'name',
         });
 
         /**
@@ -153,16 +158,16 @@ describe('SellerController', () => {
          * 상품을 만든다.
          */
         const decoded: Payload = jwtService.decode(accessToken!);
-        const product = await controller.createProduct(decoded.id, {
+        const product = await sellercontroller.createProduct(decoded.id, {
           categoryId: (await new CategoryEntity({ name: 'name' }).save()).id,
           companyId: (await new CompanyEntity({ name: 'name' }).save()).id,
+          isSale: 0,
+          name: 'name',
+          description: 'description',
           deliveryCharge: 3000,
           deliveryFreeOver: 30000,
           deliveryType: 'COUNT_FREE',
-          description: 'description',
           img: 'img.jpg',
-          isSale: 0,
-          name: 'name',
         });
 
         /**
@@ -179,5 +184,22 @@ describe('SellerController', () => {
         expect(productList?.length).toBe(1);
       });
     });
+
+    /**
+     * 판매자는 등록한 상품에 대해 id를 발급받는다.
+     *
+     * 판매자는 id가 발급된 상품에 대하여 옵션, 선택옵션을 추가/조회/삭제할 수 있다.
+     *  - DB 칼럼이 같으므로 하나의 api로 만든다.
+     *    - 옵션, 선택옵션의 여부는 isRequire 쿼리 파라미터를 기준으로 한다.
+     *      - /product/:id/option?isRequire=true  <<< 옵션
+     *      - /product/:id/option?isRequire=false  <<< 선택 옵션
+     *
+     *  - 등록된 옵션, 선택옵션은 각각 id를 발급받는다.
+     *  - 상품이 삭제되면 해당 상품의 옵션과 선택옵션은 함께 삭제된다.
+     *
+     * 판매자는 id가 발급된 옵션에 대하여 입력 옵션을 추가/조회/삭제 할 수 있다.
+     *
+     */
+    describe('등록된 상품에 대하여 옵션, 선택옵션이 추가되는 것을 검증한다.', () => {});
   });
 });
