@@ -1,4 +1,4 @@
-import { Body, Controller, Param, Post, Query, UseGuards } from '@nestjs/common';
+import { Controller, UseGuards, Post, Body, Param, ParseIntPipe, Query, ParseBoolPipe } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SellerJwtAuthGuard } from 'src/auth/guards/seller.jwt.guard';
 import { UserId } from 'src/auth/userid.decorator';
@@ -37,8 +37,8 @@ export class SellerController {
     description: 'seller는 상품의 옵션과 선택옵션을 등록할 수 있다.',
   })
   async createProductOptions(
-    @Param('id') productId: number,
-    @Query('isRequire') isRequire: boolean,
+    @Param('id', ParseIntPipe) productId: number,
+    @Query('isRequire', ParseBoolPipe) isRequire: boolean,
     @Body() createProductOptionsDto: CreateProductOptionsDto,
   ): Promise<ProductRequiredOptionEntity | ProductOptionEntity> {
     return await this.sellerservice.createProductOptions(productId, isRequire, createProductOptionsDto);
