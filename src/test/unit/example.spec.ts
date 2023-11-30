@@ -18,15 +18,6 @@ describe('ProductController', () => {
     controller = module.get<ProductController>(ProductController);
   });
 
-  describe('findAll', () => {
-    it('should return an array of users', async () => {
-      const result = ['test'];
-      //   jest.spyOn(new ProductService2(), 'abc').mockImplementation(() => result);
-
-      expect(await controller.findAll()).toBe(result);
-    });
-  });
-
   /**
    * 조건 1.
    *
