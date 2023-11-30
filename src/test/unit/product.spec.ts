@@ -48,6 +48,9 @@ describe('ProductController', () => {
 
     /**
      * GET products?page=1&limit=15&category=&sellerId=&
+     * GET categories/:categoryId/products?page=1&limit=15 ...
+     *
+     * 엔드포인트를 2개 가질 수도 있다.
      */
     describe('구매자 입장에서의 조회 로직', () => {
       /**
