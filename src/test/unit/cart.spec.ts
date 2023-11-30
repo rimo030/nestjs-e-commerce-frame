@@ -83,6 +83,4 @@ describe('CartController', () => {
     const products = await productRespository.find();
     expect(products.length > 0).toBe(true);
   });
-
-  it.todo('');
 });

@@ -18,15 +18,6 @@ describe('ProductController', () => {
     controller = module.get<ProductController>(ProductController);
   });
 
-  describe('findAll', () => {
-    it('should return an array of users', async () => {
-      const result = ['test'];
-      //   jest.spyOn(new ProductService2(), 'abc').mockImplementation(() => result);
-
-      expect(await controller.findAll()).toBe(result);
-    });
-  });
-
   /**
    * 조건 1.
    *
@@ -57,6 +48,9 @@ describe('ProductController', () => {
 
     /**
      * GET products?page=1&limit=15&category=&sellerId=&
+     * GET categories/:categoryId/products?page=1&limit=15 ...
+     *
+     * 엔드포인트를 2개 가질 수도 있다.
      */
     describe('구매자 입장에서의 조회 로직', () => {
       /**
@@ -209,6 +203,53 @@ describe('ProductController', () => {
 
         expect(productListByProductService.every((el) => el.categoryId === 조회할_카테고리_값)).toBe(true);
       });
+    });
+
+    /**
+     * 상품의 상세 페이지 조회
+     */
+    describe('GET products/:id', () => {
+      /**
+       * 상품의 이름을 포함한 기본적인 정보 전체와,
+       * 옵션 10개, 선택 옵션 10개를 가져온다.
+       * 이렇게 옵션을 미리 가져 오는 이유는 상품 조회, 페이지 이동, 옵션 조회 등 API가 나뉘는 것을 방지하기 위함이다.
+       * 이렇게 한 번의 요청으로 가져온 후 이후 필요한 데이터를 추가적인 API로 가져오는 게 성능 상 유리하다.
+       * 네트워크 대역폭을 아낄 수 있기 때문이다.
+       */
+      it.todo('상품의 상세 페이지를 조회한다.');
+
+      /**
+       * 추천 상품 기준은, 여기서는 편의 상 동일 카테고리를 기준으로 한다.
+       */
+      it.todo('상품 상세 페이지 조회 시에는 상품의 추천 상품 10개가 함께 보여져야 한다.');
+    });
+
+    describe('GET products/:id/options?required=', () => {
+      /**
+       * 상품의 옵션 조회 시 쿼리로 받은 requried true, false를 통해 선택 옵션과 그렇지 않은 경우를 구분할 수 있어야 한다.
+       * 당연히 페이지네이션이어야 하며, 1페이지가 default로 조회되어야 한다.
+       * 상품의 최초 조회 시 상품의 옵션들이 조회되기 때문에 서비스 로직은 재사용될 수 있어야 한다.
+       */
+      it.todo('상품의 옵션을 페이지네이션으로 조회한다.');
+
+      /**
+       * 입력 옵션이 존재할 경우 배열에 담겨서 보여진다.
+       * 없을 경우 빈 배열이며, 빈 배열이면 데이터가 빈 것이 아니라 입력 옵션이 없는 것과 동일하게 처리될 것이다.
+       */
+      it.todo('필수 옵션의 경우, 선택 옵션과 달리 입력 옵션이 있을 경우 입력 옵션들이 함께 보여져야 한다.');
+
+      /**
+       * 즉, 먼저 생긴 옵션이 가장 위에 보여져야 한다.
+       */
+      it.todo('옵션은 id 값을 기준으로 정렬되어 보여져야 한다.');
+
+      /**
+       * 먼 미래에 도전했으면 하는 사항.
+       *
+       * 예를 들어 '홍길동' 인지, 영문 이름으로 'hong-gil-dong'인지, 아니면 숫자만 받는지 등 조건이 있을 것이다.
+       * 해당 조건들을 따로 칼럼으로 가지고 있다면 더 대응의 폭이 넓어질 것이다.
+       */
+      it.todo('입력 옵션에는 어떠한 정규식 패턴을 사용할 것인지를 의미하는 Enum 칼럼이 존재해야 한다.');
     });
   });
 });
