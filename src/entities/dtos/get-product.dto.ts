@@ -2,7 +2,7 @@ import { Type } from 'class-transformer';
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class PostProductDto {
+export class GetProductDto {
   @ApiProperty({ description: '현재 페이지', required: false })
   @Type(() => Number)
   @IsNumber()
@@ -16,17 +16,17 @@ export class PostProductDto {
   @ApiProperty({ description: '검색 키워드', required: false })
   @IsOptional()
   @IsString()
-  search!: string | null;
+  search?: string;
 
   @ApiProperty({ description: '카테고리 id', required: false })
   @Type(() => Number)
   @IsOptional()
   @IsNumber()
-  categoryId!: number | null;
+  categoryId?: number;
 
   @ApiProperty({ description: '판매자 id', required: false })
   @Type(() => Number)
   @IsOptional()
   @IsNumber()
-  sellerId!: number | null;
+  sellerId?: number;
 }
