@@ -11,7 +11,9 @@ import { CompanyEntity } from 'src/entities/company.entity';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 import { AccessToken } from 'src/interfaces/access-token';
 import { Payload } from 'src/interfaces/payload';
+import { ProductsOptionRespository } from 'src/repositories/products.option.repository';
 import { ProductsRespository } from 'src/repositories/products.repository';
+import { ProductsRequiredRespository } from 'src/repositories/products.required.option.repository';
 import { SellersRespository } from 'src/repositories/sellers.repository';
 import { SellerService } from 'src/services/sellers.service';
 
@@ -27,6 +29,8 @@ describe('SellerController', () => {
 
   let productController: ProductController;
   let productsRespository: ProductsRespository;
+  let productsRequiredRespository: ProductsRequiredRespository;
+  let productsOptionRespository: ProductsOptionRespository;
 
   let accessToken: string | null = null;
 
@@ -48,6 +52,8 @@ describe('SellerController', () => {
 
     productController = module.get<ProductController>(ProductController);
     productsRespository = module.get<ProductsRespository>(ProductsRespository);
+    productsRequiredRespository = module.get<ProductsRequiredRespository>(ProductsRequiredRespository);
+    productsOptionRespository = module.get<ProductsOptionRespository>(ProductsOptionRespository);
 
     jwtService = module.get<JwtService>(JwtService);
 
@@ -197,7 +203,7 @@ describe('SellerController', () => {
      *
      */
     describe('등록된 상품에 대하여 필수 옵션/ 선택옵션이 추가되는 것을 검증한다.', () => {
-      it('필수 옵션이 추가되면 DB에서 조회할 수 있어야 한다.', async () => {
+      it('필수 옵션과 선택옵션이 추가되면 그 id를 DB에서 조회할 수 있어야 한다.', async () => {
         /**
          * 상품 1개 가져오기
          */
@@ -206,8 +212,41 @@ describe('SellerController', () => {
           limit: 1,
           page: 1,
         });
+
+        const isRequire = true;
+
+        if (product) {
+          const productId = product[0].id;
+
+          /**
+           * 필수 옵션 추가
+           */
+
+          const requireOption = await sellercontroller.createProductOptions(productId, isRequire, {
+            name: 'name',
+            price: 0,
+            stock: 0,
+            isSale: 0,
+          });
+          /**
+           * 선택 옵션 추가
+           */
+          const option = await sellercontroller.createProductOptions(productId, !isRequire, {
+            name: 'name',
+            price: 0,
+            stock: 0,
+            isSale: 0,
+          });
+
+          /**
+           * 데이터 베이스에서 조회
+           */
+          const ro = await productsRequiredRespository.findOneBy({ id: requireOption.id });
+          const o = await productsOptionRespository.findOneBy({ id: option.id });
+          expect(ro === null).toBe(false);
+          expect(o === null).toBe(false);
+        }
       });
-      it('선택 옵션이 추가되면 DB에서 조회할 수 있어야 한다.', async () => {});
     });
   });
 });
