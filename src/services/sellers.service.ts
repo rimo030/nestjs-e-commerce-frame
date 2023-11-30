@@ -9,7 +9,7 @@ import { ProductEntity } from 'src/entities/product.entity';
 import { ProductsBundleRespository } from 'src/repositories/products.bundle.repository';
 import { ProductsOptionRespository } from 'src/repositories/products.option.repository';
 import { ProductsRespository } from 'src/repositories/products.repository';
-import { ProductsRequiredRespository } from 'src/repositories/products.required.option.repository';
+import { ProductsRequiredOptionRespository } from 'src/repositories/products.required.option.repository';
 
 @Injectable()
 export class SellerService {
@@ -20,8 +20,8 @@ export class SellerService {
     @InjectRepository(ProductsRespository)
     private readonly productsRespository: ProductsRespository,
 
-    @InjectRepository(ProductsRequiredRespository)
-    private readonly productsRequiredRespository: ProductsRequiredRespository,
+    @InjectRepository(ProductsRequiredOptionRespository)
+    private readonly productsRequiredRespository: ProductsRequiredOptionRespository,
 
     @InjectRepository(ProductsOptionRespository)
     private readonly productsOptionRespository: ProductsOptionRespository,

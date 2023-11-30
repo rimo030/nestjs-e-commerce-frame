@@ -3,7 +3,7 @@ import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
 import { ProductsBundleRespository } from 'src/repositories/products.bundle.repository';
 import { ProductsOptionRespository } from 'src/repositories/products.option.repository';
 import { ProductsRespository } from 'src/repositories/products.repository';
-import { ProductsRequiredRespository } from 'src/repositories/products.required.option.repository';
+import { ProductsRequiredOptionRespository } from 'src/repositories/products.required.option.repository';
 import { SellerController } from '../controllers/sellers.controller';
 import { SellerService } from '../services/sellers.service';
 
@@ -12,7 +12,7 @@ import { SellerService } from '../services/sellers.service';
     CustomTypeOrmModule.forCustomRepository([
       ProductsRespository,
       ProductsBundleRespository,
-      ProductsRequiredRespository,
+      ProductsRequiredOptionRespository,
       ProductsOptionRespository,
     ]),
   ],

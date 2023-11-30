@@ -13,7 +13,7 @@ import { AccessToken } from 'src/interfaces/access-token';
 import { Payload } from 'src/interfaces/payload';
 import { ProductsOptionRespository } from 'src/repositories/products.option.repository';
 import { ProductsRespository } from 'src/repositories/products.repository';
-import { ProductsRequiredRespository } from 'src/repositories/products.required.option.repository';
+import { ProductsRequiredOptionRespository } from 'src/repositories/products.required.option.repository';
 import { SellersRespository } from 'src/repositories/sellers.repository';
 import { SellerService } from 'src/services/sellers.service';
 
@@ -29,7 +29,7 @@ describe('SellerController', () => {
 
   let productController: ProductController;
   let productsRespository: ProductsRespository;
-  let productsRequiredRespository: ProductsRequiredRespository;
+  let productsRequiredRespository: ProductsRequiredOptionRespository;
   let productsOptionRespository: ProductsOptionRespository;
 
   let accessToken: string | null = null;
@@ -52,7 +52,7 @@ describe('SellerController', () => {
 
     productController = module.get<ProductController>(ProductController);
     productsRespository = module.get<ProductsRespository>(ProductsRespository);
-    productsRequiredRespository = module.get<ProductsRequiredRespository>(ProductsRequiredRespository);
+    productsRequiredRespository = module.get<ProductsRequiredOptionRespository>(ProductsRequiredOptionRespository);
     productsOptionRespository = module.get<ProductsOptionRespository>(ProductsOptionRespository);
 
     jwtService = module.get<JwtService>(JwtService);
