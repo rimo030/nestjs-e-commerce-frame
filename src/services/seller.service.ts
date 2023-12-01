@@ -10,17 +10,17 @@ import { ProductRepository } from 'src/repositories/product.repository';
 export class SellerService {
   constructor(
     @InjectRepository(ProductBundleRepository)
-    private readonly productsBundleRespository: ProductBundleRepository,
+    private readonly productBundleRepository: ProductBundleRepository,
 
     @InjectRepository(ProductRepository)
-    private readonly productsRespository: ProductRepository,
+    private readonly productRepository: ProductRepository,
   ) {}
 
   async createProductBundle(sellerId: number, createProductBundleDto: CreateProductBundleDto): Promise<void> {
-    await this.productsBundleRespository.save({ sellerId, ...createProductBundleDto });
+    await this.productBundleRepository.save({ sellerId, ...createProductBundleDto });
   }
 
   async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductEntity> {
-    return await this.productsRespository.save(createProductDto);
+    return await this.productRepository.save(createProductDto);
   }
 }

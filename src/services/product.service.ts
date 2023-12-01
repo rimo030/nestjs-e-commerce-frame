@@ -10,12 +10,12 @@ import { ProductRepository } from 'src/repositories/product.repository';
 export class ProductService {
   constructor(
     @InjectRepository(ProductRepository)
-    private readonly productsRespository: ProductRepository,
+    private readonly productRepository: ProductRepository,
   ) {}
 
   // params가 주어지지 않았을 때
   async getProductList(params: PostProductDto): Promise<ProductEntity[] | null> {
-    const result = await this.productsRespository
+    const result = await this.productRepository
       .createQueryBuilder('product')
       .withDeleted() // 작동안함..
       .limit(params.limit)
