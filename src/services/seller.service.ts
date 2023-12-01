@@ -6,19 +6,19 @@ import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
 import { ProductEntity } from 'src/entities/product.entity';
-import { ProductsBundleRespository } from 'src/repositories/products.bundle.repository';
+import { ProductBundleRepository } from 'src/repositories/product.bundle.repository';
+import { ProductRepository } from 'src/repositories/product.repository';
 import { ProductsOptionRespository } from 'src/repositories/products.option.repository';
-import { ProductsRespository } from 'src/repositories/products.repository';
 import { ProductsRequiredOptionRespository } from 'src/repositories/products.required.option.repository';
 
 @Injectable()
 export class SellerService {
   constructor(
-    @InjectRepository(ProductsBundleRespository)
-    private readonly productsBundleRespository: ProductsBundleRespository,
+    @InjectRepository(ProductBundleRepository)
+    private readonly productBundleRepository: ProductBundleRepository,
 
-    @InjectRepository(ProductsRespository)
-    private readonly productsRespository: ProductsRespository,
+    @InjectRepository(ProductRepository)
+    private readonly productRepository: ProductRepository,
 
     @InjectRepository(ProductsRequiredOptionRespository)
     private readonly productsRequiredRespository: ProductsRequiredOptionRespository,
@@ -28,11 +28,11 @@ export class SellerService {
   ) {}
 
   async createProductBundle(sellerId: number, createProductBundleDto: CreateProductBundleDto): Promise<void> {
-    await this.productsBundleRespository.save({ sellerId, ...createProductBundleDto });
+    await this.productBundleRepository.save({ sellerId, ...createProductBundleDto });
   }
 
   async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductEntity> {
-    return await this.productsRespository.save(createProductDto);
+    return await this.productRepository.save(createProductDto);
   }
 
   async createProductOptions(
@@ -47,7 +47,7 @@ export class SellerService {
      *  seller의 모든 작업에 필요하지 않나?? 그럼 별도의 함수로 분리해야 하지 않나?
      */
 
-    const product = await this.productsRespository.findOneBy({ id: productId });
+    const product = await this.productRepository.findOneBy({ id: productId });
     if (!product) {
       throw new NotFoundException(`Can't find product id : ${productId}`);
     }

@@ -8,7 +8,7 @@ import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
 import { ProductEntity } from 'src/entities/product.entity';
-import { SellerService } from 'src/services/sellers.service';
+import { SellerService } from 'src/services/seller.service';
 
 @Controller('seller')
 @ApiTags('Seller API')

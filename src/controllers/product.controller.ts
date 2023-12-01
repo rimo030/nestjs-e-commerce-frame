@@ -2,7 +2,7 @@ import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetProductDto } from 'src/entities/dtos/get-product.dto';
 import { ProductEntity } from 'src/entities/product.entity';
-import { ProductService } from 'src/services/products.service';
+import { ProductService } from 'src/services/product.service';
 
 @Controller('products')
 @ApiTags('Product API')

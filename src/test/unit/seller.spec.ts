@@ -4,31 +4,32 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { AuthController } from 'src/auth/auth.controller';
 import { AuthService } from 'src/auth/auth.service';
-import { ProductController } from 'src/controllers/products.controller';
-import { SellerController } from 'src/controllers/sellers.controller';
+import { ProductController } from 'src/controllers/product.controller';
+import { SellerController } from 'src/controllers/seller.controller';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 import { AccessToken } from 'src/interfaces/access-token';
 import { Payload } from 'src/interfaces/payload';
+import { ProductRepository } from 'src/repositories/product.repository';
 import { ProductsOptionRespository } from 'src/repositories/products.option.repository';
-import { ProductsRespository } from 'src/repositories/products.repository';
 import { ProductsRequiredOptionRespository } from 'src/repositories/products.required.option.repository';
-import { SellersRespository } from 'src/repositories/sellers.repository';
-import { SellerService } from 'src/services/sellers.service';
+import { SellerRepository } from 'src/repositories/seller.repository';
+import { SellerService } from 'src/services/seller.service';
 
 describe('SellerController', () => {
   let jwtService: JwtService;
 
   let sellercontroller: SellerController;
   let sellerservice: SellerService;
-  let sellersRespository: SellersRespository;
+  let sellerRepository: SellerRepository;
 
   let authController: AuthController;
   let authService: AuthService;
 
   let productController: ProductController;
-  let productsRespository: ProductsRespository;
+  let productRespository: ProductRepository;
+
   let productsRequiredRespository: ProductsRequiredOptionRespository;
   let productsOptionRespository: ProductsOptionRespository;
 
@@ -45,13 +46,14 @@ describe('SellerController', () => {
 
     sellercontroller = module.get<SellerController>(SellerController);
     sellerservice = module.get<SellerService>(SellerService);
-    sellersRespository = module.get<SellersRespository>(SellersRespository);
+    sellerRepository = module.get<SellerRepository>(SellerRepository);
 
     authController = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(AuthService);
 
     productController = module.get<ProductController>(ProductController);
-    productsRespository = module.get<ProductsRespository>(ProductsRespository);
+
+    productRespository = module.get<ProductRepository>(ProductRepository);
     productsRequiredRespository = module.get<ProductsRequiredOptionRespository>(ProductsRequiredOptionRespository);
     productsOptionRespository = module.get<ProductsOptionRespository>(ProductsOptionRespository);
 
@@ -71,7 +73,7 @@ describe('SellerController', () => {
 
     await authController.sellerSignUp(createSellerDto);
 
-    const createdSeller = await sellersRespository.findOne({
+    const createdSeller = await sellerRepository.findOne({
       select: {
         id: true,
       },
@@ -145,7 +147,7 @@ describe('SellerController', () => {
         /**
          * 데이터베이스에 있음을 검증
          */
-        const createdInDatabase = await productsRespository.findOne({ where: { id: product.id } });
+        const createdInDatabase = await productRespository.findOne({ where: { id: product.id } });
         expect(createdInDatabase).toBeDefined();
       });
 
