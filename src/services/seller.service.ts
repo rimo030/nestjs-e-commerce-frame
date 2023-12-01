@@ -7,9 +7,9 @@ import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
 import { ProductEntity } from 'src/entities/product.entity';
 import { ProductBundleRepository } from 'src/repositories/product.bundle.repository';
+import { ProductOptionRepository } from 'src/repositories/product.option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
-import { ProductsOptionRespository } from 'src/repositories/products.option.repository';
-import { ProductsRequiredOptionRespository } from 'src/repositories/products.required.option.repository';
+import { ProductRequiredOptionRepository } from 'src/repositories/products.required.option.repository';
 
 @Injectable()
 export class SellerService {
@@ -20,11 +20,11 @@ export class SellerService {
     @InjectRepository(ProductRepository)
     private readonly productRepository: ProductRepository,
 
-    @InjectRepository(ProductsRequiredOptionRespository)
-    private readonly productsRequiredRespository: ProductsRequiredOptionRespository,
+    @InjectRepository(ProductRequiredOptionRepository)
+    private readonly productsRequiredRespository: ProductRequiredOptionRepository,
 
-    @InjectRepository(ProductsOptionRespository)
-    private readonly productsOptionRespository: ProductsOptionRespository,
+    @InjectRepository(ProductOptionRepository)
+    private readonly productsOptionRespository: ProductOptionRepository,
   ) {}
 
   async createProductBundle(sellerId: number, createProductBundleDto: CreateProductBundleDto): Promise<void> {

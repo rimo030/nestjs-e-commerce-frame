@@ -3,4 +3,4 @@ import { ProductRequiredOptionEntity } from 'src/entities/product-required-optio
 import { CustomRepository } from '../configs/custom-typeorm.decorator';
 
 @CustomRepository(ProductRequiredOptionEntity)
-export class ProductsRequiredOptionRespository extends Repository<ProductRequiredOptionEntity> {}
+export class ProductRequiredOptionRepository extends Repository<ProductRequiredOptionEntity> {}

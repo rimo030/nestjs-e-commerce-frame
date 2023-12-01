@@ -11,9 +11,9 @@ import { CompanyEntity } from 'src/entities/company.entity';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 import { AccessToken } from 'src/interfaces/access-token';
 import { Payload } from 'src/interfaces/payload';
+import { ProductOptionRepository } from 'src/repositories/product.option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
-import { ProductsOptionRespository } from 'src/repositories/products.option.repository';
-import { ProductsRequiredOptionRespository } from 'src/repositories/products.required.option.repository';
+import { ProductRequiredOptionRepository } from 'src/repositories/products.required.option.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
 import { SellerService } from 'src/services/seller.service';
 
@@ -30,8 +30,8 @@ describe('SellerController', () => {
   let productController: ProductController;
   let productRespository: ProductRepository;
 
-  let productsRequiredRespository: ProductsRequiredOptionRespository;
-  let productsOptionRespository: ProductsOptionRespository;
+  let productsRequiredRespository: ProductRequiredOptionRepository;
+  let productsOptionRespository: ProductOptionRepository;
 
   let accessToken: string | null = null;
 
@@ -54,8 +54,8 @@ describe('SellerController', () => {
     productController = module.get<ProductController>(ProductController);
 
     productRespository = module.get<ProductRepository>(ProductRepository);
-    productsRequiredRespository = module.get<ProductsRequiredOptionRespository>(ProductsRequiredOptionRespository);
-    productsOptionRespository = module.get<ProductsOptionRespository>(ProductsOptionRespository);
+    productsRequiredRespository = module.get<ProductRequiredOptionRepository>(ProductRequiredOptionRepository);
+    productsOptionRespository = module.get<ProductOptionRepository>(ProductOptionRepository);
 
     jwtService = module.get<JwtService>(JwtService);
 
