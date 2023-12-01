@@ -1,15 +1,15 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BoardEntity } from 'src/entities/board.entity';
-import { BoardRespository } from 'src/repositories/board.repository';
+import { BoardRepository } from 'src/repositories/board.repository';
 import { CreateBoardDto } from '../entities/dtos/create-board.dto';
 import { BoardStatus } from '../types/enums/board-status.enum';
 
 @Injectable()
 export class BoardsService {
   constructor(
-    @InjectRepository(BoardRespository)
-    private readonly boardRespository: BoardRespository,
+    @InjectRepository(BoardRepository)
+    private readonly boardRespository: BoardRepository,
   ) {}
 
   // 모든 게시물 가져오기

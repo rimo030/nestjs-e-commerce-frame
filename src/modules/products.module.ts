@@ -1,12 +1,12 @@
 import { Module } from '@nestjs/common';
 import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
-import { ProductsBundleRespository } from 'src/repositories/products.bundle.repository';
-import { ProductsRespository } from 'src/repositories/products.repository';
+import { ProductBundleRepository } from 'src/repositories/product.bundle.repository';
+import { ProductRepository } from 'src/repositories/product.repository';
 import { ProductController } from '../controllers/products.controller';
 import { ProductService } from '../services/products.service';
 
 @Module({
-  imports: [CustomTypeOrmModule.forCustomRepository([ProductsRespository])],
+  imports: [CustomTypeOrmModule.forCustomRepository([ProductRepository])],
   controllers: [ProductController],
   providers: [ProductService],
 })

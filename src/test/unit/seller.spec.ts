@@ -11,8 +11,8 @@ import { CompanyEntity } from 'src/entities/company.entity';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 import { AccessToken } from 'src/interfaces/access-token';
 import { Payload } from 'src/interfaces/payload';
-import { ProductsRespository } from 'src/repositories/products.repository';
-import { SellersRespository } from 'src/repositories/sellers.repository';
+import { ProductRepository } from 'src/repositories/product.repository';
+import { SellersRespository } from 'src/repositories/seller.repository';
 import { SellerService } from 'src/services/sellers.service';
 
 describe('SellerController', () => {
@@ -26,7 +26,7 @@ describe('SellerController', () => {
   let authService: AuthService;
 
   let productController: ProductController;
-  let productsRespository: ProductsRespository;
+  let productsRespository: ProductRepository;
 
   /**
    * 구매자 사이드
@@ -45,7 +45,7 @@ describe('SellerController', () => {
     authService = module.get<AuthService>(AuthService);
 
     productController = module.get<ProductController>(ProductController);
-    productsRespository = module.get<ProductsRespository>(ProductsRespository);
+    productsRespository = module.get<ProductRepository>(ProductRepository);
 
     jwtService = module.get<JwtService>(JwtService);
   });

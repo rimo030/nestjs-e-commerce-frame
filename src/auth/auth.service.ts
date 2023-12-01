@@ -10,14 +10,14 @@ import { AccessToken } from 'src/interfaces/access-token';
 import { BuyerAuthResult } from 'src/interfaces/buyer-auth-result';
 import { Payload } from 'src/interfaces/payload';
 import { SellerAuthResult } from 'src/interfaces/seller-auth-result';
-import { BuyersRespository } from 'src/repositories/buyers.repository';
-import { SellersRespository } from 'src/repositories/sellers.repository';
+import { BuyerRepository } from 'src/repositories/buyer.repository';
+import { SellersRespository } from 'src/repositories/seller.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(BuyersRespository)
-    private readonly buyersRespository: BuyersRespository,
+    @InjectRepository(BuyerRepository)
+    private readonly buyersRespository: BuyerRepository,
 
     @InjectRepository(SellersRespository)
     private readonly sellersRespository: SellersRespository,
