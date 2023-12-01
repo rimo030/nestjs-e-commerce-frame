@@ -12,7 +12,7 @@ import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 import { AccessToken } from 'src/interfaces/access-token';
 import { Payload } from 'src/interfaces/payload';
 import { ProductRepository } from 'src/repositories/product.repository';
-import { SellersRespository } from 'src/repositories/seller.repository';
+import { SellerRepository } from 'src/repositories/seller.repository';
 import { SellerService } from 'src/services/seller.service';
 
 describe('SellerController', () => {
@@ -20,13 +20,13 @@ describe('SellerController', () => {
 
   let sellercontroller: SellerController;
   let sellerservice: SellerService;
-  let sellersRespository: SellersRespository;
+  let sellersRespository: SellerRepository;
 
   let authController: AuthController;
   let authService: AuthService;
 
   let productController: ProductController;
-  let productsRespository: ProductRepository;
+  let productRepository: ProductRepository;
 
   /**
    * 구매자 사이드
@@ -39,13 +39,13 @@ describe('SellerController', () => {
 
     sellercontroller = module.get<SellerController>(SellerController);
     sellerservice = module.get<SellerService>(SellerService);
-    sellersRespository = module.get<SellersRespository>(SellersRespository);
+    sellersRespository = module.get<SellerRepository>(SellerRepository);
 
     authController = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(AuthService);
 
     productController = module.get<ProductController>(ProductController);
-    productsRespository = module.get<ProductRepository>(ProductRepository);
+    productRepository = module.get<ProductRepository>(ProductRepository);
 
     jwtService = module.get<JwtService>(JwtService);
   });
@@ -141,7 +141,7 @@ describe('SellerController', () => {
         /**
          * 데이터베이스에 있음을 검증
          */
-        const createdInDatabase = await productsRespository.findOne({ where: { id: product.id } });
+        const createdInDatabase = await productRepository.findOne({ where: { id: product.id } });
         expect(createdInDatabase).toBeDefined();
       });
 
