@@ -4,12 +4,14 @@ import { ProductsBundleRespository } from 'src/repositories/products.bundle.repo
 import { ProductsOptionRespository } from 'src/repositories/products.option.repository';
 import { ProductsRespository } from 'src/repositories/products.repository';
 import { ProductsRequiredOptionRespository } from 'src/repositories/products.required.option.repository';
+import { SellersRespository } from 'src/repositories/sellers.repository';
 import { SellerController } from '../controllers/sellers.controller';
 import { SellerService } from '../services/sellers.service';
 
 @Module({
   imports: [
     CustomTypeOrmModule.forCustomRepository([
+      SellersRespository,
       ProductsRespository,
       ProductsBundleRespository,
       ProductsRequiredOptionRespository,

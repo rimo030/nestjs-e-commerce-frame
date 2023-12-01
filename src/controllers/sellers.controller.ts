@@ -37,10 +37,11 @@ export class SellerController {
     description: 'seller는 상품의 옵션과 선택옵션을 등록할 수 있다.',
   })
   async createProductOptions(
+    @UserId() sellerId: number,
     @Param('id', ParseIntPipe) productId: number,
     @Query('isRequire', ParseBoolPipe) isRequire: boolean,
     @Body() createProductOptionsDto: CreateProductOptionsDto,
   ): Promise<ProductRequiredOptionEntity | ProductOptionEntity> {
-    return await this.sellerservice.createProductOptions(productId, isRequire, createProductOptionsDto);
+    return await this.sellerservice.createProductOptions(sellerId, productId, isRequire, createProductOptionsDto);
   }
 }

@@ -222,7 +222,7 @@ describe('SellerController', () => {
            * 필수 옵션 추가
            */
 
-          const requireOption = await sellercontroller.createProductOptions(productId, isRequire, {
+          const requireOption = await sellercontroller.createProductOptions(decoded.id, productId, isRequire, {
             name: 'name',
             price: 0,
             stock: 0,
@@ -231,7 +231,7 @@ describe('SellerController', () => {
           /**
            * 선택 옵션 추가
            */
-          const option = await sellercontroller.createProductOptions(productId, !isRequire, {
+          const option = await sellercontroller.createProductOptions(decoded.id, productId, !isRequire, {
             name: 'name',
             price: 0,
             stock: 0,
