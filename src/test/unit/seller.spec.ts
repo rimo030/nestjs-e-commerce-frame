@@ -13,7 +13,7 @@ import { AccessToken } from 'src/interfaces/access-token';
 import { Payload } from 'src/interfaces/payload';
 import { ProductRepository } from 'src/repositories/product.repository';
 import { SellersRespository } from 'src/repositories/seller.repository';
-import { SellerService } from 'src/services/sellers.service';
+import { SellerService } from 'src/services/seller.service';
 
 describe('SellerController', () => {
   let jwtService: JwtService;

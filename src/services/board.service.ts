@@ -6,7 +6,7 @@ import { CreateBoardDto } from '../entities/dtos/create-board.dto';
 import { BoardStatus } from '../types/enums/board-status.enum';
 
 @Injectable()
-export class BoardsService {
+export class BoardService {
   constructor(
     @InjectRepository(BoardRepository)
     private readonly boardRespository: BoardRepository,

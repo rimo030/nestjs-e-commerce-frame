@@ -17,14 +17,14 @@ import { UserId } from 'src/auth/userid.decorator';
 import { BoardEntity } from 'src/entities/board.entity';
 import { CreateBoardDto } from '../entities/dtos/create-board.dto';
 import { BoardStatusValidationPipe } from '../pipes/board-status-vaildation.pipe';
-import { BoardsService } from '../services/boards.service';
+import { BoardService } from '../services/board.service';
 import { BoardStatus } from '../types/enums/board-status.enum';
 
 @UseGuards(BuyerJwtAuthGuard)
 @Controller('boards')
 export class BoardController {
   private logger = new Logger('Board');
-  constructor(private readonly boardsSevice: BoardsService) {}
+  constructor(private readonly boardsSevice: BoardService) {}
 
   @Get('/')
   async getBoardByUserId(@UserId() id: number): Promise<BoardEntity[]> {
