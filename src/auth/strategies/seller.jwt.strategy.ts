@@ -4,13 +4,13 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Payload } from 'src/interfaces/payload';
-import { SellersRespository } from 'src/repositories/seller.repository';
+import { SellerRepository } from 'src/repositories/seller.repository';
 
 @Injectable()
 export class SellerJwtStrategy extends PassportStrategy(Strategy, 'seller-jwt') {
   constructor(
-    @InjectRepository(SellersRespository)
-    private readonly sellersRespository: SellersRespository,
+    @InjectRepository(SellerRepository)
+    private readonly sellerRepository: SellerRepository,
     readonly configService: ConfigService,
   ) {
     super({
@@ -21,7 +21,7 @@ export class SellerJwtStrategy extends PassportStrategy(Strategy, 'seller-jwt') 
 
   async validate(payload: Payload) {
     const { id } = payload;
-    const member = await this.sellersRespository.findOneBy({ id });
+    const member = await this.sellerRepository.findOneBy({ id });
     if (member) {
       return { id };
     }
