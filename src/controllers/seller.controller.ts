@@ -5,7 +5,7 @@ import { UserId } from 'src/auth/userid.decorator';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
 import { ProductEntity } from 'src/entities/product.entity';
-import { SellerService } from 'src/services/sellers.service';
+import { SellerService } from 'src/services/seller.service';
 
 @Controller('seller')
 @ApiTags('Seller API')

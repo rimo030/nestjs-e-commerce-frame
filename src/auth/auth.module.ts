@@ -7,10 +7,10 @@ import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
 import { typeORMConfig } from 'src/configs/typeorm.config';
 import { CartModule } from 'src/modules/cart.module';
 import { CategoryModule } from 'src/modules/category.module';
-import { ProductModule } from 'src/modules/products.module';
-import { SellerModule } from 'src/modules/sellers.module';
-import { BuyersRespository } from 'src/repositories/buyers.repository';
-import { SellersRespository } from 'src/repositories/sellers.repository';
+import { ProductModule } from 'src/modules/product.module';
+import { SellerModule } from 'src/modules/seller.module';
+import { BuyerRepository } from 'src/repositories/buyer.repository';
+import { SellerRepository } from 'src/repositories/seller.repository';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { BuyerJwtStrategy } from './strategies/buyer.jwt.strategy';
@@ -44,7 +44,7 @@ import { SellerLocalStrategy } from './strategies/seller.local.strategy';
         };
       },
     }),
-    CustomTypeOrmModule.forCustomRepository([BuyersRespository, SellersRespository]),
+    CustomTypeOrmModule.forCustomRepository([BuyerRepository, SellerRepository]),
   ],
   controllers: [AuthController],
   providers: [AuthService, BuyerLocalStrategy, SellerLocalStrategy, BuyerJwtStrategy, SellerJwtStrategy],

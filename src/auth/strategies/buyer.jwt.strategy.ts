@@ -4,13 +4,13 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Payload } from 'src/interfaces/payload';
-import { BuyersRespository } from 'src/repositories/buyers.repository';
+import { BuyerRepository } from 'src/repositories/buyer.repository';
 
 @Injectable()
 export class BuyerJwtStrategy extends PassportStrategy(Strategy, 'buyer-jwt') {
   constructor(
-    @InjectRepository(BuyersRespository)
-    private readonly buyersRespository: BuyersRespository,
+    @InjectRepository(BuyerRepository)
+    private readonly buyersRespository: BuyerRepository,
     readonly configService: ConfigService,
   ) {
     super({

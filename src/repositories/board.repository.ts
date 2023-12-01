@@ -3,4 +3,4 @@ import { CustomRepository } from '../configs/custom-typeorm.decorator';
 import { BoardEntity } from '../entities/board.entity';
 
 @CustomRepository(BoardEntity)
-export class BoardRespository extends Repository<BoardEntity> {}
+export class BoardRepository extends Repository<BoardEntity> {}

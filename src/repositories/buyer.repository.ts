@@ -3,4 +3,4 @@ import { BuyerEntity } from 'src/entities/buyer.entity';
 import { CustomRepository } from '../configs/custom-typeorm.decorator';
 
 @CustomRepository(BuyerEntity)
-export class BuyersRespository extends Repository<BuyerEntity> {}
+export class BuyerRepository extends Repository<BuyerEntity> {}
