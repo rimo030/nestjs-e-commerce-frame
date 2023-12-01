@@ -21,10 +21,10 @@ export class SellerService {
     private readonly productRepository: ProductRepository,
 
     @InjectRepository(ProductRequiredOptionRepository)
-    private readonly productsRequiredRespository: ProductRequiredOptionRepository,
+    private readonly productRequiredRepository: ProductRequiredOptionRepository,
 
     @InjectRepository(ProductOptionRepository)
-    private readonly productsOptionRespository: ProductOptionRepository,
+    private readonly productOptionRepository: ProductOptionRepository,
   ) {}
 
   async createProductBundle(sellerId: number, createProductBundleDto: CreateProductBundleDto): Promise<void> {
@@ -58,7 +58,7 @@ export class SellerService {
      * 이런 식으로도 표현 가능하겠죠?
      *
      */
-    const res = isRequire ? this.productsRequiredRespository : this.productsOptionRespository;
+    const res = isRequire ? this.productRequiredRepository : this.productOptionRepository;
     return await res.save({ productId, ...createProductOptionsDto }); // error??
   }
 }
