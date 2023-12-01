@@ -17,36 +17,36 @@ import { UserId } from 'src/auth/userid.decorator';
 import { BoardEntity } from 'src/entities/board.entity';
 import { CreateBoardDto } from '../entities/dtos/create-board.dto';
 import { BoardStatusValidationPipe } from '../pipes/board-status-vaildation.pipe';
-import { BoardsService } from '../services/boards.service';
+import { BoardService } from '../services/board.service';
 import { BoardStatus } from '../types/enums/board-status.enum';
 
 @UseGuards(BuyerJwtAuthGuard)
 @Controller('boards')
-export class BoardsController {
+export class BoardController {
   private logger = new Logger('Board');
-  constructor(private readonly boardsSevice: BoardsService) {}
+  constructor(private readonly boardSevice: BoardService) {}
 
   @Get('/')
   async getBoardByUserId(@UserId() id: number): Promise<BoardEntity[]> {
     this.logger.verbose(`User ${id} trying to get all boards`);
-    return await this.boardsSevice.getBoardByUserId(id);
+    return await this.boardSevice.getBoardByUserId(id);
   }
 
   @Post('/')
   @UsePipes(ValidationPipe)
   async createBoard(@Body() createBoardDto: CreateBoardDto, @UserId() id: number): Promise<BoardEntity> {
     this.logger.verbose(`User ${id} creating a new board. Payload: ${JSON.stringify(createBoardDto)}`);
-    return await this.boardsSevice.createBoard(createBoardDto, id);
+    return await this.boardSevice.createBoard(createBoardDto, id);
   }
 
   @Get('/:id')
   async getBoardById(@Param('id', ParseIntPipe) id: number): Promise<BoardEntity> {
-    return await this.boardsSevice.getBoardById(id);
+    return await this.boardSevice.getBoardById(id);
   }
 
   @Delete('/:id')
   async deleteBoard(@Param('id', ParseIntPipe) boardId: number, @UserId() userId: number): Promise<boolean> {
-    return await this.boardsSevice.deleteBoard(boardId, userId);
+    return await this.boardSevice.deleteBoard(boardId, userId);
   }
 
   @Patch('/:id/status')
@@ -54,6 +54,6 @@ export class BoardsController {
     @Param('id', ParseIntPipe) id: number,
     @Body('status', BoardStatusValidationPipe) status: BoardStatus,
   ) {
-    return await this.boardsSevice.updateBoardStatus(id, status);
+    return await this.boardSevice.updateBoardStatus(id, status);
   }
 }

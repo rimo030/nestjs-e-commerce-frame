@@ -3,4 +3,4 @@ import { ProductBundleEntity } from 'src/entities/product-bundle.entity';
 import { CustomRepository } from '../configs/custom-typeorm.decorator';
 
 @CustomRepository(ProductBundleEntity)
-export class ProductsBundleRespository extends Repository<ProductBundleEntity> {}
+export class ProductBundleRepository extends Repository<ProductBundleEntity> {}

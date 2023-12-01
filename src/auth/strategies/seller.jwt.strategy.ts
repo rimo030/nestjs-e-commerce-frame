@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Payload } from 'src/interfaces/payload';
-import { SellersRespository } from 'src/repositories/sellers.repository';
+import { SellersRespository } from 'src/repositories/seller.repository';
 
 @Injectable()
 export class SellerJwtStrategy extends PassportStrategy(Strategy, 'seller-jwt') {

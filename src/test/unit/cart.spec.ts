@@ -4,20 +4,20 @@ import { AppModule } from 'src/app.module';
 import { AuthController } from 'src/auth/auth.controller';
 import { CartController } from 'src/controllers/cart.controller';
 import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
-import { BuyersRespository } from 'src/repositories/buyers.repository';
-import { CartRespository } from 'src/repositories/cart.repository';
-import { ProductsRespository } from 'src/repositories/products.repository';
+import { BuyerRepository } from 'src/repositories/buyer.repository';
+import { CartRepository } from 'src/repositories/cart.repository';
+import { ProductRepository } from 'src/repositories/product.repository';
 import { CartService } from 'src/services/cart.service';
 
 describe('CartController', () => {
   let Controller: CartController;
   let Service: CartService;
-  let respository: CartRespository;
+  let respository: CartRepository;
 
   let authController: AuthController;
 
-  let buyersRespository: BuyersRespository;
-  let productRespository: ProductsRespository;
+  let buyersRespository: BuyerRepository;
+  let productRespository: ProductRepository;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -26,10 +26,10 @@ describe('CartController', () => {
 
     Controller = module.get<CartController>(CartController);
     Service = module.get<CartService>(CartService);
-    respository = module.get<CartRespository>(CartRespository);
+    respository = module.get<CartRepository>(CartRepository);
     authController = module.get<AuthController>(AuthController);
-    buyersRespository = module.get<BuyersRespository>(BuyersRespository);
-    productRespository = module.get<ProductsRespository>(ProductsRespository);
+    buyersRespository = module.get<BuyerRepository>(BuyerRepository);
+    productRespository = module.get<ProductRepository>(ProductRepository);
   });
 
   it('should be defined.', async () => {
