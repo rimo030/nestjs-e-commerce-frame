@@ -21,7 +21,7 @@ export class CategoryController {
    */
   @Get()
   @ApiOperation({ summary: '카테고리 조회 API', description: '등록된 카테고리를 확인할 수 있다.' })
-  async getProduct(): Promise<CategoryEntity[]> {
-    return await this.categoryService.getCategory();
+  async getCategoryList(): Promise<CategoryEntity[]> {
+    return await this.categoryService.getCategoryList();
   }
 }
