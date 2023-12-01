@@ -22,7 +22,7 @@ import { BoardStatus } from '../types/enums/board-status.enum';
 
 @UseGuards(BuyerJwtAuthGuard)
 @Controller('boards')
-export class BoardsController {
+export class BoardController {
   private logger = new Logger('Board');
   constructor(private readonly boardsSevice: BoardsService) {}
 
