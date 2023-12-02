@@ -37,8 +37,6 @@ describe('SellerController', () => {
 
   let accessToken: string | null = null;
 
-
-
   /**
    * 구매자 사이드
    */
@@ -52,7 +50,6 @@ describe('SellerController', () => {
     sellerservice = module.get<SellerService>(SellerService);
     sellerRepository = module.get<SellerRepository>(SellerRepository);
 
-
     authController = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(AuthService);
 
@@ -60,7 +57,6 @@ describe('SellerController', () => {
     productRepository = module.get<ProductRepository>(ProductRepository);
     productRequiredRepository = module.get<ProductRequiredOptionRepository>(ProductRequiredOptionRepository);
     productOptionRepository = module.get<ProductOptionRepository>(ProductOptionRepository);
-
 
     jwtService = module.get<JwtService>(JwtService);
 
@@ -250,8 +246,8 @@ describe('SellerController', () => {
           /**
            * 데이터 베이스에서 조회
            */
-          const ro = await productsRequiredRespository.findOneBy({ id: requireOption.id });
-          const o = await productsOptionRespository.findOneBy({ id: option.id });
+          const ro = await productRequiredRepository.findOneBy({ id: requireOption.id });
+          const o = await productOptionRepository.findOneBy({ id: option.id });
           expect(ro === null).toBe(false);
           expect(o === null).toBe(false);
         }
