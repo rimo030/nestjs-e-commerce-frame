@@ -8,7 +8,7 @@ import { AuthService } from './auth.service';
 import { BuyerLocalAuthGuard } from './guards/buyer-local.auth.guard';
 import { BuyerJwtAuthGuard } from './guards/buyer.jwt.guard';
 import { SellerLocalAuthGuard } from './guards/seller-local.auth.guard';
-import { UserId } from './userid.decorator';
+import { UserId } from './user-id.decorator';
 
 @Controller('auth')
 @ApiTags('Auth API')

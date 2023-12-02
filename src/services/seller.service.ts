@@ -48,10 +48,21 @@ export class SellerService {
     });
 
     if (!product?.id) {
-      throw new NotFoundException(`Can't find product id : ${productId}`);
+      throw new NotFoundException({
+        code: 4001,
+        type: 'businessError',
+        result: false,
+        errMessage: `Can't find product id : ${productId}`,
+      });
     }
+
     if (product?.sellerId !== sellerId) {
-      throw new UnauthorizedException('You are not seller of this product.');
+      throw new UnauthorizedException({
+        code: 4001,
+        type: 'businessError',
+        result: false,
+        errorMessage: 'You are not seller of this product.',
+      });
     }
 
     if (isRequire) {
