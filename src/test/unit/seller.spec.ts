@@ -1,4 +1,5 @@
 import { v4 } from 'uuid';
+import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
@@ -247,6 +248,34 @@ describe('SellerController', () => {
           const o = await productsOptionRespository.findOneBy({ id: option.id });
           expect(ro === null).toBe(false);
           expect(o === null).toBe(false);
+        }
+      });
+
+      it('해당 상품을 생성한 판매자가 아닐 경우 권한 에러를 던져야 한다.', async () => {
+        /**
+         * 상품 1개 가져오기
+         */
+        const decoded: Payload = jwtService.decode(accessToken!);
+        const product = await productController.getProductList({
+          limit: 1,
+          page: 1,
+        });
+
+        if (product) {
+          const productId = product[0].id;
+          const isRequire = true;
+          try {
+            const anotherSeller = await sellercontroller.createProductOptions(1234567890, productId, isRequire, {
+              name: 'name',
+              price: 0,
+              stock: 0,
+              isSale: 0,
+            });
+
+            expect(1).toBe('판매자가 다른 데도 불구하고 에러가 나지 않은 케이스');
+          } catch (err) {
+            expect(err).toBeInstanceOf(UnauthorizedException);
+          }
         }
       });
     });
