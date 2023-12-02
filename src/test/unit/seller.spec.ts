@@ -210,7 +210,6 @@ describe('SellerController', () => {
         /**
          * 상품 1개 가져오기
          */
-        const decoded: Payload = jwtService.decode(accessToken!);
         const product = await productController.getProductList({
           limit: 1,
           page: 1,
@@ -220,12 +219,13 @@ describe('SellerController', () => {
 
         if (product) {
           const productId = product[0].id;
+          const sellerId = product[0].sellerId;
 
           /**
            * 필수 옵션 추가
            */
 
-          const requireOption = await sellercontroller.createProductOptions(decoded.id, productId, isRequire, {
+          const requireOption = await sellercontroller.createProductOptions(sellerId, productId, isRequire, {
             name: 'name',
             price: 0,
             stock: 0,
@@ -234,7 +234,7 @@ describe('SellerController', () => {
           /**
            * 선택 옵션 추가
            */
-          const option = await sellercontroller.createProductOptions(decoded.id, productId, !isRequire, {
+          const option = await sellercontroller.createProductOptions(sellerId, productId, !isRequire, {
             name: 'name',
             price: 0,
             stock: 0,
