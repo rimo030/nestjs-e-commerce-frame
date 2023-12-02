@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
@@ -32,7 +32,7 @@ export class SellerService {
   }
 
   async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductEntity> {
-    return await this.productRepository.save(createProductDto);
+    return await this.productRepository.save({ sellerId, ...createProductDto });
   }
 
   async createProductOptions(
@@ -40,25 +40,24 @@ export class SellerService {
     productId: number,
     isRequire: boolean,
     createProductOptionsDto: CreateProductOptionsDto,
-  ): Promise<ProductRequiredOptionEntity | ProductOptionEntity> {
-    /**
-     * todo 지금 생성하려는 옵션의 상품을 가져온 뒤, 이 상품의 판매자가 맞는지 체크하는 방어 로직이 필요
-     *
-     *  seller의 모든 작업에 필요하지 않나?? 그럼 별도의 함수로 분리해야 하지 않나?
-     */
+  ): Promise<ProductOptionEntity | ProductRequiredOptionEntity> {
+    const product = await this.productRepository.findOne({
+      where: {
+        id: productId,
+      },
+    });
 
-    const product = await this.productRepository.findOneBy({ id: productId });
-    if (!product) {
+    if (!product?.id) {
       throw new NotFoundException(`Can't find product id : ${productId}`);
     }
+    if (product?.sellerId !== sellerId) {
+      throw new UnauthorizedException('You are not seller of this product.');
+    }
 
-    /**
-     * const context = isRequire ? A : B;
-     * return await context.save(dto);
-     * 이런 식으로도 표현 가능하겠죠?
-     *
-     */
-    const res = isRequire ? this.productRequiredRepository : this.productOptionRepository;
-    return await res.save({ productId, ...createProductOptionsDto }); // error??
+    if (isRequire) {
+      return await this.productRequiredRepository.save({ productId, ...createProductOptionsDto });
+    } else {
+      return await this.productOptionRepository.save({ productId, ...createProductOptionsDto });
+    }
   }
 }
