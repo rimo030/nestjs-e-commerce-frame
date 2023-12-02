@@ -8,11 +8,15 @@ import { OrderProductEntity } from './order-product.entity';
 import { ProductBundleEntity } from './product-bundle.entity';
 import { ProductOptionEntity } from './product-option.entity';
 import { ProductRequiredOptionEntity } from './product-required-option.entity';
+import { SellerEntity } from './seller.entity';
 
 @Entity({ name: 'product' })
 export class ProductEntity extends CommonEntity {
+  @Column()
+  sellerId!: number;
+
   @Column({ nullable: true })
-  bundleId!: number;
+  bundleId?: number | null;
 
   @Column()
   categoryId!: number;
@@ -45,6 +49,10 @@ export class ProductEntity extends CommonEntity {
    * relations
    */
 
+  @ManyToOne(() => SellerEntity, (s) => s.products)
+  @JoinColumn({ referencedColumnName: 'id' })
+  seller!: SellerEntity;
+
   @ManyToOne(() => CategoryEntity, (c) => c.products)
   @JoinColumn({ referencedColumnName: 'id' })
   category!: CategoryEntity;
@@ -55,7 +63,7 @@ export class ProductEntity extends CommonEntity {
 
   @ManyToOne(() => ProductBundleEntity, (pb) => pb.products)
   @JoinColumn({ referencedColumnName: 'id' })
-  bundle!: ProductBundleEntity;
+  bundle?: ProductBundleEntity;
 
   @OneToMany(() => ProductRequiredOptionEntity, (pro) => pro.productId)
   productRequiredOptions!: ProductRequiredOptionEntity[];

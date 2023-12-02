@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
 import { ProductBundleEntity } from './product-bundle.entity';
+import { ProductEntity } from './product.entity';
 
 @Entity({ name: 'seller' })
 export class SellerEntity extends CommonEntity {
@@ -24,4 +25,7 @@ export class SellerEntity extends CommonEntity {
    */
   @OneToMany(() => ProductBundleEntity, (pb) => pb.sellerId)
   productBundles!: ProductBundleEntity[];
+
+  @OneToMany(() => ProductEntity, (p) => p.sellerId)
+  products!: ProductEntity[];
 }
