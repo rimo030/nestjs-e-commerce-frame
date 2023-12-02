@@ -10,6 +10,7 @@ import { SellerController } from 'src/controllers/seller.controller';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
+import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { AccessToken } from 'src/interfaces/access-token';
 import { Payload } from 'src/interfaces/payload';
 import { ProductOptionRepository } from 'src/repositories/product.option.repository';
@@ -215,7 +216,8 @@ describe('SellerController', () => {
           page: 1,
         });
 
-        const isRequire = true;
+        const Require = new IsRequireOptionDto();
+        Require.isRequire = true;
 
         if (product) {
           const productId = product[0].id;
@@ -225,7 +227,7 @@ describe('SellerController', () => {
            * 필수 옵션 추가
            */
 
-          const requireOption = await sellercontroller.createProductOptions(sellerId, productId, isRequire, {
+          const requireOption = await sellercontroller.createProductOptions(sellerId, productId, Require, {
             name: 'name',
             price: 0,
             isSale: true,
@@ -233,7 +235,9 @@ describe('SellerController', () => {
           /**
            * 선택 옵션 추가
            */
-          const option = await sellercontroller.createProductOptions(sellerId, productId, !isRequire, {
+
+          Require.isRequire = false;
+          const option = await sellercontroller.createProductOptions(sellerId, productId, Require, {
             name: 'name',
             price: 0,
             isSale: true,
@@ -261,9 +265,11 @@ describe('SellerController', () => {
 
         if (product) {
           const productId = product[0].id;
-          const isRequire = true;
+          const Require = new IsRequireOptionDto();
+          Require.isRequire = true;
+
           try {
-            const anotherSeller = await sellercontroller.createProductOptions(1234567890, productId, isRequire, {
+            const anotherSeller = await sellercontroller.createProductOptions(1234567890, productId, Require, {
               name: 'name',
               price: 0,
               isSale: true,

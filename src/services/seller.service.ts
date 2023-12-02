@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
+import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
 import { ProductEntity } from 'src/entities/product.entity';
@@ -38,7 +39,7 @@ export class SellerService {
   async createProductOptions(
     sellerId: number,
     productId: number,
-    isRequire: boolean,
+    isRequireOptionDto: IsRequireOptionDto,
     createProductOptionsDto: CreateProductOptionsDto,
   ): Promise<ProductOptionEntity | ProductRequiredOptionEntity> {
     const product = await this.productRepository.findOne({
@@ -65,7 +66,7 @@ export class SellerService {
       });
     }
 
-    if (isRequire) {
+    if (isRequireOptionDto.isRequire) {
       return await this.productRequiredRepository.save({ productId, ...createProductOptionsDto });
     } else {
       return await this.productOptionRepository.save({ productId, ...createProductOptionsDto });

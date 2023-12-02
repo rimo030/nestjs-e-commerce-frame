@@ -5,6 +5,7 @@ import { UserId } from 'src/auth/user-id.decorator';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
+import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
 import { ProductEntity } from 'src/entities/product.entity';
@@ -31,7 +32,7 @@ export class SellerController {
     return await this.sellerservice.createProduct(sellerId, createProductDto);
   }
 
-  @Post('/product/:id/options?')
+  @Post('/product/:id/options')
   @ApiOperation({
     summary: 'product 옵션, 선택옵션 등록 API',
     description: 'seller는 상품의 옵션과 선택옵션을 등록할 수 있다.',
@@ -39,9 +40,14 @@ export class SellerController {
   async createProductOptions(
     @UserId() sellerId: number,
     @Param('id', ParseIntPipe) productId: number,
-    @Query('isRequire', ParseBoolPipe) isRequire: boolean,
+    @Query() isRequireOptionDto: IsRequireOptionDto,
     @Body() createProductOptionsDto: CreateProductOptionsDto,
   ): Promise<ProductRequiredOptionEntity | ProductOptionEntity> {
-    return await this.sellerservice.createProductOptions(sellerId, productId, isRequire, createProductOptionsDto);
+    return await this.sellerservice.createProductOptions(
+      sellerId,
+      productId,
+      isRequireOptionDto,
+      createProductOptionsDto,
+    );
   }
 }
