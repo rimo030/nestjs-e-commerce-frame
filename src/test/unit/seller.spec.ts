@@ -30,12 +30,14 @@ describe('SellerController', () => {
   let authService: AuthService;
 
   let productController: ProductController;
-  let productRespository: ProductRepository;
+  let productRepository: ProductRepository;
 
-  let productsRequiredRespository: ProductRequiredOptionRepository;
-  let productsOptionRespository: ProductOptionRepository;
+  let productRequiredRepository: ProductRequiredOptionRepository;
+  let productOptionRepository: ProductOptionRepository;
 
   let accessToken: string | null = null;
+
+
 
   /**
    * 구매자 사이드
@@ -50,14 +52,15 @@ describe('SellerController', () => {
     sellerservice = module.get<SellerService>(SellerService);
     sellerRepository = module.get<SellerRepository>(SellerRepository);
 
+
     authController = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(AuthService);
 
     productController = module.get<ProductController>(ProductController);
+    productRepository = module.get<ProductRepository>(ProductRepository);
+    productRequiredRepository = module.get<ProductRequiredOptionRepository>(ProductRequiredOptionRepository);
+    productOptionRepository = module.get<ProductOptionRepository>(ProductOptionRepository);
 
-    productRespository = module.get<ProductRepository>(ProductRepository);
-    productsRequiredRespository = module.get<ProductRequiredOptionRepository>(ProductRequiredOptionRepository);
-    productsOptionRespository = module.get<ProductOptionRepository>(ProductOptionRepository);
 
     jwtService = module.get<JwtService>(JwtService);
 
@@ -149,7 +152,8 @@ describe('SellerController', () => {
         /**
          * 데이터베이스에 있음을 검증
          */
-        const createdInDatabase = await productRespository.findOne({ where: { id: product.id } });
+
+        const createdInDatabase = await productRepository.findOne({ where: { id: product.id } });
         expect(createdInDatabase).toBeDefined();
       });
 

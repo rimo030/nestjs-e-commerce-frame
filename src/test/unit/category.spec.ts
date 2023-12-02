@@ -1,6 +1,9 @@
 import { Test } from '@nestjs/testing';
-import { CategoryController } from './.controller';
-import { CategoryService } from './.service';
+import { AppModule } from 'src/app.module';
+import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
+import { CategoryController } from 'src/controllers/category.controller';
+import { CategoryRepository } from 'src/repositories/category.repository';
+import { CategoryService } from 'src/services/category.service';
 
 describe('CategoryController', () => {
   let Controller: CategoryController;
@@ -8,12 +11,16 @@ describe('CategoryController', () => {
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      controllers: [CategoryController],
-      providers: [CategoryService],
+      imports: [AppModule],
     }).compile();
 
     Service = module.get<CategoryService>(CategoryService);
     Controller = module.get<CategoryController>(CategoryController);
+  });
+
+  it('should be defined.', async () => {
+    expect(Controller).toBeDefined();
+    expect(Service).toBeDefined();
   });
 
   describe('서버 실행 시 카테고리 데이터를 추가하는 스크립트', () => {
@@ -31,7 +38,13 @@ describe('CategoryController', () => {
     /**
      * 카테고리는 이미 들어 있는 rows 라고 가정한다.
      * 따라서 새로 추가하는 등 POST API는 없고 오로지 조회 요청만을 테스트한다.
+     *
+     * 한번에 몇개를 조회할건지...
+     *
      */
-    it.todo('카테고리가 조회되어야 한다.');
+    it('카테고리가 조회되어야 한다.', async () => {
+      const categorylist = Controller.getCategoryList();
+      expect((await categorylist).length > 1).toBe(true);
+    });
   });
 });
