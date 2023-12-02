@@ -137,7 +137,7 @@ describe('SellerController', () => {
         const product = await sellercontroller.createProduct(decoded.id, {
           categoryId: (await new CategoryEntity({ name: 'name' }).save()).id,
           companyId: (await new CompanyEntity({ name: 'name' }).save()).id,
-          isSale: 1,
+          isSale: true,
           name: 'name',
           description: 'description',
           deliveryCharge: 3000,
@@ -169,7 +169,7 @@ describe('SellerController', () => {
         const product = await sellercontroller.createProduct(decoded.id, {
           categoryId: (await new CategoryEntity({ name: 'name' }).save()).id,
           companyId: (await new CompanyEntity({ name: 'name' }).save()).id,
-          isSale: 0,
+          isSale: true,
           name: 'name',
           description: 'description',
           deliveryCharge: 3000,
