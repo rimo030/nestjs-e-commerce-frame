@@ -228,8 +228,7 @@ describe('SellerController', () => {
           const requireOption = await sellercontroller.createProductOptions(sellerId, productId, isRequire, {
             name: 'name',
             price: 0,
-            stock: 0,
-            isSale: 0,
+            isSale: true,
           });
           /**
            * 선택 옵션 추가
@@ -237,8 +236,7 @@ describe('SellerController', () => {
           const option = await sellercontroller.createProductOptions(sellerId, productId, !isRequire, {
             name: 'name',
             price: 0,
-            stock: 0,
-            isSale: 0,
+            isSale: true,
           });
 
           /**
@@ -268,8 +266,7 @@ describe('SellerController', () => {
             const anotherSeller = await sellercontroller.createProductOptions(1234567890, productId, isRequire, {
               name: 'name',
               price: 0,
-              stock: 0,
-              isSale: 0,
+              isSale: true,
             });
 
             expect(1).toBe('판매자가 다른 데도 불구하고 에러가 나지 않은 케이스');
