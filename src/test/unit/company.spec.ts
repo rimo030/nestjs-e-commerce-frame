@@ -1,19 +1,30 @@
 import { Test } from '@nestjs/testing';
-import { CompanyService } from './.service';
+import { AppModule } from 'src/app.module';
+import { CompanyController } from 'src/controllers/company.controller';
+import { CompanyEntity } from 'src/entities/company.entity';
+import { PaginationDto } from 'src/entities/dtos/pagination.dto';
+import { CompanyRepository } from 'src/repositories/company.repository';
+import { CompanyService } from 'src/services/company.service';
 
 describe('Company Test suite', () => {
-  let Service: CompanyService;
+  let controller: CompanyController;
+  let service: CompanyService;
+  let repository: CompanyRepository;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
-      providers: [CompanyService],
+      imports: [AppModule],
     }).compile();
 
-    Service = module.get<CompanyService>(CompanyService);
+    service = module.get<CompanyService>(CompanyService);
+    controller = module.get<CompanyController>(CompanyController);
+    repository = module.get<CompanyRepository>(CompanyRepository);
   });
 
   it('should be defined', () => {
-    expect(Service).toBeDefined();
+    expect(service).toBeDefined();
+    expect(controller).toBeDefined();
+    expect(repository).toBeDefined();
   });
 
   describe('POST company', () => {
@@ -45,11 +56,32 @@ describe('Company Test suite', () => {
   });
 
   describe('GET company', () => {
-    it.todo('회사를 조회할 수 있어야 한다.');
+    it('회사를 조회할 수 있어야 한다.', async () => {
+      const testLimit = 10;
+      /**
+       * 회사 추가
+       * 테스트로 10개의 회사를 추가한다.
+       */
+      const entities = new Array(testLimit).fill(0).map((el) => new CompanyEntity({ name: 'test' }));
+      await repository.save(entities);
+
+      /**
+       * 첫번째 페이지로 설정
+       */
+      const paginationDto = new PaginationDto();
+      paginationDto.page = 1;
+      paginationDto.limit = testLimit;
+
+      /**
+       * 회사 가져오기
+       */
+      const company = await controller.getCompany(paginationDto);
+      expect(company.data.list.length).toBe(paginationDto.limit);
+    });
     it.todo('회사는 페이지네이션을 통해, 10개, 20개, 30개씩 나눠서 조회가 가능하다.');
+
     it.todo('사업자 번호를 통한 검색이 가능해야 한다.');
     it.todo('회사 이름으로 검색이 가능해야 한다.');
-
     it.todo('회사의 업종, 업태, 종목 등 상세한 정보가 조회되어야 한다.');
   });
 });

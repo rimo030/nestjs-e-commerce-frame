@@ -16,7 +16,11 @@ export class CompanyController {
 
   @Get()
   async getCompany(
-    @UserId() sellerId: number,
+    /**
+     * @todo
+     * sellerId 추후 사용 예정
+     */
+    // @UserId() sellerId: number,
     @Query() paginationDto: PaginationDto,
   ): Promise<PaginationResponseForm<CompanyEntity>> {
     const response = await this.companyService.getCompany(paginationDto);
