@@ -50,7 +50,7 @@ describe('CartController', () => {
 
   it('장바구니 기능은 구매자 계정 id가 있어야 사용 가능하다', async () => {
     /**
-     * 판매자 계정 생성
+     * 구매자 계정 생성
      */
     const randomStringForTest = v4();
     const createBuyerDto: CreateBuyerDto = {

@@ -1,9 +1,13 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Controller, UseGuards, Post, Body, Param, ParseIntPipe, Query, ParseBoolPipe } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SellerJwtAuthGuard } from 'src/auth/guards/seller.jwt.guard';
-import { UserId } from 'src/auth/userid.decorator';
+import { UserId } from 'src/decorators/user-id.decorator';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
+import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
+import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
+import { ProductOptionEntity } from 'src/entities/product-option.entity';
+import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
 import { ProductEntity } from 'src/entities/product.entity';
 import { SellerService } from 'src/services/seller.service';
 
@@ -26,5 +30,24 @@ export class SellerController {
   @ApiOperation({ summary: 'product 등록 API', description: 'seller는 상품을 등록할 수 있다.' })
   async createProduct(@UserId() sellerId: number, @Body() createProductDto: CreateProductDto): Promise<ProductEntity> {
     return await this.sellerservice.createProduct(sellerId, createProductDto);
+  }
+
+  @Post('/product/:id/options')
+  @ApiOperation({
+    summary: 'product 옵션, 선택옵션 등록 API',
+    description: 'seller는 상품의 옵션과 선택옵션을 등록할 수 있다.',
+  })
+  async createProductOptions(
+    @UserId() sellerId: number,
+    @Param('id', ParseIntPipe) productId: number,
+    @Query() isRequireOptionDto: IsRequireOptionDto,
+    @Body() createProductOptionsDto: CreateProductOptionsDto,
+  ): Promise<ProductRequiredOptionEntity | ProductOptionEntity> {
+    return await this.sellerservice.createProductOptions(
+      sellerId,
+      productId,
+      isRequireOptionDto,
+      createProductOptionsDto,
+    );
   }
 }

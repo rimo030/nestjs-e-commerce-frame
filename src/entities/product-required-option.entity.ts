@@ -15,11 +15,8 @@ export class ProductRequiredOptionEntity extends CommonEntity {
   @Column({ type: 'int' })
   price!: number;
 
-  @Column({ type: 'int' })
-  stock!: number;
-
-  @Column({ type: 'tinyint' })
-  isSale!: number;
+  @Column({ type: 'boolean' })
+  isSale!: boolean;
 
   /**
    * relations

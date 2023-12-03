@@ -4,11 +4,11 @@ import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
 import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 import { AccessToken } from 'src/interfaces/access-token';
+import { UserId } from '../decorators/user-id.decorator';
 import { AuthService } from './auth.service';
 import { BuyerLocalAuthGuard } from './guards/buyer-local.auth.guard';
 import { BuyerJwtAuthGuard } from './guards/buyer.jwt.guard';
 import { SellerLocalAuthGuard } from './guards/seller-local.auth.guard';
-import { UserId } from './userid.decorator';
 
 @Controller('auth')
 @ApiTags('Auth API')

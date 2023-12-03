@@ -14,11 +14,8 @@ export class ProductOptionEntity extends CommonEntity {
   @Column({ type: 'int' })
   price!: number;
 
-  @Column({ type: 'int' })
-  stock!: number;
-
-  @Column({ type: 'tinyint' })
-  status!: number;
+  @Column({ type: 'boolean' })
+  isSale!: boolean;
 
   /**
    * relations
