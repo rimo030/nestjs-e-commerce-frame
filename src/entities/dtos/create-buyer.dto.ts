@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmptyNumber } from 'src/decorators/is-not-empty-number.decorator';
 import { IsNotEmptyString } from 'src/decorators/is-not-empty-string.decorator';
@@ -18,6 +19,7 @@ export class CreateBuyerDto extends AuthCredentialsDto implements Partial<BuyerE
   age!: number;
 
   @ApiProperty({ description: '휴대전화번호 ( - 는 포함하지 않습니다 )' })
+  @Transform(({ value }) => value.replace(/-/g, ''))
   @IsNotEmptyString(11, 11)
   phone!: string;
 }
