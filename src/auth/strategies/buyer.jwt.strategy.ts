@@ -3,7 +3,7 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Payload } from 'src/interfaces/payload';
+import { Payload } from 'src/interfaces/payload.interface';
 import { BuyerRepository } from 'src/repositories/buyer.repository';
 
 @Injectable()

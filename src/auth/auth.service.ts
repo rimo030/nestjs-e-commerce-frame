@@ -6,10 +6,10 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
 import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
-import { AccessToken } from 'src/interfaces/access-token';
-import { BuyerAuthResult } from 'src/interfaces/buyer-auth-result';
-import { Payload } from 'src/interfaces/payload';
-import { SellerAuthResult } from 'src/interfaces/seller-auth-result';
+import { AccessToken } from 'src/interfaces/access-token.interface';
+import { BuyerAuthResult } from 'src/interfaces/buyer-auth-result.interface';
+import { Payload } from 'src/interfaces/payload.interface';
+import { SellerAuthResult } from 'src/interfaces/seller-auth-result.interface';
 import { BuyerRepository } from 'src/repositories/buyer.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
 
