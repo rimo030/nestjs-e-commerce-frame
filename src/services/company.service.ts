@@ -16,6 +16,7 @@ export class CompanyService {
     const [list, count] = await this.companyRepository.findAndCount({
       order: {
         name: 'ASC',
+        id: 'ASC',
       },
       skip,
       take,

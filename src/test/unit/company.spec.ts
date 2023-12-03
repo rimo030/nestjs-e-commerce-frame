@@ -78,7 +78,31 @@ describe('Company Test suite', () => {
       const company = await controller.getCompany(paginationDto);
       expect(company.data.list.length).toBe(paginationDto.limit);
     });
-    it.todo('회사는 페이지네이션을 통해, 10개, 20개, 30개씩 나눠서 조회가 가능하다.');
+    it('회사는 페이지네이션을 통해, 10개, 20개,,,, n개씩 나눠서 조회가 가능하다.', async () => {
+      /**
+       * 회사 추가
+       * 테스트로 100개의 회사를 추가한다.
+       */
+      const entities = new Array(100).fill(0).map((el) => new CompanyEntity({ name: 'test' }));
+      await repository.save(entities);
+
+      const paginationDto = new PaginationDto();
+      paginationDto.page = 1;
+      paginationDto.limit = 20;
+      const firstPageList = await controller.getCompany(paginationDto);
+
+      paginationDto.page = 2;
+      const secondPageList = await controller.getCompany(paginationDto);
+      /**
+       * limit 대로 회사를 가져오는지 확인
+       */
+      expect(firstPageList.data.list.length).toBe(paginationDto.limit);
+
+      const firstPagefirstItemId = firstPageList.data.list[0].id;
+      const secondPagefirstItemId = secondPageList.data.list[0].id;
+
+      expect(firstPagefirstItemId + paginationDto.limit).toBe(secondPagefirstItemId);
+    });
 
     it.todo('사업자 번호를 통한 검색이 가능해야 한다.');
     it.todo('회사 이름으로 검색이 가능해야 한다.');
