@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsNotEmpty } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber } from 'class-validator';
 import { applyDecorators } from '@nestjs/common';
 
 /**
@@ -7,10 +7,10 @@ import { applyDecorators } from '@nestjs/common';
  * Number 데코레이터들은 int인지 모든 숫자인지 따로 받아야 한다.
  *
  */
-export function IsNotEmptyNumber() {
+export function IsNotEmptyNumber(type: 'number' | 'int' = 'number') {
   return applyDecorators(
     IsNotEmpty(),
-    IsInt(),
+    type === 'int' ? IsInt() : IsNumber(),
     Type(() => Number),
   );
 }
