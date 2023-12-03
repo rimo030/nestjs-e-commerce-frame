@@ -13,7 +13,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { BuyerJwtAuthGuard } from 'src/auth/guards/buyer.jwt.guard';
-import { UserId } from 'src/auth/user-id.decorator';
+import { UserId } from 'src/decorators/user-id.decorator';
 import { BoardEntity } from 'src/entities/board.entity';
 import { CreateBoardDto } from '../entities/dtos/create-board.dto';
 import { BoardStatusValidationPipe } from '../pipes/board-status-vaildation.pipe';

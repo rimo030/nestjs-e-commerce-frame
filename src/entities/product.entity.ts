@@ -24,20 +24,20 @@ export class ProductEntity extends CommonEntity {
   @Column()
   companyId!: number;
 
-  @Column({ type: 'tinyint' })
-  isSale!: number;
+  @Column({ type: 'boolean' })
+  isSale!: boolean;
 
   @Column({ type: 'varchar', length: 128 })
   name!: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  description!: string;
+  description?: string | null;
 
   @Column({ type: 'varchar', length: 128 })
   deliveryType!: keyof typeof deliveryType;
 
   @Column({ type: 'int' })
-  deliveryFreeOver!: number;
+  deliveryFreeOver?: number | null;
 
   @Column({ type: 'int' })
   deliveryCharge!: number;

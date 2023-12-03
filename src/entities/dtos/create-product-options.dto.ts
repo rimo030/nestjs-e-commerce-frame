@@ -1,21 +1,19 @@
-import { IsNotEmpty, IsNumber } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmptyBoolean } from 'src/decorators/is-not-empty-boolean.decorator';
+import { IsNotEmptyNumber } from 'src/decorators/is-not-empty-number.decorator';
+import { IsNotEmptyString } from 'src/decorators/is-not-empty-string.decorator';
 import { ProductRequiredOptionEntity } from '../product-required-option.entity';
 
 export class CreateProductOptionsDto implements Partial<ProductRequiredOptionEntity> {
   @ApiProperty({ description: '옵션 이름' })
-  @IsNotEmpty()
+  @IsNotEmptyString(1, 128)
   name!: string;
 
   @ApiProperty({ description: '가격' })
-  @IsNotEmpty()
+  @IsNotEmptyNumber()
   price!: number;
 
-  @ApiProperty({ description: '재고' })
-  @IsNotEmpty()
-  stock!: number;
-
   @ApiProperty({ description: '구매 가능 여부' })
-  @IsNotEmpty()
-  isSale!: number;
+  @IsNotEmptyBoolean()
+  isSale!: boolean;
 }

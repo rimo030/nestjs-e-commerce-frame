@@ -10,6 +10,7 @@ import { SellerController } from 'src/controllers/seller.controller';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
+import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { AccessToken } from 'src/interfaces/access-token';
 import { Payload } from 'src/interfaces/payload';
 import { ProductOptionRepository } from 'src/repositories/product.option.repository';
@@ -29,10 +30,10 @@ describe('SellerController', () => {
   let authService: AuthService;
 
   let productController: ProductController;
-  let productRespository: ProductRepository;
+  let productRepository: ProductRepository;
 
-  let productsRequiredRespository: ProductRequiredOptionRepository;
-  let productsOptionRespository: ProductOptionRepository;
+  let productRequiredRepository: ProductRequiredOptionRepository;
+  let productOptionRepository: ProductOptionRepository;
 
   let accessToken: string | null = null;
 
@@ -53,10 +54,9 @@ describe('SellerController', () => {
     authService = module.get<AuthService>(AuthService);
 
     productController = module.get<ProductController>(ProductController);
-
-    productRespository = module.get<ProductRepository>(ProductRepository);
-    productsRequiredRespository = module.get<ProductRequiredOptionRepository>(ProductRequiredOptionRepository);
-    productsOptionRespository = module.get<ProductOptionRepository>(ProductOptionRepository);
+    productRepository = module.get<ProductRepository>(ProductRepository);
+    productRequiredRepository = module.get<ProductRequiredOptionRepository>(ProductRequiredOptionRepository);
+    productOptionRepository = module.get<ProductOptionRepository>(ProductOptionRepository);
 
     jwtService = module.get<JwtService>(JwtService);
 
@@ -136,7 +136,7 @@ describe('SellerController', () => {
         const product = await sellercontroller.createProduct(decoded.id, {
           categoryId: (await new CategoryEntity({ name: 'name' }).save()).id,
           companyId: (await new CompanyEntity({ name: 'name' }).save()).id,
-          isSale: 1,
+          isSale: true,
           name: 'name',
           description: 'description',
           deliveryCharge: 3000,
@@ -148,7 +148,8 @@ describe('SellerController', () => {
         /**
          * 데이터베이스에 있음을 검증
          */
-        const createdInDatabase = await productRespository.findOne({ where: { id: product.id } });
+
+        const createdInDatabase = await productRepository.findOne({ where: { id: product.id } });
         expect(createdInDatabase).toBeDefined();
       });
 
@@ -168,7 +169,7 @@ describe('SellerController', () => {
         const product = await sellercontroller.createProduct(decoded.id, {
           categoryId: (await new CategoryEntity({ name: 'name' }).save()).id,
           companyId: (await new CompanyEntity({ name: 'name' }).save()).id,
-          isSale: 0,
+          isSale: true,
           name: 'name',
           description: 'description',
           deliveryCharge: 3000,
@@ -215,7 +216,8 @@ describe('SellerController', () => {
           page: 1,
         });
 
-        const isRequire = true;
+        const Require = new IsRequireOptionDto();
+        Require.isRequire = true;
 
         if (product) {
           const productId = product[0].id;
@@ -225,27 +227,27 @@ describe('SellerController', () => {
            * 필수 옵션 추가
            */
 
-          const requireOption = await sellercontroller.createProductOptions(sellerId, productId, isRequire, {
+          const requireOption = await sellercontroller.createProductOptions(sellerId, productId, Require, {
             name: 'name',
             price: 0,
-            stock: 0,
-            isSale: 0,
+            isSale: true,
           });
           /**
            * 선택 옵션 추가
            */
-          const option = await sellercontroller.createProductOptions(sellerId, productId, !isRequire, {
+
+          Require.isRequire = false;
+          const option = await sellercontroller.createProductOptions(sellerId, productId, Require, {
             name: 'name',
             price: 0,
-            stock: 0,
-            isSale: 0,
+            isSale: true,
           });
 
           /**
            * 데이터 베이스에서 조회
            */
-          const ro = await productsRequiredRespository.findOneBy({ id: requireOption.id });
-          const o = await productsOptionRespository.findOneBy({ id: option.id });
+          const ro = await productRequiredRepository.findOneBy({ id: requireOption.id });
+          const o = await productOptionRepository.findOneBy({ id: option.id });
           expect(ro === null).toBe(false);
           expect(o === null).toBe(false);
         }
@@ -263,13 +265,14 @@ describe('SellerController', () => {
 
         if (product) {
           const productId = product[0].id;
-          const isRequire = true;
+          const Require = new IsRequireOptionDto();
+          Require.isRequire = true;
+
           try {
-            const anotherSeller = await sellercontroller.createProductOptions(1234567890, productId, isRequire, {
+            const anotherSeller = await sellercontroller.createProductOptions(1234567890, productId, Require, {
               name: 'name',
               price: 0,
-              stock: 0,
-              isSale: 0,
+              isSale: true,
             });
 
             expect(1).toBe('판매자가 다른 데도 불구하고 에러가 나지 않은 케이스');
