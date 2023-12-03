@@ -7,6 +7,7 @@ import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
 import { typeORMConfig } from 'src/configs/typeorm.config';
 import { CartModule } from 'src/modules/cart.module';
 import { CategoryModule } from 'src/modules/category.module';
+import { CompanyModule } from 'src/modules/company.module';
 import { ProductModule } from 'src/modules/product.module';
 import { SellerModule } from 'src/modules/seller.module';
 import { BuyerRepository } from 'src/repositories/buyer.repository';
@@ -21,6 +22,7 @@ import { SellerLocalStrategy } from './strategies/seller.local.strategy';
 @Module({
   imports: [
     //BoardsModule,
+    CompanyModule,
     CategoryModule,
     CartModule,
     ProductModule,

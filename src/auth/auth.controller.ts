@@ -3,7 +3,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
 import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
-import { AccessToken } from 'src/interfaces/access-token';
+import { AccessToken } from 'src/interfaces/access-token.interface';
 import { UserId } from '../decorators/user-id.decorator';
 import { AuthService } from './auth.service';
 import { BuyerLocalAuthGuard } from './guards/buyer-local.auth.guard';

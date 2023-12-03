@@ -1,7 +1,7 @@
 import { BaseEntity, CreateDateColumn, DeleteDateColumn, PrimaryGeneratedColumn, UpdateDateColumn } from 'typeorm';
 
 export class CommonEntity extends BaseEntity {
-  @PrimaryGeneratedColumn({ type: 'bigint' })
+  @PrimaryGeneratedColumn({ type: 'int' })
   id!: number;
 
   @CreateDateColumn()
