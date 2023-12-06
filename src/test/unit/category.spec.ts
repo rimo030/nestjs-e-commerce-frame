@@ -1,13 +1,15 @@
+import { v4 } from 'uuid';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
-import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
 import { CategoryController } from 'src/controllers/category.controller';
+import { CategoryEntity } from 'src/entities/category.entity';
 import { CategoryRepository } from 'src/repositories/category.repository';
 import { CategoryService } from 'src/services/category.service';
 
 describe('CategoryController', () => {
   let Controller: CategoryController;
   let Service: CategoryService;
+  let repository: CategoryRepository;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -16,11 +18,13 @@ describe('CategoryController', () => {
 
     Service = module.get<CategoryService>(CategoryService);
     Controller = module.get<CategoryController>(CategoryController);
+    repository = module.get<CategoryRepository>(CategoryRepository);
   });
 
   it('should be defined.', async () => {
     expect(Controller).toBeDefined();
     expect(Service).toBeDefined();
+    expect(repository).toBeDefined();
   });
 
   describe('서버 실행 시 카테고리 데이터를 추가하는 스크립트', () => {
@@ -39,12 +43,21 @@ describe('CategoryController', () => {
      * 카테고리는 이미 들어 있는 rows 라고 가정한다.
      * 따라서 새로 추가하는 등 POST API는 없고 오로지 조회 요청만을 테스트한다.
      *
-     * 한번에 몇개를 조회할건지...
-     *
      */
     it('카테고리가 조회되어야 한다.', async () => {
-      const categorylist = Controller.getCategoryList();
-      expect((await categorylist).length > 1).toBe(true);
+      /**
+       * 카테고리를 10개 생성한다.
+       * 카테고리 명은 unique 해야한다.
+       */
+
+      const entities = new Array(10).fill(0).map((el) => new CategoryEntity({ name: v4() }));
+      await repository.save(entities);
+
+      /**
+       * 저장한 카테고리를 조회할 수 있는 지 확인한다.
+       */
+      const categorylist = Controller.getCategory({ page: 1, limit: 10 });
+      expect((await categorylist).data.list.length).toBe(10);
     });
   });
 });
