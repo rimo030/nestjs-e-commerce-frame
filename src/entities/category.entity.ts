@@ -10,7 +10,7 @@ export class CategoryEntity extends CommonEntity {
     Object.assign(this, dto);
   }
 
-  @Column({ type: 'varchar', length: 128 })
+  @Column({ type: 'varchar', length: 128, unique: true })
   name!: string;
 
   /**
