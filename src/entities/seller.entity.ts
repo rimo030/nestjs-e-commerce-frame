@@ -5,6 +5,12 @@ import { ProductEntity } from './product.entity';
 
 @Entity({ name: 'seller' })
 export class SellerEntity extends CommonEntity {
+  constructor(dto: Partial<SellerEntity>) {
+    super();
+
+    Object.assign(this, dto);
+  }
+
   @Column({ type: 'varchar', length: 128, unique: true })
   email!: string;
 

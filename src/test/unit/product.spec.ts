@@ -1,9 +1,15 @@
+import { before } from 'node:test';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { ProductController } from 'src/controllers/product.controller';
+import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
 import { ProductEntity } from 'src/entities/product.entity';
+import { SellerEntity } from 'src/entities/seller.entity';
+import { CategoryRepository } from 'src/repositories/category.repository';
+import { CompanyRepository } from 'src/repositories/company.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
+import { SellerRepository } from 'src/repositories/seller.repository';
 import { ProductService } from 'src/services/product.service';
 import { GetProductResponse } from 'src/types/get-product-response.type';
 
@@ -11,6 +17,11 @@ describe('ProductController', () => {
   let controller: ProductController;
   let service: ProductService;
   let repository: ProductRepository;
+
+  let sellerRepository: SellerRepository;
+  let categoryRepository: CategoryRepository;
+  let companyRepository: CompanyRepository;
+
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       imports: [AppModule],
@@ -18,7 +29,11 @@ describe('ProductController', () => {
 
     service = module.get<ProductService>(ProductService);
     controller = module.get<ProductController>(ProductController);
-    controller = module.get<ProductController>(ProductController);
+    repository = module.get<ProductRepository>(ProductRepository);
+
+    sellerRepository = module.get<SellerRepository>(SellerRepository);
+    categoryRepository = module.get<CategoryRepository>(CategoryRepository);
+    companyRepository = module.get<CompanyRepository>(CompanyRepository);
   });
 
   /**
@@ -28,7 +43,91 @@ describe('ProductController', () => {
    * 상품 테스트 코드는 회사에 독립적으로 진행될 수 있어야 한다.
    * 허가 칼럼 추가
    */
-  describe(' 상품은 이미 등록되어 있어야 한다.', () => {
+  describe('조회에 사용할 충분한 상품은 이미 등록되어 있어야 한다.', () => {
+    let testnum = 2;
+    let productcount = 10;
+
+    let sellers: SellerEntity[];
+    let categories: CategoryEntity[];
+    let companies: CompanyEntity[];
+    let products: ProductEntity[] = [];
+
+    before(async () => {
+      /**
+       * test 판매자 계정 DB에 삽입
+       */
+      it('판매자 계정을 생성한다.', async () => {
+        sellers = new Array(testnum).fill(0).map(
+          (el, idx) =>
+            new SellerEntity({
+              email: `${idx}`,
+              hashedPassword: `${idx}`,
+              name: `${idx}`,
+              businessNumber: `${idx}`,
+              phone: `${idx}`,
+            }),
+        );
+        await sellerRepository.save(sellers);
+      });
+
+      it('카테고리를 생성한다.', async () => {
+        categories = new Array(testnum).fill(0).map(
+          (el, idx) =>
+            new CategoryEntity({
+              name: `${idx}`,
+            }),
+        );
+        await categoryRepository.save(categories);
+      });
+
+      it('회사를 생성한다.', async () => {
+        companies = new Array(testnum).fill(0).map(
+          (el, idx) =>
+            new CompanyEntity({
+              name: `${idx}`,
+            }),
+        );
+        await companyRepository.save(companies);
+      });
+
+      it('판매자별 카테고리별 회사별 상품을 productcount개씩 생성한다.', async () => {
+        sellers.forEach((s) => {
+          let sellerId = s.id;
+          categories.forEach((ca) => {
+            let categoryId = ca.id;
+            companies.forEach((co) => {
+              let companyId = co.id;
+              for (let i = 0; i < productcount; i++) {
+                products.push(
+                  new ProductEntity({
+                    sellerId,
+                    categoryId,
+                    companyId,
+                    isSale: true,
+                    name: `${i}_${sellerId}_${categoryId}_${companyId}`,
+                    deliveryType: 'FREE',
+                    deliveryCharge: 3000,
+                    img: 'test.img',
+                  }),
+                );
+              }
+            });
+          });
+        });
+        await repository.save(products);
+      });
+    });
+
+    /**
+     * 테스트 후 데이터는 삭제한다.
+     */
+    afterAll(async () => {
+      await repository.remove(products);
+      await sellerRepository.remove(sellers);
+      await categoryRepository.remove(categories);
+      await companyRepository.remove(companies);
+    });
+
     /**
      * GET products?page=1&limit=15&category=&sellerId=&
      *
