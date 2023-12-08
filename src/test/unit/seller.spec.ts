@@ -134,8 +134,8 @@ describe('SellerController', () => {
          */
         const decoded: Payload = jwtService.decode(accessToken!);
         const product = await sellercontroller.createProduct(decoded.id, {
-          categoryId: (await new CategoryEntity({ name: 'name' }).save()).id,
-          companyId: (await new CompanyEntity({ name: 'name' }).save()).id,
+          categoryId: (await new CategoryEntity({ name: v4() }).save()).id,
+          companyId: (await new CompanyEntity({ name: v4() }).save()).id,
           isSale: true,
           name: 'name',
           description: 'description',
@@ -167,8 +167,8 @@ describe('SellerController', () => {
          */
         const decoded: Payload = jwtService.decode(accessToken!);
         const product = await sellercontroller.createProduct(decoded.id, {
-          categoryId: (await new CategoryEntity({ name: 'name' }).save()).id,
-          companyId: (await new CompanyEntity({ name: 'name' }).save()).id,
+          categoryId: (await new CategoryEntity({ name: v4() }).save()).id,
+          companyId: (await new CompanyEntity({ name: v4() }).save()).id,
           isSale: true,
           name: 'name',
           description: 'description',
@@ -181,13 +181,8 @@ describe('SellerController', () => {
         /**
          * 상품이 있다면 유저 쪽에서 조회 API를 했을 때 나와야 한다.
          */
-        const productList = await productController.getProductList({
-          limit: 1,
-          page: 1,
-          sellerId: decoded.id,
-        });
-
-        expect(productList?.length).toBe(1);
+        const response = await productController.getProductList({ page: 1, limit: 1 });
+        expect(response.data.list.length).toBe(1);
       });
     });
 
@@ -220,8 +215,8 @@ describe('SellerController', () => {
         Require.isRequire = true;
 
         if (product) {
-          const productId = product[0].id;
-          const sellerId = product[0].sellerId;
+          const productId = product.data.list[0].id;
+          const sellerId = product.data.list[0].sellerId;
 
           /**
            * 필수 옵션 추가
@@ -264,7 +259,7 @@ describe('SellerController', () => {
         });
 
         if (product) {
-          const productId = product[0].id;
+          const productId = product.data.list[0].id;
           const Require = new IsRequireOptionDto();
           Require.isRequire = true;
 
