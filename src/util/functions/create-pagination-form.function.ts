@@ -13,6 +13,6 @@ export function createPaginationForm<T>(
   paginationDto: PaginationDto,
 ): PaginationResponseForm<T> {
   const { list, count } = getResponse;
-  const response = getTotalPage(count, paginationDto.limit);
-  return { data: { ...response, list } };
+  const totalPage = getTotalPage(count, paginationDto.limit);
+  return { data: { ...totalPage, list } };
 }
