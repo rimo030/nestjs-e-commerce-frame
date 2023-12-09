@@ -44,78 +44,80 @@ describe('ProductController', () => {
    * 허가 칼럼 추가
    */
   describe('조회에 사용할 충분한 상품은 이미 등록되어 있어야 한다.', () => {
-    let testnum = 2;
-    let productcount = 10;
+    /**
+     * 생성되는 상품은
+     * testnum^3 * productcount개 이다.
+     */
+    let testNum = 2; // 판매자, 카테고리, 회사의 수
+    let productMinCount = 10; // 각 판매자별 카테고리별 회사 별 상품의 최소 개수
 
     let sellers: SellerEntity[];
     let categories: CategoryEntity[];
     let companies: CompanyEntity[];
     let products: ProductEntity[] = [];
 
-    before(async () => {
-      /**
-       * test 판매자 계정 DB에 삽입
-       */
-      it('판매자 계정을 생성한다.', async () => {
-        sellers = new Array(testnum).fill(0).map(
-          (el, idx) =>
-            new SellerEntity({
-              email: `${idx}`,
-              hashedPassword: `${idx}`,
-              name: `${idx}`,
-              businessNumber: `${idx}`,
-              phone: `${idx}`,
-            }),
-        );
-        await sellerRepository.save(sellers);
-      });
+    /**
+     * test 판매자 계정 DB에 삽입
+     */
+    it('판매자 계정을 생성한다.', async () => {
+      sellers = new Array(testNum).fill(0).map(
+        (el, idx) =>
+          new SellerEntity({
+            email: `${idx}`,
+            hashedPassword: `${idx}`,
+            name: `${idx}`,
+            businessNumber: `${idx}`,
+            phone: `${idx}`,
+          }),
+      );
+      await sellerRepository.save(sellers);
+    });
 
-      it('카테고리를 생성한다.', async () => {
-        categories = new Array(testnum).fill(0).map(
-          (el, idx) =>
-            new CategoryEntity({
-              name: `${idx}`,
-            }),
-        );
-        await categoryRepository.save(categories);
-      });
+    it('카테고리를 생성한다.', async () => {
+      categories = new Array(testNum).fill(0).map(
+        (el, idx) =>
+          new CategoryEntity({
+            name: `${idx}`,
+          }),
+      );
+      await categoryRepository.save(categories);
+    });
 
-      it('회사를 생성한다.', async () => {
-        companies = new Array(testnum).fill(0).map(
-          (el, idx) =>
-            new CompanyEntity({
-              name: `${idx}`,
-            }),
-        );
-        await companyRepository.save(companies);
-      });
+    it('회사를 생성한다.', async () => {
+      companies = new Array(testNum).fill(0).map(
+        (el, idx) =>
+          new CompanyEntity({
+            name: `${idx}`,
+          }),
+      );
+      await companyRepository.save(companies);
+    });
 
-      it('판매자별 카테고리별 회사별 상품을 productcount개씩 생성한다.', async () => {
-        sellers.forEach((s) => {
-          let sellerId = s.id;
-          categories.forEach((ca) => {
-            let categoryId = ca.id;
-            companies.forEach((co) => {
-              let companyId = co.id;
-              for (let i = 0; i < productcount; i++) {
-                products.push(
-                  new ProductEntity({
-                    sellerId,
-                    categoryId,
-                    companyId,
-                    isSale: true,
-                    name: `${i}_${sellerId}_${categoryId}_${companyId}`,
-                    deliveryType: 'FREE',
-                    deliveryCharge: 3000,
-                    img: 'test.img',
-                  }),
-                );
-              }
-            });
+    it('판매자별 카테고리별 회사별 상품을 productcount개씩 생성한다.', async () => {
+      sellers.forEach((s) => {
+        let sellerId = s.id;
+        categories.forEach((ca) => {
+          let categoryId = ca.id;
+          companies.forEach((co) => {
+            let companyId = co.id;
+            for (let i = 0; i < productMinCount; i++) {
+              products.push(
+                new ProductEntity({
+                  sellerId,
+                  categoryId,
+                  companyId,
+                  isSale: true,
+                  name: `${i}_${sellerId}_${categoryId}_${companyId}`,
+                  deliveryType: 'FREE',
+                  deliveryCharge: 3000,
+                  img: 'test.img',
+                }),
+              );
+            }
           });
         });
-        await repository.save(products);
       });
+      await repository.save(products);
     });
 
     /**
@@ -136,6 +138,17 @@ describe('ProductController', () => {
      *
      */
     describe('buyer의 상품 조회 로직을 테스트 한다.', () => {
+      it('상품이 페이지 네이션으로 1 페이지가 조회 되는지 확인한다.', async () => {
+        /**
+         * 등록된 최소한의 상품을 DB에서 페이지네이션으로 가져올 수 있어야한다.
+         */
+        const res = await controller.getProductList({
+          page: 1,
+          limit: productMinCount,
+        });
+        expect(res.data.list.length).toBe(productMinCount);
+      });
+
       it.todo('상품에 어떤 페이지도 주지 않을 경우 1페이지가 나와야 한다.');
 
       /**
@@ -170,27 +183,28 @@ describe('ProductController', () => {
       it.todo('상품 조회시 별점이 노출되어야 한다.');
       it.todo('상품 조회시 리뷰수가 노출되어야 한다.');
 
-      // it('category 별 조회가 가능해야 한다.', async () => {
-      //   const 조회할_카테고리_값 = 1;
-      //   const productList: GetProductResponse = await controller.getProductList({
-      //     ...
-      //     categoryId: 조회할_카테고리_값,
-      //   });
+      it('category 별 조회가 가능해야 한다.', async () => {
+        const categoryIds = categories.map((el) => el['id']);
+        const categoryId = categoryIds[0];
+        const res: GetProductResponse = await controller.getProductList({
+          page: 1,
+          limit: productMinCount,
+          categoryId: categoryId[0],
+        });
 
-      //   expect(typeof productList.data.productList.length === 'number').toBe(true);
-      //   expect(productList.data.productList.every((el) => el.categoryId === 조회할_카테고리_값)).toBe(true);
+        expect(res.data.list.every((el) => el.categoryId === categoryId)).toBe(true);
 
-      //   /**
-      //    * 컨트롤러의 개수 제한을 넘어선 숫자로 검증을 다시 했을 때도 동일해야 한다.
-      //    * 우연의 일치로 하필 조회한 데이터가 전부 카테고리 아이디와 일치했을 가능성을 배제하기 위해 서비스로 20페이지를 체크한다.
-      //    */
-      //   const productListByProductService = await service.find({
-      //     page: 1,
-      //     limit: 300,
-      //   });
+        /**
+         * 컨트롤러의 개수 제한을 넘어선 숫자로 검증을 다시 했을 때도 동일해야 한다.
+         * 우연의 일치로 하필 조회한 데이터가 전부 카테고리 아이디와 일치했을 가능성을 배제하기 위해 서비스로 20페이지를 체크한다.
+         */
+        const productListByProductService = await service.find({
+          page: 1,
+          limit: 300,
+        });
 
-      //   expect(productListByProductService.every((el) => el.categoryId === 조회할_카테고리_값)).toBe(true);
-      // });
+        expect(productListByProductService.every((el) => el.categoryId === 조회할_카테고리_값)).toBe(true);
+      });
     });
 
     /**
