@@ -12,6 +12,11 @@ import { SellerEntity } from './seller.entity';
 
 @Entity({ name: 'product' })
 export class ProductEntity extends CommonEntity {
+  constructor(dto: Partial<ProductEntity>) {
+    super();
+
+    Object.assign(this, dto);
+  }
   @Column()
   sellerId!: number;
 
@@ -36,7 +41,7 @@ export class ProductEntity extends CommonEntity {
   @Column({ type: 'varchar', length: 128 })
   deliveryType!: keyof typeof deliveryType;
 
-  @Column({ type: 'int' })
+  @Column({ type: 'int', nullable: true })
   deliveryFreeOver?: number | null;
 
   @Column({ type: 'int' })

@@ -1,9 +1,11 @@
 /**
- * 페이지네이션에서 요소의 개수와 전체페이지 계산을 위한 함수
- * 한번에 읽어올 개수인 limit를 받는다.
+ * 페이지네이션에서 전체페이지 계산을 위한 함수
+ *
+ * totalCount : 전체 요소의 수
+ * limit : 한번에 읽어올 요소의 수
+ *
  */
-export const getTotalPage = (totalCount = 0, limit = 0): { totalResult: number; totalPage: number } => {
-  const totalResult = totalCount;
-  const totalPage = totalResult % limit === 0 ? totalResult / limit : Math.floor(totalResult / limit) + 1;
-  return { totalResult, totalPage };
+export const getTotalPage = (totalCount = 0, limit = 0): { totalPage: number } => {
+  const totalPage = totalCount % limit === 0 ? totalCount / limit : Math.floor(totalCount / limit) + 1;
+  return { totalPage };
 };
