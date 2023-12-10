@@ -12,7 +12,7 @@ export function createPaginationForm<T>(
   getResponse: GetResponse<T>,
   paginationDto: PaginationDto,
 ): PaginationResponseForm<T> {
-  const { list, count } = getResponse;
-  const totalPage = getTotalPage(count, paginationDto.limit);
-  return { data: { ...totalPage, list } };
+  const { list, count, take } = getResponse;
+  const totalPage = getTotalPage(count, take);
+  return { data: { ...totalPage, list }, meta: { ...paginationDto } };
 }

@@ -8,9 +8,14 @@ export function createProductPaginationForm(
   getResponse: GetResponse<ProductEntity>,
   getProductDto: ProductPaginationDto,
 ): GetProductResponse {
-  const { list, count } = getResponse;
-  const totalPage = getTotalPage(count, getProductDto.limit);
-  const lastProductId = list[getProductDto.limit - 1].id;
-  const result: GetProductResponse = { data: { list }, meta: { lastProductId, ...totalPage, ...getProductDto } };
+  const { list, count, take } = getResponse;
+  const totalPage = getTotalPage(count, take);
+
+  const lastProductId = list.at(list.length - 1)?.id;
+  const result: GetProductResponse = {
+    data: { list, ...totalPage },
+    meta: { lastProductId: lastProductId ?? null, ...getProductDto },
+  };
+
   return result;
 }

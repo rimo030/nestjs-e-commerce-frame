@@ -4,6 +4,7 @@ import { AppModule } from 'src/app.module';
 import { ProductController } from 'src/controllers/product.controller';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
+import { ProductPaginationDto } from 'src/entities/dtos/product-pagination.dto';
 import { ProductEntity } from 'src/entities/product.entity';
 import { SellerEntity } from 'src/entities/seller.entity';
 import { CategoryRepository } from 'src/repositories/category.repository';
@@ -22,7 +23,15 @@ describe('ProductController', () => {
   let categoryRepository: CategoryRepository;
   let companyRepository: CompanyRepository;
 
-  beforeEach(async () => {
+  const testNum = 2; // 판매자, 카테고리, 회사의 수
+  const productMinCount = 10; // 각 판매자별 카테고리별 회사 별 상품의 최소 개수
+
+  let sellers: SellerEntity[];
+  let categories: CategoryEntity[];
+  let companies: CompanyEntity[];
+  let products: ProductEntity[] = [];
+
+  beforeAll(async () => {
     const module = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
@@ -34,6 +43,91 @@ describe('ProductController', () => {
     sellerRepository = module.get<SellerRepository>(SellerRepository);
     categoryRepository = module.get<CategoryRepository>(CategoryRepository);
     companyRepository = module.get<CompanyRepository>(CompanyRepository);
+
+    /**
+     * 조회에 사용할 충분한 상품은 이미 등록되어 있어야 한다.
+     * 생성되는 상품은
+     * testnum^3 * productcount개 이다.
+     */
+
+    /**
+     * 판매자 계정을 생성한다.
+     */
+
+    sellers = new Array(testNum).fill(0).map(
+      (el, idx) =>
+        new SellerEntity({
+          email: `${idx}`,
+          hashedPassword: `${idx}`,
+          name: `${idx}`,
+          businessNumber: `${idx}`,
+          phone: `${idx}`,
+        }),
+    );
+    await sellerRepository.save(sellers);
+
+    /**
+     * 카테고리를 생성한다.
+     */
+
+    categories = new Array(testNum).fill(0).map(
+      (el, idx) =>
+        new CategoryEntity({
+          name: `${idx}`,
+        }),
+    );
+    await categoryRepository.save(categories);
+
+    /**
+     * 회사를 생성한다.
+     */
+
+    companies = new Array(testNum).fill(0).map(
+      (el, idx) =>
+        new CompanyEntity({
+          name: `${idx}`,
+        }),
+    );
+    await companyRepository.save(companies);
+
+    /**
+     * 판매자별 카테고리별 회사별 상품을 productcount개씩 생성한다.
+     */
+
+    sellers.forEach((s) => {
+      let sellerId = s.id;
+      categories.forEach((ca) => {
+        let categoryId = ca.id;
+        companies.forEach((co) => {
+          let companyId = co.id;
+          for (let i = 0; i < productMinCount; i++) {
+            products.push(
+              new ProductEntity({
+                sellerId,
+                categoryId,
+                companyId,
+                isSale: true,
+                name: `${i}_${sellerId}_${categoryId}_${companyId}`,
+                deliveryType: 'FREE',
+                deliveryCharge: 3000,
+                img: 'test.img',
+              }),
+            );
+          }
+        });
+      });
+    });
+    await repository.save(products);
+  });
+
+  /**
+   * 테스트 후 데이터는 삭제한다.
+   */
+  afterAll(async () => {
+    await repository.remove(products);
+    await sellerRepository.remove(sellers);
+    await categoryRepository.remove(categories);
+    await companyRepository.remove(companies);
   });
 
   /**
@@ -43,203 +137,141 @@ describe('ProductController', () => {
    * 상품 테스트 코드는 회사에 독립적으로 진행될 수 있어야 한다.
    * 허가 칼럼 추가
    */
-  describe('조회에 사용할 충분한 상품은 이미 등록되어 있어야 한다.', () => {
-    let testnum = 2;
-    let productcount = 10;
 
-    let sellers: SellerEntity[];
-    let categories: CategoryEntity[];
-    let companies: CompanyEntity[];
-    let products: ProductEntity[] = [];
-
-    before(async () => {
+  /**
+   * GET products?page=1&limit=15&category=&sellerId=&
+   *
+   * @todo 엔드포인트를 2개 가질 수도 있다.
+   * GET categories/:categoryId/products?page=1&limit=15 ...
+   *
+   */
+  describe('buyer의 상품 조회 로직을 테스트 한다.', () => {
+    it('상품이 페이지 네이션으로 1 페이지가 조회 되는지 확인한다.', async () => {
       /**
-       * test 판매자 계정 DB에 삽입
+       * 등록된 최소한의 상품을 DB에서 페이지네이션으로 가져올 수 있어야한다.
        */
-      it('판매자 계정을 생성한다.', async () => {
-        sellers = new Array(testnum).fill(0).map(
-          (el, idx) =>
-            new SellerEntity({
-              email: `${idx}`,
-              hashedPassword: `${idx}`,
-              name: `${idx}`,
-              businessNumber: `${idx}`,
-              phone: `${idx}`,
-            }),
-        );
-        await sellerRepository.save(sellers);
+      const res = await controller.getProductList({
+        page: 1,
+        limit: productMinCount,
       });
-
-      it('카테고리를 생성한다.', async () => {
-        categories = new Array(testnum).fill(0).map(
-          (el, idx) =>
-            new CategoryEntity({
-              name: `${idx}`,
-            }),
-        );
-        await categoryRepository.save(categories);
-      });
-
-      it('회사를 생성한다.', async () => {
-        companies = new Array(testnum).fill(0).map(
-          (el, idx) =>
-            new CompanyEntity({
-              name: `${idx}`,
-            }),
-        );
-        await companyRepository.save(companies);
-      });
-
-      it('판매자별 카테고리별 회사별 상품을 productcount개씩 생성한다.', async () => {
-        sellers.forEach((s) => {
-          let sellerId = s.id;
-          categories.forEach((ca) => {
-            let categoryId = ca.id;
-            companies.forEach((co) => {
-              let companyId = co.id;
-              for (let i = 0; i < productcount; i++) {
-                products.push(
-                  new ProductEntity({
-                    sellerId,
-                    categoryId,
-                    companyId,
-                    isSale: true,
-                    name: `${i}_${sellerId}_${categoryId}_${companyId}`,
-                    deliveryType: 'FREE',
-                    deliveryCharge: 3000,
-                    img: 'test.img',
-                  }),
-                );
-              }
-            });
-          });
-        });
-        await repository.save(products);
-      });
+      expect(res.data.list.length).toBe(productMinCount);
     });
 
-    /**
-     * 테스트 후 데이터는 삭제한다.
-     */
-    afterAll(async () => {
-      await repository.remove(products);
-      await sellerRepository.remove(sellers);
-      await categoryRepository.remove(categories);
-      await companyRepository.remove(companies);
+    it('상품에 어떤 페이지도 주지 않을 경우 첫번째 페이지가 나와야 한다.', async () => {
+      const isPage = await controller.getProductList({ page: 1 });
+      const notPage = await controller.getProductList({});
+
+      /**
+       * 조회한 상품의 id 값들 추출
+       */
+      const isPageIds = isPage.data.list.map((el) => el.id);
+      const notPageIds = notPage.data.list.map((el) => el.id);
+
+      expect(isPageIds.every((el, idx) => el === notPageIds.at(idx))).toBe(true);
     });
 
-    /**
-     * GET products?page=1&limit=15&category=&sellerId=&
-     *
-     * @todo 엔드포인트를 2개 가질 수도 있다.
-     * GET categories/:categoryId/products?page=1&limit=15 ...
-     *
-     */
-    describe('buyer의 상품 조회 로직을 테스트 한다.', () => {
-      it.todo('상품에 어떤 페이지도 주지 않을 경우 1페이지가 나와야 한다.');
+    it('category 별 조회가 가능해야 한다.', async () => {
+      const categoryIds = categories.map((el) => el.id);
+      const testCategoryId = categoryIds[0];
 
-      /**
-       * 대표 가격은 입력한 옵션 중 자동으로 최솟값이 들어가야 한다.
-       *  - 여기서 말하는 입력한 옵션이란, 품절과 판매가 중단된, 그리고 삭제된 옵션을 모두 제외한 후의 최솟값이다.
-       *  - 즉, '반드시 현재 구매 가능한 상태' 중의 최솟값을 말한다.
-       *
-       *   representivePrice: number;
-       */
+      const res: GetProductResponse = await controller.getProductList({
+        page: 0,
+        limit: productMinCount,
+        categoryId: testCategoryId,
+      });
 
-      it.todo('상품 조회시 대표가격이 노출된다.');
+      expect(res.data.list.every((el) => el.categoryId === testCategoryId)).toBe(true);
 
-      /**
-       * 이미지는 등록 순으로 정렬되어야 하며, 리스트에서는 이미지가 1장이면 되기 때문에 썸네일로 제공되어야 한다.
-       *    - 이미지는 가장 먼저 등록된 것을 썸네일로 삼는다.
-       *
-       * @todo 이미지 컬럼을 별도의 테이블로 분리
-       */
-      it.todo('상품 조회시 썸네일이 노출되어야 한다.');
-
-      /**
-       * @todo 상품에 대한 리뷰시스템를 추가한다.
-       * 리뷰 테이블을 별도로 두고 아래 정보는 조인해서 조회한다.
-       * 한 명의 유저가 기록할 때마다 수정하려면 너무 많은 연산이 필요하기 떄문에 미리 저장해둔다.
-       *
-       * 상품에 대한 리뷰 별점을 의미한다.
-       * rating : number;
-       *
-       * 상품에 대한 리뷰 작성수를 의미한다.
-       * reviewCount : number;
-       */
-      it.todo('상품 조회시 별점이 노출되어야 한다.');
-      it.todo('상품 조회시 리뷰수가 노출되어야 한다.');
-
-      // it('category 별 조회가 가능해야 한다.', async () => {
-      //   const 조회할_카테고리_값 = 1;
-      //   const productList: GetProductResponse = await controller.getProductList({
-      //     ...
-      //     categoryId: 조회할_카테고리_값,
-      //   });
-
-      //   expect(typeof productList.data.productList.length === 'number').toBe(true);
-      //   expect(productList.data.productList.every((el) => el.categoryId === 조회할_카테고리_값)).toBe(true);
-
-      //   /**
-      //    * 컨트롤러의 개수 제한을 넘어선 숫자로 검증을 다시 했을 때도 동일해야 한다.
-      //    * 우연의 일치로 하필 조회한 데이터가 전부 카테고리 아이디와 일치했을 가능성을 배제하기 위해 서비스로 20페이지를 체크한다.
-      //    */
-      //   const productListByProductService = await service.find({
-      //     page: 1,
-      //     limit: 300,
-      //   });
-
-      //   expect(productListByProductService.every((el) => el.categoryId === 조회할_카테고리_값)).toBe(true);
+      // /**
+      //  * 컨트롤러의 개수 제한을 넘어선 숫자로 검증을 다시 했을 때도 동일해야 한다.
+      //  * 우연의 일치로 하필 조회한 데이터가 전부 카테고리 아이디와 일치했을 가능성을 배제하기 위해 서비스로 20페이지를 체크한다.
+      //  */
+      // const productListByProductService = await service.find({
+      //   page: 1,
+      //   limit: 300,
       // });
+
+      // expect(productListByProductService.every((el) => el.categoryId === 조회할_카테고리_값)).toBe(true);
     });
+    /**
+     * 대표 가격은 입력한 옵션 중 자동으로 최솟값이 들어가야 한다.
+     *  - 여기서 말하는 입력한 옵션이란, 품절과 판매가 중단된, 그리고 삭제된 옵션을 모두 제외한 후의 최솟값이다.
+     *  - 즉, '반드시 현재 구매 가능한 상태' 중의 최솟값을 말한다.
+     *
+     *   representivePrice: number;
+     */
+
+    it.todo('상품 조회시 대표가격이 노출된다.');
 
     /**
-     * GET products/:id
+     * 이미지는 등록 순으로 정렬되어야 하며, 리스트에서는 이미지가 1장이면 되기 때문에 썸네일로 제공되어야 한다.
+     *    - 이미지는 가장 먼저 등록된 것을 썸네일로 삼는다.
+     *
+     * @todo 이미지 컬럼을 별도의 테이블로 분리
      */
-    describe('상품의 상세 페이지 조회를 검증한다.', () => {
-      /**
-       * 상품의 이름을 포함한 기본적인 정보 전부와
-       * 옵션 10개, 선택 옵션 10개를 가져온다.
-       *
-       * 이렇게 옵션을 미리 가져 오는 이유는 상품 조회, 페이지 이동, 옵션 조회 등 API가 나뉘는 것을 방지하기 위함이다.
-       * 이렇게 한 번의 요청으로 가져온 후 이후 필요한 데이터를 추가적인 API로 가져오는 게 성능 상 유리하다.
-       */
-      it.todo('상품의 상세 페이지를 조회할수 있어야한다.');
+    it.todo('상품 조회시 썸네일이 노출되어야 한다.');
 
-      /**
-       * 추천 상품의 기준은 편의 상 동일 카테고리를 기준으로 한다.
-       */
-      it.todo('상품 상세 페이지 조회 시에는 상품의 추천 상품 10개가 함께 보여져야 한다.');
-    });
+    /**
+     * @todo 상품에 대한 리뷰시스템를 추가한다.
+     * 리뷰 테이블을 별도로 두고 아래 정보는 조인해서 조회한다.
+     * 한 명의 유저가 기록할 때마다 수정하려면 너무 많은 연산이 필요하기 떄문에 미리 저장해둔다.
+     *
+     * 상품에 대한 리뷰 별점을 의미한다.
+     * rating : number;
+     *
+     * 상품에 대한 리뷰 작성수를 의미한다.
+     * reviewCount : number;
+     */
+    it.todo('상품 조회시 별점이 노출되어야 한다.');
+    it.todo('상품 조회시 리뷰수가 노출되어야 한다.');
+  });
 
-    describe('GET products/:id/options?required=', () => {
-      /**
-       * 상품의 옵션 조회 시 쿼리로 받은 requried true, false를 통해
-       * 선택 옵션과 그렇지 않은 경우를 구분할 수 있어야 한다.
-       *
-       * 당연히 페이지네이션이어야 하며, 1페이지가 default로 조회되어야 한다.
-       * 상품의 최초 조회 시 상품의 옵션들이 조회되기 때문에 서비스 로직은 재사용될 수 있어야 한다.
-       */
-      it.todo('상품의 옵션을 페이지네이션으로 조회한다.');
+  /**
+   * GET products/:id
+   */
+  describe('상품의 상세 페이지 조회를 검증한다.', () => {
+    /**
+     * 상품의 이름을 포함한 기본적인 정보 전부와
+     * 옵션 10개, 선택 옵션 10개를 가져온다.
+     *
+     * 이렇게 옵션을 미리 가져 오는 이유는 상품 조회, 페이지 이동, 옵션 조회 등 API가 나뉘는 것을 방지하기 위함이다.
+     * 이렇게 한 번의 요청으로 가져온 후 이후 필요한 데이터를 추가적인 API로 가져오는 게 성능 상 유리하다.
+     */
+    it.todo('상품의 상세 페이지를 조회할수 있어야한다.');
 
-      /**
-       * 입력 옵션이 존재할 경우 배열에 담겨서 보여진다.
-       * 없을 경우 빈 배열이며, 빈 배열이면 데이터가 빈 것이 아니라 입력 옵션이 없는 것과 동일하게 처리될 것이다.
-       */
-      it.todo('필수 옵션의 경우, 선택 옵션과 달리 입력 옵션이 있을 경우 입력 옵션들이 함께 보여져야 한다.');
+    /**
+     * 추천 상품의 기준은 편의 상 동일 카테고리를 기준으로 한다.
+     */
+    it.todo('상품 상세 페이지 조회 시에는 상품의 추천 상품 10개가 함께 보여져야 한다.');
+  });
 
-      /**
-       * 즉, 먼저 생긴 옵션이 가장 위에 보여져야 한다.
-       */
-      it.todo('옵션은 id 값을 기준으로 정렬되어 보여져야 한다.');
+  describe('GET products/:id/options?required=', () => {
+    /**
+     * 상품의 옵션 조회 시 쿼리로 받은 requried true, false를 통해
+     * 선택 옵션과 그렇지 않은 경우를 구분할 수 있어야 한다.
+     *
+     * 당연히 페이지네이션이어야 하며, 1페이지가 default로 조회되어야 한다.
+     * 상품의 최초 조회 시 상품의 옵션들이 조회되기 때문에 서비스 로직은 재사용될 수 있어야 한다.
+     */
+    it.todo('상품의 옵션을 페이지네이션으로 조회한다.');
 
-      /**
-       * 먼 미래에 도전했으면 하는 사항.
-       *
-       * 예를 들어 '홍길동' 인지, 영문 이름으로 'hong-gil-dong'인지, 아니면 숫자만 받는지 등 조건이 있을 것이다.
-       * 해당 조건들을 따로 칼럼으로 가지고 있다면 더 대응의 폭이 넓어질 것이다.
-       */
-      it.todo('입력 옵션에는 어떠한 정규식 패턴을 사용할 것인지를 의미하는 Enum 칼럼이 존재해야 한다.');
-    });
+    /**
+     * 입력 옵션이 존재할 경우 배열에 담겨서 보여진다.
+     * 없을 경우 빈 배열이며, 빈 배열이면 데이터가 빈 것이 아니라 입력 옵션이 없는 것과 동일하게 처리될 것이다.
+     */
+    it.todo('필수 옵션의 경우, 선택 옵션과 달리 입력 옵션이 있을 경우 입력 옵션들이 함께 보여져야 한다.');
+
+    /**
+     * 즉, 먼저 생긴 옵션이 가장 위에 보여져야 한다.
+     */
+    it.todo('옵션은 id 값을 기준으로 정렬되어 보여져야 한다.');
+
+    /**
+     * 먼 미래에 도전했으면 하는 사항.
+     *
+     * 예를 들어 '홍길동' 인지, 영문 이름으로 'hong-gil-dong'인지, 아니면 숫자만 받는지 등 조건이 있을 것이다.
+     * 해당 조건들을 따로 칼럼으로 가지고 있다면 더 대응의 폭이 넓어질 것이다.
+     */
+    it.todo('입력 옵션에는 어떠한 정규식 패턴을 사용할 것인지를 의미하는 Enum 칼럼이 존재해야 한다.');
   });
 });
