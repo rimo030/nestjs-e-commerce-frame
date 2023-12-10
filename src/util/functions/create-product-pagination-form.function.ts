@@ -1,4 +1,3 @@
-import { NotFoundException } from '@nestjs/common';
 import { ProductPaginationDto } from 'src/entities/dtos/product-pagination.dto';
 import { ProductEntity } from 'src/entities/product.entity';
 import { GetResponse } from 'src/interfaces/get-response.interface';
@@ -9,13 +8,13 @@ export function createProductPaginationForm(
   getResponse: GetResponse<ProductEntity>,
   getProductDto: ProductPaginationDto,
 ): GetProductResponse {
-  const { list, count } = getResponse;
-  const totalPage = getTotalPage(count, getProductDto.limit);
+  const { list, count, take } = getResponse;
+  const totalPage = getTotalPage(count, take);
 
   const lastProductId = list.at(list.length - 1)?.id;
   const result: GetProductResponse = {
-    data: { list },
-    meta: { lastProductId: lastProductId ?? null, ...totalPage, ...getProductDto },
+    data: { list, ...totalPage },
+    meta: { lastProductId: lastProductId ?? null, ...getProductDto },
   };
 
   return result;

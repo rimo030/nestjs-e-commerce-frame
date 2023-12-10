@@ -3,14 +3,13 @@ import { ProductEntity } from 'src/entities/product.entity';
 export type GetProductResponse = {
   data: {
     list: ProductEntity[];
+    totalPage: number;
   };
 
   meta: {
-    page: number;
+    page?: number | null;
 
-    totalPage: number;
-
-    limit: number;
+    limit?: number | null;
 
     /**
      * 스크롤 기반에서 사용하기 위해서 마지막 상품 아이디를 제공한다.
