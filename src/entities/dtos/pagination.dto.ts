@@ -1,11 +1,9 @@
-import { IsInt, IsNotEmpty } from 'class-validator';
+import { IsOptionalNumber } from 'src/decorators/is-optional-number.decorator';
 
 export class PaginationDto {
-  @IsInt()
-  @IsNotEmpty()
-  page!: number;
+  @IsOptionalNumber('int')
+  page?: number | null;
 
-  @IsInt()
-  @IsNotEmpty()
-  limit!: number;
+  @IsOptionalNumber('int')
+  limit?: number | null;
 }
