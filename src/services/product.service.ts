@@ -17,10 +17,15 @@ export class ProductService {
   async getProduct(id: number): Promise<any> {}
 
   async getProductList(dto: ProductPaginationDto): Promise<GetResponse<ProductEntity>> {
-    const { skip, take } = getOffset({ page: dto.page, limit: dto.limit });
+    const { page, limit, search, categoryId, sellerId } = dto;
+    const { skip, take } = getOffset({ page, limit });
     const [list, count] = await this.productRepository.findAndCount({
       order: {
         id: 'ASC',
+      },
+      where: {
+        ...{ categoryId: categoryId ?? undefined },
+        ...{ sellerId: sellerId ?? undefined },
       },
       skip,
       take,

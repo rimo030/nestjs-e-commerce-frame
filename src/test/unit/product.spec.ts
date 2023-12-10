@@ -4,6 +4,7 @@ import { AppModule } from 'src/app.module';
 import { ProductController } from 'src/controllers/product.controller';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
+import { ProductPaginationDto } from 'src/entities/dtos/product-pagination.dto';
 import { ProductEntity } from 'src/entities/product.entity';
 import { SellerEntity } from 'src/entities/seller.entity';
 import { CategoryRepository } from 'src/repositories/category.repository';
@@ -149,8 +150,43 @@ describe('ProductController', () => {
         expect(res.data.list.length).toBe(productMinCount);
       });
 
-      it.todo('상품에 어떤 페이지도 주지 않을 경우 1페이지가 나와야 한다.');
+      it('상품에 어떤 페이지도 주지 않을 경우 첫번째 페이지가 나와야 한다.', async () => {
+        const isPage = await controller.getProductList({ page: 0 });
+        const notPage = await controller.getProductList({});
 
+        /**
+         * 조회한 상품의 id 값들 추출
+         */
+        const isPageIds = isPage.data.list.map((el) => el.id);
+        const notPageIds = notPage.data.list.map((el) => el.id);
+
+        expect(isPageIds.every((el, idx) => el === notPageIds.at(idx))).toBe(true);
+      });
+
+      it('category 별 조회가 가능해야 한다.', async () => {
+        const categoryIds = categories.map((el) => el['id']);
+        const testCategoryId = categoryIds[0];
+
+        new ProductPaginationDto();
+        const res: GetProductResponse = await controller.getProductList({
+          page: 0,
+          limit: productMinCount,
+          categoryId: testCategoryId,
+        });
+
+        expect(res.data.list.every((el) => el.categoryId === testCategoryId)).toBe(true);
+
+        // /**
+        //  * 컨트롤러의 개수 제한을 넘어선 숫자로 검증을 다시 했을 때도 동일해야 한다.
+        //  * 우연의 일치로 하필 조회한 데이터가 전부 카테고리 아이디와 일치했을 가능성을 배제하기 위해 서비스로 20페이지를 체크한다.
+        //  */
+        // const productListByProductService = await service.find({
+        //   page: 1,
+        //   limit: 300,
+        // });
+
+        // expect(productListByProductService.every((el) => el.categoryId === 조회할_카테고리_값)).toBe(true);
+      });
       /**
        * 대표 가격은 입력한 옵션 중 자동으로 최솟값이 들어가야 한다.
        *  - 여기서 말하는 입력한 옵션이란, 품절과 판매가 중단된, 그리고 삭제된 옵션을 모두 제외한 후의 최솟값이다.
@@ -182,29 +218,6 @@ describe('ProductController', () => {
        */
       it.todo('상품 조회시 별점이 노출되어야 한다.');
       it.todo('상품 조회시 리뷰수가 노출되어야 한다.');
-
-      it('category 별 조회가 가능해야 한다.', async () => {
-        const categoryIds = categories.map((el) => el['id']);
-        const categoryId = categoryIds[0];
-        const res: GetProductResponse = await controller.getProductList({
-          page: 1,
-          limit: productMinCount,
-          categoryId: categoryId[0],
-        });
-
-        expect(res.data.list.every((el) => el.categoryId === categoryId)).toBe(true);
-
-        /**
-         * 컨트롤러의 개수 제한을 넘어선 숫자로 검증을 다시 했을 때도 동일해야 한다.
-         * 우연의 일치로 하필 조회한 데이터가 전부 카테고리 아이디와 일치했을 가능성을 배제하기 위해 서비스로 20페이지를 체크한다.
-         */
-        const productListByProductService = await service.find({
-          page: 1,
-          limit: 300,
-        });
-
-        expect(productListByProductService.every((el) => el.categoryId === 조회할_카테고리_값)).toBe(true);
-      });
     });
 
     /**
