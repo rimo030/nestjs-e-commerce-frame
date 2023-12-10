@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CompanyEntity } from 'src/entities/company.entity';
 import { PaginationDto } from 'src/entities/dtos/pagination.dto';
+import { GetResponse } from 'src/interfaces/get-response.interface';
 import { CompanyRepository } from 'src/repositories/company.repository';
 import { getOffset } from 'src/util/functions/get-offset.function';
 
@@ -11,7 +13,7 @@ export class CompanyService {
     private readonly companyRepository: CompanyRepository,
   ) {}
 
-  async getCompany(paginationDto: PaginationDto) {
+  async getCompany(paginationDto: PaginationDto): Promise<GetResponse<CompanyEntity>> {
     const { skip, take } = getOffset(paginationDto);
     const [list, count] = await this.companyRepository.findAndCount({
       order: {
@@ -21,6 +23,6 @@ export class CompanyService {
       skip,
       take,
     });
-    return { list, count };
+    return { list, count, take };
   }
 }
