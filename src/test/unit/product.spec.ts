@@ -182,17 +182,19 @@ describe('ProductController', () => {
 
       expect(res.data.list.every((el) => el.categoryId === testCategoryId)).toBe(true);
 
-      // /**
-      //  * 컨트롤러의 개수 제한을 넘어선 숫자로 검증을 다시 했을 때도 동일해야 한다.
-      //  * 우연의 일치로 하필 조회한 데이터가 전부 카테고리 아이디와 일치했을 가능성을 배제하기 위해 서비스로 20페이지를 체크한다.
-      //  */
-      // const productListByProductService = await service.find({
-      //   page: 1,
-      //   limit: 300,
-      // });
+      /**
+       * 우연의 일치로 하필 조회한 데이터가 전부 카테고리 아이디와 일치했을 가능성을 배제하기 위해
+       * 서비스로 등록된 상품 개수 이상을 체크한다.
+       */
+      const resByService = await service.getProductList({
+        page: 1,
+        limit: 300,
+        categoryId: testCategoryId,
+      });
 
-      // expect(productListByProductService.every((el) => el.categoryId === 조회할_카테고리_값)).toBe(true);
+      expect(resByService.list.every((el) => el.categoryId === testCategoryId)).toBe(true);
     });
+
     /**
      * 대표 가격은 입력한 옵션 중 자동으로 최솟값이 들어가야 한다.
      *  - 여기서 말하는 입력한 옵션이란, 품절과 판매가 중단된, 그리고 삭제된 옵션을 모두 제외한 후의 최솟값이다.
