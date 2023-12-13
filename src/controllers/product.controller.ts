@@ -11,9 +11,6 @@ import { createProductPaginationForm } from 'src/util/functions/create-product-p
 export class ProductController {
   constructor(private readonly productService: ProductService) {}
 
-  /**
-   * @todo 상품 상세 보기 구현
-   */
   @Get('/:id')
   @ApiOperation({ summary: '상품 상세 조회 API', description: '등록된 상품의 정보를 확인할 수 있다.' })
   async getProduct(@Param() ProductId: number) {

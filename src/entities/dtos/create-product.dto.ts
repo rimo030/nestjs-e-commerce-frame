@@ -8,7 +8,11 @@ import { IsOptionalString } from 'src/decorators/is-optional-string.decorator';
 import { deliveryType } from 'src/types/enums/fee-type.enum';
 import { ProductEntity } from '../product.entity';
 
-export class CreateProductDto implements Partial<ProductEntity> {
+export class CreateProductDto
+  implements
+    Partial<ProductEntity>,
+    Pick<ProductEntity, 'categoryId' | 'companyId' | 'isSale' | 'name' | 'deliveryType' | 'deliveryCharge' | 'img'>
+{
   @ApiProperty({ description: '묶음 배송 그룹 id' })
   @IsOptionalNumber()
   bundleId?: number;
