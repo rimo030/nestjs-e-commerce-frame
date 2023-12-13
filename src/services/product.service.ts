@@ -4,7 +4,6 @@ import { ProductPaginationDto } from 'src/entities/dtos/product-pagination.dto';
 import { ProductEntity } from 'src/entities/product.entity';
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { ProductRepository } from 'src/repositories/product.repository';
-import { GetProductResponse } from 'src/types/get-product-response.type';
 import { getOffset } from 'src/util/functions/get-offset.function';
 
 @Injectable()

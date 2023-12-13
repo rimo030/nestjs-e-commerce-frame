@@ -1,18 +1,16 @@
-import { before } from 'node:test';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { ProductController } from 'src/controllers/product.controller';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
-import { ProductPaginationDto } from 'src/entities/dtos/product-pagination.dto';
 import { ProductEntity } from 'src/entities/product.entity';
 import { SellerEntity } from 'src/entities/seller.entity';
+import { GetProductResponse } from 'src/interfaces/get-product-response.interface';
 import { CategoryRepository } from 'src/repositories/category.repository';
 import { CompanyRepository } from 'src/repositories/company.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
 import { ProductService } from 'src/services/product.service';
-import { GetProductResponse } from 'src/types/get-product-response.type';
 
 describe('ProductController', () => {
   let controller: ProductController;

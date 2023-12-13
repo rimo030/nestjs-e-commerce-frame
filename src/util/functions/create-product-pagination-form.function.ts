@@ -1,7 +1,7 @@
 import { ProductPaginationDto } from 'src/entities/dtos/product-pagination.dto';
 import { ProductEntity } from 'src/entities/product.entity';
+import { GetProductResponse } from 'src/interfaces/get-product-response.interface';
 import { GetResponse } from 'src/interfaces/get-response.interface';
-import { GetProductResponse } from 'src/types/get-product-response.type';
 import { getTotalPage } from './get-total-page.function';
 
 export function createProductPaginationForm(

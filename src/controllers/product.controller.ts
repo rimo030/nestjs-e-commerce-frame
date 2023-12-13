@@ -1,9 +1,8 @@
 import { Controller, Get, Param, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ProductPaginationDto } from 'src/entities/dtos/product-pagination.dto';
-import { ProductEntity } from 'src/entities/product.entity';
+import { GetProductResponse } from 'src/interfaces/get-product-response.interface';
 import { ProductService } from 'src/services/product.service';
-import { GetProductResponse } from 'src/types/get-product-response.type';
 import { createProductPaginationForm } from 'src/util/functions/create-product-pagination-form.function';
 
 @Controller('products')
