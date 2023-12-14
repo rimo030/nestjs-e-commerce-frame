@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ProductPaginationDto } from 'src/entities/dtos/product-pagination.dto';
 import { ProductEntity } from 'src/entities/product.entity';
@@ -13,7 +13,30 @@ export class ProductService {
     private readonly productRepository: ProductRepository,
   ) {}
 
-  async getProduct(id: number): Promise<any> {}
+  async getProduct(id: number): Promise<ProductEntity> {
+    const product = await this.productRepository.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!product?.id) {
+      throw new NotFoundException(`Can't find product id : ${id}`);
+    }
+
+    const data = await this.productRepository
+      .createQueryBuilder('product')
+      .withDeleted()
+      // .leftJoinAndSelect('product.productRequiredOptions', 'productRequiredOption') // TypeError: Cannot read properties of undefined (reading 'joinColumns')
+      .where('product.id = :id', { id })
+      .andWhere('product.isSale = :isSale', { isSale: true })
+      .getOne();
+
+    if (data === null) {
+      throw new NotFoundException(`Can't find product id : ${id}`);
+    }
+    return data;
+  }
 
   async getProductList(dto: ProductPaginationDto): Promise<GetResponse<ProductEntity>> {
     const { page, limit, search, categoryId, sellerId } = dto;

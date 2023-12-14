@@ -283,7 +283,18 @@ describe('ProductController', () => {
      * 이렇게 옵션을 미리 가져 오는 이유는 상품 조회, 페이지 이동, 옵션 조회 등 API가 나뉘는 것을 방지하기 위함이다.
      * 이렇게 한 번의 요청으로 가져온 후 이후 필요한 데이터를 추가적인 API로 가져오는 게 성능 상 유리하다.
      */
-    it.todo('상품의 상세 페이지를 조회할 수 있어야한다.');
+    it('상품의 상세 페이지를 조회할 수 있어야한다.', async () => {
+      const ProductIds = products.map((el) => el.id);
+      const testId = ProductIds.at(0);
+      if (testId !== undefined) {
+        const res = await controller.getProduct(testId);
+
+        /**
+         * @todo 조회된 상품옵션의 productId 값이 testId와 같아야 한다.
+         * expect(res.data.조인된옵션들.every((el) => el.productId === testId)).toBe(true);
+         */
+      }
+    });
 
     /**
      * 추천 상품의 기준은 편의 상 동일 카테고리를 기준으로 한다.
