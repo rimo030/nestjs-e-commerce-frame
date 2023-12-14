@@ -1,6 +1,7 @@
 import { PaginationDto } from 'src/entities/dtos/pagination.dto';
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { PaginationResponseForm } from 'src/interfaces/pagination-response-form.interface';
+import { ResponseForm } from 'src/interfaces/response-form.interface';
 import { isPaginationResponseTypeGuard } from '../type-guards/is-pagination-response-type-guard';
 import { getTotalPage } from './get-total-page.function';
 
@@ -10,7 +11,7 @@ function createPaginationForm<T>(getResponse: GetResponse<T>, paginationDto: Pag
   return { data: { ...totalPage, list }, meta: { ...paginationDto } };
 }
 
-export function createResponseForm<T>(data: object | boolean | string | number | BigInt): { data: 'DATA' };
+export function createResponseForm<T>(data: object | boolean | string | number | BigInt): ResponseForm<T>;
 export function createResponseForm<T>(data: GetResponse<T>, paginationDto: PaginationDto): PaginationResponseForm<T>;
 export function createResponseForm<T>(
   data: GetResponse<T> | (object | boolean | string | number | BigInt),
