@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ProductPaginationDto } from 'src/entities/dtos/product-pagination.dto';
+import { GetProductPaginationDto } from 'src/entities/dtos/product-pagination.dto';
 import { ProductEntity } from 'src/entities/product.entity';
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { ProductRepository } from 'src/repositories/product.repository';
@@ -38,7 +38,7 @@ export class ProductService {
     return data;
   }
 
-  async getProductList(dto: ProductPaginationDto): Promise<GetResponse<ProductEntity>> {
+  async getProductList(dto: GetProductPaginationDto): Promise<GetResponse<ProductEntity>> {
     const { page, limit, search, categoryId, sellerId } = dto;
     const { skip, take } = getOffset({ page, limit });
     const [list, count] = await this.productRepository.findAndCount({
