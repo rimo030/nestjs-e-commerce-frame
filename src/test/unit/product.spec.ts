@@ -7,6 +7,7 @@ import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
 import { ProductEntity } from 'src/entities/product.entity';
 import { SellerEntity } from 'src/entities/seller.entity';
+import { GetProductListResponse } from 'src/interfaces/get-product-list-response.interface';
 import { GetProductResponse } from 'src/interfaces/get-product-response.interface';
 import { CategoryRepository } from 'src/repositories/category.repository';
 import { CompanyRepository } from 'src/repositories/company.repository';
@@ -28,7 +29,13 @@ describe('ProductController', () => {
   let productOptionRepository: ProductOptionRepository;
 
   const testNum = 2; // 판매자, 카테고리, 회사의 수
-  const testMinCount = 5; // 상품, 필수옵션, 선택옵션 테스트 데이터 생성 수
+
+  /**
+   *  상품, 필수옵션, 선택옵션 테스트 데이터 생성 수
+   *  무조건 1 이상이어야 합니다.
+   */
+
+  const testMinCount = 5;
 
   let sellers: SellerEntity[];
   let categories: CategoryEntity[];
@@ -218,7 +225,7 @@ describe('ProductController', () => {
       const categoryIds = categories.map((el) => el.id);
       const testCategoryId = categoryIds[0];
 
-      const res: GetProductResponse = await controller.getProductList({
+      const res: GetProductListResponse = await controller.getProductList({
         page: 0,
         limit: testMinCount,
         categoryId: testCategoryId,
@@ -285,15 +292,17 @@ describe('ProductController', () => {
      */
     it('상품의 상세 페이지를 조회할 수 있어야한다.', async () => {
       const ProductIds = products.map((el) => el.id);
-      const testId = ProductIds.at(0);
-      if (testId !== undefined) {
-        const res = await controller.getProduct(testId);
+      const testId = ProductIds[0];
 
-        /**
-         * @todo 조회된 상품옵션의 productId 값이 testId와 같아야 한다.
-         * expect(res.data.조인된옵션들.every((el) => el.productId === testId)).toBe(true);
-         */
-      }
+      const res = await controller.getProduct(testId);
+      const { product, productRequiredOptions, productOptions } = res.data as GetProductResponse;
+
+      /**
+       * 조회된 상품 id와 필수옵션, 선택옵션의 productId 값이 testId와 같아야 한다.
+       */
+      expect(product.id === testId).toBe(true);
+      expect(productRequiredOptions.every((el) => el.productId === testId)).toBe(true);
+      expect(productOptions.every((el) => el.productId === testId)).toBe(true);
     });
 
     /**
