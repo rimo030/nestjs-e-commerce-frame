@@ -1,18 +1,21 @@
-import { before } from 'node:test';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { ProductController } from 'src/controllers/product.controller';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
-import { ProductPaginationDto } from 'src/entities/dtos/product-pagination.dto';
+import { ProductOptionEntity } from 'src/entities/product-option.entity';
+import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
 import { ProductEntity } from 'src/entities/product.entity';
 import { SellerEntity } from 'src/entities/seller.entity';
+import { GetProductListResponse } from 'src/interfaces/get-product-list-response.interface';
+import { GetProductResponse } from 'src/interfaces/get-product-response.interface';
 import { CategoryRepository } from 'src/repositories/category.repository';
 import { CompanyRepository } from 'src/repositories/company.repository';
+import { ProductOptionRepository } from 'src/repositories/product.option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
+import { ProductRequiredOptionRepository } from 'src/repositories/products.required.option.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
 import { ProductService } from 'src/services/product.service';
-import { GetProductResponse } from 'src/types/get-product-response.type';
 
 describe('ProductController', () => {
   let controller: ProductController;
@@ -22,14 +25,24 @@ describe('ProductController', () => {
   let sellerRepository: SellerRepository;
   let categoryRepository: CategoryRepository;
   let companyRepository: CompanyRepository;
+  let productRequiredOptionRepository: ProductRequiredOptionRepository;
+  let productOptionRepository: ProductOptionRepository;
 
   const testNum = 2; // 판매자, 카테고리, 회사의 수
-  const productMinCount = 10; // 각 판매자별 카테고리별 회사 별 상품의 최소 개수
+
+  /**
+   *  상품, 필수옵션, 선택옵션 테스트 데이터 생성 수
+   *  무조건 1 이상이어야 합니다.
+   */
+
+  const testMinCount = 5;
 
   let sellers: SellerEntity[];
   let categories: CategoryEntity[];
   let companies: CompanyEntity[];
   let products: ProductEntity[] = [];
+  let productReqiredOptions: ProductRequiredOptionEntity[] = [];
+  let productOptions: ProductOptionEntity[] = [];
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
@@ -43,6 +56,8 @@ describe('ProductController', () => {
     sellerRepository = module.get<SellerRepository>(SellerRepository);
     categoryRepository = module.get<CategoryRepository>(CategoryRepository);
     companyRepository = module.get<CompanyRepository>(CompanyRepository);
+    productRequiredOptionRepository = module.get<ProductRequiredOptionRepository>(ProductRequiredOptionRepository);
+    productOptionRepository = module.get<ProductOptionRepository>(ProductOptionRepository);
 
     /**
      * 조회에 사용할 충분한 상품은 이미 등록되어 있어야 한다.
@@ -100,7 +115,7 @@ describe('ProductController', () => {
         let categoryId = ca.id;
         companies.forEach((co) => {
           let companyId = co.id;
-          for (let i = 0; i < productMinCount; i++) {
+          for (let i = 0; i < testMinCount; i++) {
             products.push(
               new ProductEntity({
                 sellerId,
@@ -118,12 +133,48 @@ describe('ProductController', () => {
       });
     });
     await repository.save(products);
+
+    /**
+     * 상품당 필수 옵션을 productMinCount개씩 생성한다.
+     */
+    products.forEach((p) => {
+      for (let i = 0; i < testMinCount; i++) {
+        productReqiredOptions.push(
+          new ProductRequiredOptionEntity({
+            productId: p.id,
+            name: `test_${p.id}_${i}`,
+            price: i * 1000,
+            isSale: true,
+          }),
+        );
+      }
+    });
+    await productRequiredOptionRepository.save(productReqiredOptions);
+
+    /**
+     * 상품당 선택 옵션을 productMinCount개씩 생성한다.
+     */
+    products.forEach((p) => {
+      for (let i = 0; i < testMinCount; i++) {
+        productOptions.push(
+          new ProductOptionEntity({
+            productId: p.id,
+            name: `test_${p.id}_${i}`,
+            price: i * 1000,
+            isSale: true,
+          }),
+        );
+      }
+    });
+    await productOptionRepository.save(productOptions);
   });
 
   /**
    * 테스트 후 데이터는 삭제한다.
    */
   afterAll(async () => {
+    await productOptionRepository.remove(productOptions);
+    await productRequiredOptionRepository.remove(productReqiredOptions);
     await repository.remove(products);
     await sellerRepository.remove(sellers);
     await categoryRepository.remove(categories);
@@ -152,9 +203,9 @@ describe('ProductController', () => {
        */
       const res = await controller.getProductList({
         page: 1,
-        limit: productMinCount,
+        limit: testMinCount,
       });
-      expect(res.data.list.length).toBe(productMinCount);
+      expect(res.data.list.length).toBe(testMinCount);
     });
 
     it('상품에 어떤 페이지도 주지 않을 경우 첫번째 페이지가 나와야 한다.', async () => {
@@ -174,25 +225,27 @@ describe('ProductController', () => {
       const categoryIds = categories.map((el) => el.id);
       const testCategoryId = categoryIds[0];
 
-      const res: GetProductResponse = await controller.getProductList({
+      const res: GetProductListResponse = await controller.getProductList({
         page: 0,
-        limit: productMinCount,
+        limit: testMinCount,
         categoryId: testCategoryId,
       });
 
       expect(res.data.list.every((el) => el.categoryId === testCategoryId)).toBe(true);
 
-      // /**
-      //  * 컨트롤러의 개수 제한을 넘어선 숫자로 검증을 다시 했을 때도 동일해야 한다.
-      //  * 우연의 일치로 하필 조회한 데이터가 전부 카테고리 아이디와 일치했을 가능성을 배제하기 위해 서비스로 20페이지를 체크한다.
-      //  */
-      // const productListByProductService = await service.find({
-      //   page: 1,
-      //   limit: 300,
-      // });
+      /**
+       * 우연의 일치로 하필 조회한 데이터가 전부 카테고리 아이디와 일치했을 가능성을 배제하기 위해
+       * 서비스로 등록된 상품 개수 이상을 체크한다.
+       */
+      const resByService = await service.getProductList({
+        page: 1,
+        limit: 300,
+        categoryId: testCategoryId,
+      });
 
-      // expect(productListByProductService.every((el) => el.categoryId === 조회할_카테고리_값)).toBe(true);
+      expect(resByService.list.every((el) => el.categoryId === testCategoryId)).toBe(true);
     });
+
     /**
      * 대표 가격은 입력한 옵션 중 자동으로 최솟값이 들어가야 한다.
      *  - 여기서 말하는 입력한 옵션이란, 품절과 판매가 중단된, 그리고 삭제된 옵션을 모두 제외한 후의 최솟값이다.
@@ -232,12 +285,25 @@ describe('ProductController', () => {
   describe('상품의 상세 페이지 조회를 검증한다.', () => {
     /**
      * 상품의 이름을 포함한 기본적인 정보 전부와
-     * 옵션 10개, 선택 옵션 10개를 가져온다.
+     * 필수옵션, 선택옵션을 가져온다.
      *
      * 이렇게 옵션을 미리 가져 오는 이유는 상품 조회, 페이지 이동, 옵션 조회 등 API가 나뉘는 것을 방지하기 위함이다.
      * 이렇게 한 번의 요청으로 가져온 후 이후 필요한 데이터를 추가적인 API로 가져오는 게 성능 상 유리하다.
      */
-    it.todo('상품의 상세 페이지를 조회할수 있어야한다.');
+    it('상품의 상세 페이지를 조회할 수 있어야한다.', async () => {
+      const ProductIds = products.map((el) => el.id);
+      const testId = ProductIds[0];
+
+      const res = await controller.getProduct(testId);
+      const { product, productRequiredOptions, productOptions } = res.data as GetProductResponse;
+
+      /**
+       * 조회된 상품 id와 필수옵션, 선택옵션의 productId 값이 testId와 같아야 한다.
+       */
+      expect(product.id === testId).toBe(true);
+      expect(productRequiredOptions.every((el) => el.productId === testId)).toBe(true);
+      expect(productOptions.every((el) => el.productId === testId)).toBe(true);
+    });
 
     /**
      * 추천 상품의 기준은 편의 상 동일 카테고리를 기준으로 한다.

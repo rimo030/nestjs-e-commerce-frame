@@ -6,6 +6,12 @@ import { ProductEntity } from './product.entity';
 
 @Entity({ name: 'product_required_option' })
 export class ProductRequiredOptionEntity extends CommonEntity {
+  constructor(dto: Partial<ProductRequiredOptionEntity>) {
+    super();
+
+    Object.assign(this, dto);
+  }
+
   @Column()
   productId!: number;
 
@@ -23,7 +29,7 @@ export class ProductRequiredOptionEntity extends CommonEntity {
    */
 
   @ManyToOne(() => ProductEntity, (p) => p.productRequiredOptions)
-  @JoinColumn({ referencedColumnName: 'id' })
+  @JoinColumn({ name: 'product_id', referencedColumnName: 'id' })
   product!: ProductEntity;
 
   @OneToMany(() => ProductInputOptionEntity, (pio) => pio.productRequiredOptionId)

@@ -4,7 +4,7 @@ import { IsNotEmptyNumber } from 'src/decorators/is-not-empty-number.decorator';
 import { IsNotEmptyString } from 'src/decorators/is-not-empty-string.decorator';
 import { ProductRequiredOptionEntity } from '../product-required-option.entity';
 
-export class CreateProductOptionsDto implements Partial<ProductRequiredOptionEntity> {
+export class CreateProductOptionsDto implements Pick<ProductRequiredOptionEntity, 'name' | 'price' | 'isSale'> {
   @ApiProperty({ description: '옵션 이름' })
   @IsNotEmptyString(1, 128)
   name!: string;

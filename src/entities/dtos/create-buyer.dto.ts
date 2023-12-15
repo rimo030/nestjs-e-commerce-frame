@@ -5,7 +5,10 @@ import { IsNotEmptyString } from 'src/decorators/is-not-empty-string.decorator';
 import { BuyerEntity } from '../buyer.entity';
 import { AuthCredentialsDto } from './auth-credentials.dto';
 
-export class CreateBuyerDto extends AuthCredentialsDto implements Partial<BuyerEntity> {
+export class CreateBuyerDto
+  extends AuthCredentialsDto
+  implements Pick<BuyerEntity, 'name' | 'gender' | 'age' | 'phone'>
+{
   @ApiProperty({ description: '이름' })
   @IsNotEmptyString(1, 128)
   name!: string;

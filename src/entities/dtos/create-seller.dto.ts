@@ -3,7 +3,10 @@ import { IsNotEmptyString } from 'src/decorators/is-not-empty-string.decorator';
 import { SellerEntity } from '../seller.entity';
 import { AuthCredentialsDto } from './auth-credentials.dto';
 
-export class CreateSellerDto extends AuthCredentialsDto implements Partial<SellerEntity> {
+export class CreateSellerDto
+  extends AuthCredentialsDto
+  implements Pick<SellerEntity, 'name' | 'phone' | 'businessNumber'>
+{
   @ApiProperty({ description: '이름' })
   @IsNotEmptyString(1, 128)
   name!: string;

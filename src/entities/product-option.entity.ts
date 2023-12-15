@@ -5,6 +5,12 @@ import { ProductEntity } from './product.entity';
 
 @Entity({ name: 'product_option' })
 export class ProductOptionEntity extends CommonEntity {
+  constructor(dto: Partial<ProductOptionEntity>) {
+    super();
+
+    Object.assign(this, dto);
+  }
+
   @Column()
   productId!: number;
 

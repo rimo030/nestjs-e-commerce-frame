@@ -3,7 +3,7 @@ import { IsOptionalNumber } from 'src/decorators/is-optional-number.decorator';
 import { IsOptionalString } from 'src/decorators/is-optional-string.decorator';
 import { PaginationDto } from './pagination.dto';
 
-export class ProductPaginationDto extends PaginationDto {
+export class GetProductPaginationDto extends PaginationDto {
   /**
    * @todo
    * 검색어 길이 제한 결정

@@ -6,7 +6,7 @@ import { CompanyEntity } from 'src/entities/company.entity';
 import { PaginationDto } from 'src/entities/dtos/pagination.dto';
 import { PaginationResponseForm } from 'src/interfaces/pagination-response-form.interface';
 import { CompanyService } from 'src/services/company.service';
-import { createPaginationForm } from 'src/util/functions/create-pagination-form.function';
+import { createResponseForm } from 'src/util/functions/create-response-form.function';
 
 @Controller('company')
 @ApiTags('Company API')
@@ -24,6 +24,6 @@ export class CompanyController {
     @Query() paginationDto: PaginationDto,
   ): Promise<PaginationResponseForm<CompanyEntity>> {
     const response = await this.companyService.getCompany(paginationDto);
-    return createPaginationForm(response, paginationDto);
+    return createResponseForm(response, paginationDto);
   }
 }
