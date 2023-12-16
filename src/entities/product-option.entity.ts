@@ -31,6 +31,6 @@ export class ProductOptionEntity extends CommonEntity {
   @JoinColumn({ referencedColumnName: 'id' })
   product!: ProductEntity;
 
-  @OneToMany(() => CartOptionEntity, (cpo) => cpo.productOptionId)
+  @OneToMany(() => CartOptionEntity, (cpo) => cpo.productOption)
   cartOptions!: CartOptionEntity[];
 }

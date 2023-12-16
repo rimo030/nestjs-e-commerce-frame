@@ -21,6 +21,6 @@ export class OrderProductRequiredOptionEntity extends CommonEntity {
   @JoinColumn({ referencedColumnName: 'id' })
   orderProductBundle!: OrderProductBundleEntity;
 
-  @OneToMany(() => OrderProductInputOptionEntity, (opio) => opio.orderProductRequiredOptionId)
+  @OneToMany(() => OrderProductInputOptionEntity, (opio) => opio.orderProductRequiredOption)
   orderProductInputOptions!: OrderProductInputOptionEntity[];
 }

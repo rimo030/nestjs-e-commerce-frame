@@ -29,9 +29,9 @@ export class SellerEntity extends CommonEntity {
   /**
    * relations
    */
-  @OneToMany(() => ProductBundleEntity, (pb) => pb.sellerId)
+  @OneToMany(() => ProductBundleEntity, (pb) => pb.seller)
   productBundles!: ProductBundleEntity[];
 
-  @OneToMany(() => ProductEntity, (p) => p.sellerId)
+  @OneToMany(() => ProductEntity, (p) => p.seller)
   products!: ProductEntity[];
 }

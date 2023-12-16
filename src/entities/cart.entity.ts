@@ -29,12 +29,12 @@ export class CartEntity extends CommonEntity {
   @JoinColumn({ referencedColumnName: 'id' })
   product!: ProductEntity;
 
-  @OneToMany(() => CartRequiredOptionEntity, (cpro) => cpro.cartId)
+  @OneToMany(() => CartRequiredOptionEntity, (cpro) => cpro.cart)
   cartRequiredOptions!: CartRequiredOptionEntity[];
 
-  @OneToMany(() => CartOptionEntity, (cpo) => cpo.cartId)
+  @OneToMany(() => CartOptionEntity, (cpo) => cpo.cart)
   cartOptions!: CartOptionEntity[];
 
-  @OneToMany(() => OrderProductEntity, (op) => op.cartId)
+  @OneToMany(() => OrderProductEntity, (op) => op.cart)
   orderProducts!: OrderProductEntity[];
 }

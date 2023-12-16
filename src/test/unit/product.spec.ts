@@ -279,6 +279,30 @@ describe('ProductController', () => {
     it.todo('상품 조회시 리뷰수가 노출되어야 한다.');
   });
 
+  describe('typeorm 조인 쿼리를 검증한다.', () => {
+    it('상품 조회시 필수 옵션에 대한 DB 조회를 할 수 있어야 한다.', async () => {
+      const ProductIds = products.map((el) => el.id);
+      const testId = ProductIds[0];
+
+      const data = await repository
+        .createQueryBuilder('product')
+        .withDeleted()
+        .innerJoinAndSelect('product.productRequiredOptions', 'productRequiredOption')
+        .where('product.id = :id', { id: testId })
+        .andWhere('product.isSale = :isSale', { isSale: true })
+        .andWhere('productRequiredOption.productId = :productId', { productId: testId })
+        .andWhere('productRequiredOption.isSale = :isSale', { isSale: true })
+        .getOne();
+
+      expect(data !== null).toBe(true);
+      if (data != null) {
+        expect(data.id).toBe(testId);
+        expect(data.isSale).toBe(true);
+        expect(data['productRequiredOptions'].every((el) => el.productId === testId)).toBe(true);
+      }
+    });
+  });
+
   /**
    * GET products/:id
    */
