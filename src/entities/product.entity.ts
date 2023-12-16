@@ -70,7 +70,7 @@ export class ProductEntity extends CommonEntity {
   @JoinColumn({ referencedColumnName: 'id' })
   bundle?: ProductBundleEntity;
 
-  @OneToMany(() => ProductRequiredOptionEntity, (pro) => pro.productId)
+  @OneToMany(() => ProductRequiredOptionEntity, (pro) => pro.product)
   productRequiredOptions!: ProductRequiredOptionEntity[];
 
   @OneToMany(() => ProductOptionEntity, (po) => po.productId)
