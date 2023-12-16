@@ -17,6 +17,6 @@ export class CategoryEntity extends CommonEntity {
    * relations
    */
 
-  @OneToMany(() => ProductEntity, (p) => p.categoryId)
+  @OneToMany(() => ProductEntity, (p) => p.category)
   products!: ProductEntity[];
 }

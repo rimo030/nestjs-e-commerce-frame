@@ -21,13 +21,13 @@ export class OrderProductBundleEntity extends CommonEntity {
    * relations
    */
 
-  @OneToMany(() => OrderProductEntity, (op) => op.orderProductId)
+  @OneToMany(() => OrderProductEntity, (op) => op.orderProductBundle)
   orderProducts!: OrderProductEntity[];
 
-  @OneToMany(() => OrderProductRequiredOptionEntity, (opro) => opro.OrderProductBundleId)
+  @OneToMany(() => OrderProductRequiredOptionEntity, (opro) => opro.orderProductBundle)
   orderProductRequiredOptions!: OrderProductRequiredOptionEntity[];
 
-  @OneToMany(() => OrderProductOptionEntity, (opo) => opo.OrderProductOptionId)
+  @OneToMany(() => OrderProductOptionEntity, (opo) => opo.orderProductBundle)
   orderProductOptions!: OrderProductOptionEntity[];
 
   @ManyToOne(() => OrderEntity, (o) => o.orderProductBundles)

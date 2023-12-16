@@ -16,6 +16,6 @@ export class OrderEntity extends CommonEntity {
   @JoinColumn({ referencedColumnName: 'id' })
   buyer!: BuyerEntity;
 
-  @OneToMany(() => OrderProductBundleEntity, (opb) => opb.orderId)
+  @OneToMany(() => OrderProductBundleEntity, (opb) => opb.user)
   orderProductBundles!: OrderProductBundleEntity[];
 }

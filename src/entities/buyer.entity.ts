@@ -28,12 +28,12 @@ export class BuyerEntity extends CommonEntity {
    * relations
    */
 
-  @OneToMany(() => BoardEntity, (b) => b.buyerId)
+  @OneToMany(() => BoardEntity, (b) => b.buyer)
   boards!: BoardEntity[];
 
-  @OneToMany(() => CartEntity, (c) => c.buyerId)
+  @OneToMany(() => CartEntity, (c) => c.buyer)
   carts!: CartEntity[];
 
-  @OneToMany(() => OrderEntity, (o) => o.buyerId)
+  @OneToMany(() => OrderEntity, (o) => o.buyer)
   orders!: OrderEntity[];
 }
