@@ -22,6 +22,6 @@ export class ProductBundleEntity extends CommonEntity {
   @JoinColumn({ referencedColumnName: 'id' })
   seller!: SellerEntity;
 
-  @OneToMany(() => ProductEntity, (p) => p.bundleId)
+  @OneToMany(() => ProductEntity, (p) => p.bundle)
   products!: ProductEntity[];
 }

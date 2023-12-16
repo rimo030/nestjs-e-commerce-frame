@@ -29,7 +29,7 @@ export class ProductRequiredOptionEntity extends CommonEntity {
    */
 
   @ManyToOne(() => ProductEntity, (p) => p.productRequiredOptions)
-  @JoinColumn({ name: 'product_id', referencedColumnName: 'id' })
+  @JoinColumn({ referencedColumnName: 'id' })
   product!: ProductEntity;
 
   @OneToMany(() => ProductInputOptionEntity, (pio) => pio.productRequiredOption)
