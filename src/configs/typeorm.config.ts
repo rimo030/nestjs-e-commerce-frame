@@ -18,5 +18,6 @@ export const typeORMConfig = (configService: ConfigService): TypeOrmModuleOption
     entities: [path.join(__dirname, '/../entities/*.entity.{js,ts}')],
     synchronize: true,
     namingStrategy: new SnakeNamingStrategy(),
+    logging: NODE_ENV === 'dev' ? true : false,
   };
 };

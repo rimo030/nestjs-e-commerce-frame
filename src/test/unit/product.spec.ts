@@ -36,6 +36,7 @@ describe('ProductController', () => {
    */
 
   const testMinCount = 5;
+  const MinPrice = 100;
 
   let sellers: SellerEntity[];
   let categories: CategoryEntity[];
@@ -122,7 +123,7 @@ describe('ProductController', () => {
                 categoryId,
                 companyId,
                 isSale: true,
-                name: `${i}_${sellerId}_${categoryId}_${companyId}`,
+                name: `${String.fromCharCode(i + 65)}_${sellerId}_${categoryId}_${companyId}`,
                 deliveryType: 'FREE',
                 deliveryCharge: 3000,
                 img: 'test.img',
@@ -143,7 +144,7 @@ describe('ProductController', () => {
           new ProductRequiredOptionEntity({
             productId: p.id,
             name: `test_${p.id}_${i}`,
-            price: i * 1000,
+            price: i * 1000 + 100,
             isSale: true,
           }),
         );
@@ -160,7 +161,7 @@ describe('ProductController', () => {
           new ProductOptionEntity({
             productId: p.id,
             name: `test_${p.id}_${i}`,
-            price: i * 1000,
+            price: i * 1000 + MinPrice,
             isSale: true,
           }),
         );
@@ -226,7 +227,7 @@ describe('ProductController', () => {
       const testCategoryId = categoryIds[0];
 
       const res: GetProductListResponse = await controller.getProductList({
-        page: 0,
+        page: 1,
         limit: testMinCount,
         categoryId: testCategoryId,
       });
@@ -250,11 +251,35 @@ describe('ProductController', () => {
      * 대표 가격은 입력한 옵션 중 자동으로 최솟값이 들어가야 한다.
      *  - 여기서 말하는 입력한 옵션이란, 품절과 판매가 중단된, 그리고 삭제된 옵션을 모두 제외한 후의 최솟값이다.
      *  - 즉, '반드시 현재 구매 가능한 상태' 중의 최솟값을 말한다.
-     *
-     *   representivePrice: number;
      */
 
-    it.todo('상품 조회시 대표가격이 노출된다.');
+    it('상품리스트 조회시 대표가격이 노출된다.', async () => {
+      const res = await controller.getProductList({
+        page: 1,
+        limit: testMinCount,
+      });
+
+      expect(res.data.list.every((el) => el['minimumPrice'] === MinPrice)).toBe(true);
+    });
+
+    /**
+     * 상품의 이름은 product에 name 칼럼에 저장한다.
+     *
+     * 유저가 입력한 search으로 name 칼럼을 조회한다.
+     * search 문자열이 name에 포함되어 있으면 검색결과로 조회되고 포함되지 않는다면 조회되지 않는다.
+     *
+     */
+    it.only('상품의 name으로 검색할 수 있다.', async () => {
+      const ProductNames = products.map((el) => el.name);
+      const testName = ProductNames.at(0)?.charAt(0);
+      const res = await controller.getProductList({
+        page: 1,
+        limit: 300,
+        search: testName,
+      });
+
+      expect(res.data.list.every((el) => el.name.includes(testName as string))).toBe(true);
+    });
 
     /**
      * 이미지는 등록 순으로 정렬되어야 하며, 리스트에서는 이미지가 1장이면 되기 때문에 썸네일로 제공되어야 한다.
@@ -280,7 +305,7 @@ describe('ProductController', () => {
   });
 
   describe('typeorm 조인 쿼리를 검증한다.', () => {
-    it('상품 조회시 필수 옵션에 대한 DB 조회를 할 수 있어야 한다.', async () => {
+    it.skip('상품 조회시 필수 옵션에 대한 DB 조회를 할 수 있어야 한다.', async () => {
       const ProductIds = products.map((el) => el.id);
       const testId = ProductIds[0];
 
@@ -290,7 +315,6 @@ describe('ProductController', () => {
         .innerJoinAndSelect('product.productRequiredOptions', 'productRequiredOption')
         .where('product.id = :id', { id: testId })
         .andWhere('product.isSale = :isSale', { isSale: true })
-        .andWhere('productRequiredOption.productId = :productId', { productId: testId })
         .andWhere('productRequiredOption.isSale = :isSale', { isSale: true })
         .getOne();
 

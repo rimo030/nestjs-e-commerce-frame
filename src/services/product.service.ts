@@ -1,3 +1,4 @@
+import { ILike } from 'typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { GetProductPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
@@ -47,10 +48,28 @@ export class ProductService {
       where: {
         ...{ categoryId: categoryId ?? undefined },
         ...{ sellerId: sellerId ?? undefined },
+        ...{ name: search ? ILike(`%${search}%`) : undefined },
       },
       skip,
       take,
     });
+
+    const productIds = list.map((el) => el.id);
+
+    if (productIds.length) {
+      const raws: { productId: number; minimumPrice: number }[] = await this.productRequiredOptionRepository
+        .createQueryBuilder('pro')
+        .select('pro.productId as productId')
+        .addSelect('MIN(pro.price) as minimumPrice')
+        .where('pro.productId IN (:...productIds)', { productIds })
+        .groupBy('pro.productId')
+        .getRawMany();
+
+      list.forEach((product) => {
+        (product as any).minimumPrice = raws.find((raw) => raw.productId === product.id)?.minimumPrice ?? 0;
+      });
+    }
+
     return { list, count, take };
   }
 
