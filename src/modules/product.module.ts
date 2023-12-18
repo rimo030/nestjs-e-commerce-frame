@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
+import { ProductInputOptionRepository } from 'src/repositories/product.input.option.repository';
 import { ProductOptionRepository } from 'src/repositories/product.option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
 import { ProductRequiredOptionRepository } from 'src/repositories/products.required.option.repository';
@@ -12,6 +13,7 @@ import { ProductService } from '../services/product.service';
       ProductRepository,
       ProductRequiredOptionRepository,
       ProductOptionRepository,
+      ProductInputOptionRepository,
     ]),
   ],
   controllers: [ProductController],
