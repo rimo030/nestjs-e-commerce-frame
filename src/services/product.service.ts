@@ -13,6 +13,39 @@ import { ProductRepository } from 'src/repositories/product.repository';
 import { ProductRequiredOptionRepository } from 'src/repositories/products.required.option.repository';
 import { getOffset } from 'src/util/functions/get-offset.function';
 
+export interface ProductElement
+  extends Pick<
+    ProductEntity,
+    | 'bundleId'
+    | 'categoryId'
+    | 'companyId'
+    | 'createdAt'
+    | 'deletedAt'
+    | 'deliveryCharge'
+    | 'deliveryFreeOver'
+    | 'deliveryType'
+    | 'description'
+    | 'id'
+    | 'name'
+    | 'sellerId'
+    | 'updatedAt'
+  > {
+  salePrice: number;
+
+  /**
+   * 상품에 대한 썸네일을 의미한다.
+   * thumbnail: string;
+   */
+
+  /**
+   * 상품에 대한 리뷰 별점을 의미한다.
+   * rating : number;
+   *
+   * 상품에 대한 리뷰 작성수를 의미한다.
+   * reviewCount : number;
+   */
+}
+
 @Injectable()
 export class ProductService {
   constructor(
@@ -40,7 +73,7 @@ export class ProductService {
     return product;
   }
 
-  async getProductList(dto: GetProductListPaginationDto): Promise<GetResponse<ProductEntity>> {
+  async getProductList(dto: GetProductListPaginationDto): Promise<GetResponse<ProductElement>> {
     const { page, limit, search, categoryId, sellerId } = dto;
     const { skip, take } = getOffset({ page, limit });
     const [list, count] = await this.productRepository.findAndCount({
@@ -67,12 +100,17 @@ export class ProductService {
         .groupBy('pro.productId')
         .getRawMany();
 
-      list.forEach((product) => {
-        (product as any).minimumPrice = raws.find((raw) => raw.productId === product.id)?.minimumPrice ?? 0;
-      });
+      return {
+        list: list.map((product) => {
+          const salePrice = raws.find((raw) => raw.productId === product.id)?.minimumPrice ?? 0;
+          return { ...product, salePrice };
+        }),
+        count,
+        take,
+      };
     }
 
-    return { list, count, take };
+    return { list: [], count, take };
   }
 
   async getProductOptions(
