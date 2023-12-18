@@ -361,10 +361,6 @@ describe('ProductController', () => {
 
   describe('GET products/:id/options?required=', () => {
     /**
-     * 상품의 옵션 조회 시 쿼리로 받은 requried true, false를 통해
-     * 선택 옵션과 그렇지 않은 경우를 구분할 수 있어야 한다.
-     *
-     * 당연히 페이지네이션이어야 하며, 1페이지가 default로 조회되어야 한다.
      * 상품의 최초 조회 시 상품의 옵션들이 조회되기 때문에 서비스 로직은 재사용될 수 있어야 한다.
      */
     it('상품의 옵션을 페이지네이션으로 서비스 단에서 조회할 수 있다.', async () => {
@@ -419,6 +415,26 @@ describe('ProductController', () => {
        */
       expect(resByControllerIsRequired.data.list.length === testMinCount).toBe(true);
       expect(resByControllerIsNotRequired.data.list.length === testMinCount).toBe(true);
+
+      /**
+       * 상품의 옵션 조회 시 쿼리로 받은 requried true, false를 통해
+       * 선택 옵션과 그렇지 않은 경우를 구분할 수 있어야 한다.
+       */
+      const isRequiredIds = productReqiredOptions.map((el) => el.id);
+      const notRquiredIds = productOptions.map((el) => el.id);
+
+      const resIsRequiredIds = resByControllerIsRequired.data.list.map((el) => el.id);
+      const resNotsRequiredIds = resByControllerIsNotRequired.data.list.map((el) => el.id);
+
+      expect(resIsRequiredIds.every((el) => isRequiredIds.includes(el))).toBe(true);
+      expect(resNotsRequiredIds.every((el) => notRquiredIds.includes(el))).toBe(true);
+
+      /**
+       * id를 UUID로 바꾼후 테스트에 추가
+       *
+       * expect(resIsRequiredIds.every((el) => notRquiredIds.includes(el))).toBe(false);
+       * expect(resNotsRequiredIds.every((el) => isRequiredIds.includes(el))).toBe(false);
+       */
     });
 
     it('옵션은 페이지네이션 입력을 주지 않아도 자동으로 1페이지의 데이터를 조회할 수 있어야한다.', async () => {
