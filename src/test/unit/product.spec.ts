@@ -367,7 +367,32 @@ describe('ProductController', () => {
      * 당연히 페이지네이션이어야 하며, 1페이지가 default로 조회되어야 한다.
      * 상품의 최초 조회 시 상품의 옵션들이 조회되기 때문에 서비스 로직은 재사용될 수 있어야 한다.
      */
-    it.todo('상품의 옵션을 페이지네이션으로 조회한다.');
+    it.only('상품의 옵션을 페이지네이션으로 서비스 단에서 조회할 수 있다.', async () => {
+      const productIds = products.map((el) => el.id);
+      const testProductId = productIds[0];
+
+      const resByServiceIsRequired = await service.getProductOptions(
+        testProductId,
+        { isRequire: true },
+        { page: 0, limit: testMinCount },
+      );
+
+      const resByServiceIsNotRequired = await service.getProductOptions(
+        testProductId,
+        { isRequire: false },
+        { page: 0, limit: testMinCount },
+      );
+      /**
+       * 페이지네이션으로 조회된 상품 필수/선택옵션의 id는 testId와 같아야 한다.
+       */
+      expect(resByServiceIsRequired.list.every((el) => el.productId === testProductId)).toBe(true);
+      expect(resByServiceIsNotRequired.list.every((el) => el.productId === testProductId)).toBe(true);
+      /**
+       * 해당 테스트에서 페이지네이션으로 조회된 결과 배열의 length는 testMinCount과 같아야한다.
+       */
+      expect(resByServiceIsRequired.list.length === testMinCount).toBe(true);
+      expect(resByServiceIsNotRequired.list.length === testMinCount).toBe(true);
+    });
 
     /**
      * 입력 옵션이 존재할 경우 배열에 담겨서 보여진다.

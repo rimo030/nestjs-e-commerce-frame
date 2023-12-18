@@ -2,6 +2,8 @@ import { ILike } from 'typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
+import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
+import { PaginationDto } from 'src/entities/dtos/pagination.dto';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
 import { ProductEntity } from 'src/entities/product.entity';
@@ -31,7 +33,7 @@ export class ProductService {
       },
     });
 
-    if (!product?.id) {
+    if (product === null) {
       throw new NotFoundException(`Can't find product id : ${id}`);
     }
 
@@ -73,16 +75,54 @@ export class ProductService {
     return { list, count, take };
   }
 
-  async getProductRequiredOptions(productId: number): Promise<ProductRequiredOptionEntity[]> {
+  async getProductOptions(
+    productId: number,
+    isRequireOptionDto: IsRequireOptionDto,
+    paginationDto: PaginationDto,
+  ): Promise<GetResponse<ProductRequiredOptionEntity | ProductOptionEntity>> {
+    const { isRequire } = isRequireOptionDto;
+    const { skip, take } = getOffset(paginationDto);
+
+    if (isRequire) {
+      const [list, count] = await this.productRequiredOptionRepository.findAndCount({
+        order: {
+          id: 'ASC',
+        },
+        where: {
+          productId: productId,
+        },
+        skip,
+        take,
+      });
+      return { list, count, take };
+    } else {
+      const [list, count] = await this.productOptionRepository.findAndCount({
+        order: {
+          id: 'ASC',
+        },
+        where: {
+          productId: productId,
+        },
+        skip,
+        take,
+      });
+      return { list, count, take };
+    }
+  }
+
+  async getProductRequiredOption(productId: number): Promise<ProductRequiredOptionEntity[]> {
     const requiredOptions = await this.productRequiredOptionRepository.find({
       where: {
         productId,
       },
     });
-    return requiredOptions;
+
+    if (requiredOptions.length) return requiredOptions;
+
+    throw new NotFoundException(`There is no required option for product ${productId}.`);
   }
 
-  async getProductOptions(productId: number): Promise<ProductOptionEntity[]> {
+  async getProductOption(productId: number): Promise<ProductOptionEntity[]> {
     const Options = await this.productOptionRepository.find({
       where: {
         productId,
