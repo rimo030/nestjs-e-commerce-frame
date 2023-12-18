@@ -394,7 +394,7 @@ describe('ProductController', () => {
       expect(resByServiceIsNotRequired.list.length === testMinCount).toBe(true);
     });
 
-    it.only('상품의 옵션을 페이지네이션으로 조회할 수 있다.', async () => {
+    it('상품의 옵션을 페이지네이션으로 조회할 수 있다.', async () => {
       const productIds = products.map((el) => el.id);
       const testProductId = productIds[0];
 
@@ -419,21 +419,41 @@ describe('ProductController', () => {
        */
       expect(resByControllerIsRequired.data.list.length === testMinCount).toBe(true);
       expect(resByControllerIsNotRequired.data.list.length === testMinCount).toBe(true);
+    });
 
-      /**
-       * 페이지네이션 입력을 주지 않아도
-       * 자동으로 1 페이지의 데이터를 조회할 수 있어야한다.
-       */
+    it('옵션은 페이지네이션 입력을 주지 않아도 자동으로 1페이지의 데이터를 조회할 수 있어야한다.', async () => {
+      const productIds = products.map((el) => el.id);
+      const testProductId = productIds[0];
+
       const resByControllerNoPageNolimit = await controller.getProductOptions(testProductId, { isRequire: true }, {});
       const resByControllerOnePage = await controller.getProductOptions(
         testProductId,
         { isRequire: true },
         { page: 1 },
       );
+
+      /**
+       * 페이지네이션을 사용하지 않고 조회한 결과는 {page:1} 을 조회한 결과와 일치해야 한다.
+       */
       const NoPageNoLimitIds = resByControllerNoPageNolimit.data.list.map((el) => el.id);
       const OnePageIds = resByControllerOnePage.data.list.map((el) => el.id);
 
       expect(NoPageNoLimitIds.every((el, i) => el === OnePageIds.at(i))).toBe(true);
+    });
+
+    it('옵션은 id 값을 기준으로 정렬되어 보여져야 한다.', async () => {
+      const productIds = products.map((el) => el.id);
+      const testProductId = productIds[0];
+
+      const res = await controller.getProductOptions(testProductId, { isRequire: true }, { page: 1, limit: 300 });
+      expect(res.data.list.length > 0).toBe(true);
+
+      /**
+       * 조회 결과는 id 순으로 정렬 되어 있어야 한다.
+       */
+      const resIds = res.data.list.map((el) => el.id);
+      const sortedList = resIds.sort();
+      expect(res.data.list.every((el, i) => el.id === sortedList.at(i))).toBe(true);
     });
 
     /**
@@ -441,11 +461,6 @@ describe('ProductController', () => {
      * 없을 경우 빈 배열이며, 빈 배열이면 데이터가 빈 것이 아니라 입력 옵션이 없는 것과 동일하게 처리될 것이다.
      */
     it.todo('필수 옵션의 경우, 선택 옵션과 달리 입력 옵션이 있을 경우 입력 옵션들이 함께 보여져야 한다.');
-
-    /**
-     * 즉, 먼저 생긴 옵션이 가장 위에 보여져야 한다.
-     */
-    it.todo('옵션은 id 값을 기준으로 정렬되어 보여져야 한다.');
 
     /**
      * 먼 미래에 도전했으면 하는 사항.
