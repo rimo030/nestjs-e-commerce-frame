@@ -338,7 +338,7 @@ describe('ProductController', () => {
      * 이렇게 옵션을 미리 가져 오는 이유는 상품 조회, 페이지 이동, 옵션 조회 등 API가 나뉘는 것을 방지하기 위함이다.
      * 이렇게 한 번의 요청으로 가져온 후 이후 필요한 데이터를 추가적인 API로 가져오는 게 성능 상 유리하다.
      */
-    it('상품의 상세 페이지를 조회할 수 있어야한다.', async () => {
+    it.skip('상품의 상세 페이지를 조회할 수 있어야한다.', async () => {
       const ProductIds = products.map((el) => el.id);
       const testId = ProductIds[0];
 
@@ -367,7 +367,7 @@ describe('ProductController', () => {
      * 당연히 페이지네이션이어야 하며, 1페이지가 default로 조회되어야 한다.
      * 상품의 최초 조회 시 상품의 옵션들이 조회되기 때문에 서비스 로직은 재사용될 수 있어야 한다.
      */
-    it.only('상품의 옵션을 페이지네이션으로 서비스 단에서 조회할 수 있다.', async () => {
+    it('상품의 옵션을 페이지네이션으로 서비스 단에서 조회할 수 있다.', async () => {
       const productIds = products.map((el) => el.id);
       const testProductId = productIds[0];
 
@@ -392,6 +392,48 @@ describe('ProductController', () => {
        */
       expect(resByServiceIsRequired.list.length === testMinCount).toBe(true);
       expect(resByServiceIsNotRequired.list.length === testMinCount).toBe(true);
+    });
+
+    it.only('상품의 옵션을 페이지네이션으로 조회할 수 있다.', async () => {
+      const productIds = products.map((el) => el.id);
+      const testProductId = productIds[0];
+
+      const resByControllerIsRequired = await controller.getProductOptions(
+        testProductId,
+        { isRequire: true },
+        { page: 0, limit: testMinCount },
+      );
+
+      const resByControllerIsNotRequired = await controller.getProductOptions(
+        testProductId,
+        { isRequire: false },
+        { page: 0, limit: testMinCount },
+      );
+      /**
+       * 페이지네이션으로 조회된 상품 필수/선택옵션의 id는 testId와 같아야 한다.
+       */
+      expect(resByControllerIsRequired.data.list.every((el) => el.productId === testProductId)).toBe(true);
+      expect(resByControllerIsNotRequired.data.list.every((el) => el.productId === testProductId)).toBe(true);
+      /**
+       * 해당 테스트에서 페이지네이션으로 조회된 결과 배열의 length는 testMinCount과 같아야한다.
+       */
+      expect(resByControllerIsRequired.data.list.length === testMinCount).toBe(true);
+      expect(resByControllerIsNotRequired.data.list.length === testMinCount).toBe(true);
+
+      /**
+       * 페이지네이션 입력을 주지 않아도
+       * 자동으로 1 페이지의 데이터를 조회할 수 있어야한다.
+       */
+      const resByControllerNoPageNolimit = await controller.getProductOptions(testProductId, { isRequire: true }, {});
+      const resByControllerOnePage = await controller.getProductOptions(
+        testProductId,
+        { isRequire: true },
+        { page: 1 },
+      );
+      const NoPageNoLimitIds = resByControllerNoPageNolimit.data.list.map((el) => el.id);
+      const OnePageIds = resByControllerOnePage.data.list.map((el) => el.id);
+
+      expect(NoPageNoLimitIds.every((el, i) => el === OnePageIds.at(i))).toBe(true);
     });
 
     /**

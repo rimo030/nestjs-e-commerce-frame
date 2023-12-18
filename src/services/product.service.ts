@@ -89,7 +89,8 @@ export class ProductService {
           id: 'ASC',
         },
         where: {
-          productId: productId,
+          productId,
+          isSale: true,
         },
         skip,
         take,
@@ -101,7 +102,8 @@ export class ProductService {
           id: 'ASC',
         },
         where: {
-          productId: productId,
+          productId,
+          isSale: true,
         },
         skip,
         take,

@@ -8,6 +8,7 @@ import { ProductRequiredOptionEntity } from 'src/entities/product-required-optio
 import { ProductEntity } from 'src/entities/product.entity';
 import { GetProductListResponse } from 'src/interfaces/get-product-list-response.interface';
 import { GetProductResponse } from 'src/interfaces/get-product-response.interface';
+import { PaginationResponseForm } from 'src/interfaces/pagination-response-form.interface';
 import { ResponseForm } from 'src/interfaces/response-form.interface';
 import { ProductService } from 'src/services/product.service';
 import { createProductPaginationForm } from 'src/util/functions/create-product-pagination-form.function';
@@ -32,14 +33,13 @@ export class ProductController {
     summary: '상품 필수/선택 옵션 조회 API',
     description: '등록된 상품의 필수/선택 옵션을 조회할 수 있다.',
   })
-  async getProductRequiredOption(
+  async getProductOptions(
     @Param('id', ParseIntPipe) productId: number,
     @Query() isRequireOptionDto: IsRequireOptionDto,
     @Query() paginationDto: PaginationDto,
-  ): Promise<ResponseForm<ProductRequiredOptionEntity | ProductOptionEntity>> {
-    const product = await this.productService.getProductOptions(productId, isRequireOptionDto, paginationDto);
-    // return createResponseForm({ product });
-    return 1 as any;
+  ): Promise<PaginationResponseForm<ProductRequiredOptionEntity | ProductOptionEntity>> {
+    const response = await this.productService.getProductOptions(productId, isRequireOptionDto, paginationDto);
+    return createResponseForm(response, paginationDto);
   }
 
   @Get('/:id')
