@@ -269,7 +269,7 @@ describe('ProductController', () => {
      * search 문자열이 name에 포함되어 있으면 검색결과로 조회되고 포함되지 않는다면 조회되지 않는다.
      *
      */
-    it.only('상품의 name으로 검색할 수 있다.', async () => {
+    it('상품의 name으로 검색할 수 있다.', async () => {
       const ProductNames = products.map((el) => el.name);
       const testName = ProductNames.at(0)?.charAt(0);
       const res = await controller.getProductList({

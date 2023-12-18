@@ -1,4 +1,4 @@
-import { GetProductPaginationDto as GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
+import { GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
 import { ProductEntity } from 'src/entities/product.entity';
 
 export interface GetProductListResponse {

@@ -1,7 +1,7 @@
 import { ILike } from 'typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GetProductPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
+import { GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
 import { ProductEntity } from 'src/entities/product.entity';
@@ -38,7 +38,7 @@ export class ProductService {
     return product;
   }
 
-  async getProductList(dto: GetProductPaginationDto): Promise<GetResponse<ProductEntity>> {
+  async getProductList(dto: GetProductListPaginationDto): Promise<GetResponse<ProductEntity>> {
     const { page, limit, search, categoryId, sellerId } = dto;
     const { skip, take } = getOffset({ page, limit });
     const [list, count] = await this.productRepository.findAndCount({
