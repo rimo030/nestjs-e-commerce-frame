@@ -338,7 +338,11 @@ describe('ProductController', () => {
      * 이렇게 옵션을 미리 가져 오는 이유는 상품 조회, 페이지 이동, 옵션 조회 등 API가 나뉘는 것을 방지하기 위함이다.
      * 이렇게 한 번의 요청으로 가져온 후 이후 필요한 데이터를 추가적인 API로 가져오는 게 성능 상 유리하다.
      */
-    it.skip('상품의 상세 페이지를 조회할 수 있어야한다.', async () => {
+
+    /**
+     * 상품의 최초 조회 시 상품의 옵션들이 조회되기 때문에 서비스 로직은 재사용될 수 있어야 한다.
+     */
+    it.only('상품의 상세 페이지를 조회할 수 있어야한다.', async () => {
       const ProductIds = products.map((el) => el.id);
       const testId = ProductIds[0];
 
@@ -348,9 +352,10 @@ describe('ProductController', () => {
       /**
        * 조회된 상품 id와 필수옵션, 선택옵션의 productId 값이 testId와 같아야 한다.
        */
+
       expect(product.id === testId).toBe(true);
-      expect(productRequiredOptions.every((el) => el.productId === testId)).toBe(true);
-      expect(productOptions.every((el) => el.productId === testId)).toBe(true);
+      expect(productRequiredOptions.list.every((el) => el.productId === testId)).toBe(true);
+      expect(productOptions.list.every((el) => el.productId === testId)).toBe(true);
     });
 
     /**
@@ -360,9 +365,6 @@ describe('ProductController', () => {
   });
 
   describe('GET products/:id/options?required=', () => {
-    /**
-     * 상품의 최초 조회 시 상품의 옵션들이 조회되기 때문에 서비스 로직은 재사용될 수 있어야 한다.
-     */
     it('상품의 옵션을 페이지네이션으로 서비스 단에서 조회할 수 있다.', async () => {
       const productIds = products.map((el) => el.id);
       const testProductId = productIds[0];

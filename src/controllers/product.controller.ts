@@ -46,8 +46,16 @@ export class ProductController {
   @ApiOperation({ summary: '상품 상세 조회 API', description: '등록된 상품의 정보를 확인할 수 있다.' })
   async getProduct(@Param('id', ParseIntPipe) id: number): Promise<ResponseForm<GetProductResponse>> {
     const product = await this.productService.getProduct(id);
-    const productRequiredOptions = await this.productService.getProductRequiredOption(id);
-    const productOptions = await this.productService.getProductOption(id);
+    const productRequiredOptions = await this.productService.getProductOptions(
+      id,
+      { isRequire: true },
+      { page: 1, limit: 10 },
+    );
+    const productOptions = await this.productService.getProductOptions(
+      id,
+      { isRequire: false },
+      { page: 1, limit: 10 },
+    );
     return createResponseForm({ product, productRequiredOptions, productOptions });
   }
 

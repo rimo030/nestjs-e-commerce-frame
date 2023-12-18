@@ -95,7 +95,10 @@ export class ProductService {
         skip,
         take,
       });
-      return { list, count, take };
+
+      if (list.length) return { list, count, take };
+
+      throw new NotFoundException(`There is no required option for product ${productId}.`);
     } else {
       const [list, count] = await this.productOptionRepository.findAndCount({
         order: {
@@ -110,26 +113,5 @@ export class ProductService {
       });
       return { list, count, take };
     }
-  }
-
-  async getProductRequiredOption(productId: number): Promise<ProductRequiredOptionEntity[]> {
-    const requiredOptions = await this.productRequiredOptionRepository.find({
-      where: {
-        productId,
-      },
-    });
-
-    if (requiredOptions.length) return requiredOptions;
-
-    throw new NotFoundException(`There is no required option for product ${productId}.`);
-  }
-
-  async getProductOption(productId: number): Promise<ProductOptionEntity[]> {
-    const Options = await this.productOptionRepository.find({
-      where: {
-        productId,
-      },
-    });
-    return Options;
   }
 }
