@@ -8,43 +8,11 @@ import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
 import { ProductEntity } from 'src/entities/product.entity';
 import { GetResponse } from 'src/interfaces/get-response.interface';
+import { ProductElement } from 'src/interfaces/product-element.interface';
 import { ProductOptionRepository } from 'src/repositories/product.option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
 import { ProductRequiredOptionRepository } from 'src/repositories/products.required.option.repository';
 import { getOffset } from 'src/util/functions/get-offset.function';
-
-export interface ProductElement
-  extends Pick<
-    ProductEntity,
-    | 'bundleId'
-    | 'categoryId'
-    | 'companyId'
-    | 'createdAt'
-    | 'deletedAt'
-    | 'deliveryCharge'
-    | 'deliveryFreeOver'
-    | 'deliveryType'
-    | 'description'
-    | 'id'
-    | 'name'
-    | 'sellerId'
-    | 'updatedAt'
-  > {
-  salePrice: number;
-
-  /**
-   * 상품에 대한 썸네일을 의미한다.
-   * thumbnail: string;
-   */
-
-  /**
-   * 상품에 대한 리뷰 별점을 의미한다.
-   * rating : number;
-   *
-   * 상품에 대한 리뷰 작성수를 의미한다.
-   * reviewCount : number;
-   */
-}
 
 @Injectable()
 export class ProductService {

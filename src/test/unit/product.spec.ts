@@ -253,13 +253,13 @@ describe('ProductController', () => {
      *  - 즉, '반드시 현재 구매 가능한 상태' 중의 최솟값을 말한다.
      */
 
-    it('상품리스트 조회시 대표가격이 노출된다.', async () => {
+    it.only('상품리스트 조회시 대표가격이 노출된다.', async () => {
       const res = await controller.getProductList({
         page: 1,
         limit: testMinCount,
       });
 
-      expect(res.data.list.every((el) => el['minimumPrice'] === MinPrice)).toBe(true);
+      expect(res.data.list.every((el) => el.salePrice === MinPrice)).toBe(true);
     });
 
     /**
@@ -342,7 +342,7 @@ describe('ProductController', () => {
     /**
      * 상품의 최초 조회 시 상품의 옵션들이 조회되기 때문에 서비스 로직은 재사용될 수 있어야 한다.
      */
-    it.only('상품의 상세 페이지를 조회할 수 있어야한다.', async () => {
+    it('상품의 상세 페이지를 조회할 수 있어야한다.', async () => {
       const ProductIds = products.map((el) => el.id);
       const testId = ProductIds[0];
 

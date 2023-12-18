@@ -1,7 +1,22 @@
 import { ProductEntity } from 'src/entities/product.entity';
-import { deliveryType } from 'src/types/enums/fee-type.enum';
 
-export interface ProductElement extends ProductEntity {
+export interface ProductElement
+  extends Pick<
+    ProductEntity,
+    | 'bundleId'
+    | 'categoryId'
+    | 'companyId'
+    | 'createdAt'
+    | 'deletedAt'
+    | 'deliveryCharge'
+    | 'deliveryFreeOver'
+    | 'deliveryType'
+    | 'description'
+    | 'id'
+    | 'name'
+    | 'sellerId'
+    | 'updatedAt'
+  > {
   salePrice: number;
 
   /**
