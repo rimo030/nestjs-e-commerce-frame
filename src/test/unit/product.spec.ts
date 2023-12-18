@@ -3,6 +3,7 @@ import { AppModule } from 'src/app.module';
 import { ProductController } from 'src/controllers/product.controller';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
+import { ProductInputOptionEntity } from 'src/entities/product-input-option.entity';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
 import { ProductEntity } from 'src/entities/product.entity';
@@ -11,6 +12,7 @@ import { GetProductListResponse } from 'src/interfaces/get-product-list-response
 import { GetProductResponse } from 'src/interfaces/get-product-response.interface';
 import { CategoryRepository } from 'src/repositories/category.repository';
 import { CompanyRepository } from 'src/repositories/company.repository';
+import { ProductInputOptionRepository } from 'src/repositories/product.input.option.repository';
 import { ProductOptionRepository } from 'src/repositories/product.option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
 import { ProductRequiredOptionRepository } from 'src/repositories/products.required.option.repository';
@@ -27,6 +29,7 @@ describe('ProductController', () => {
   let companyRepository: CompanyRepository;
   let productRequiredOptionRepository: ProductRequiredOptionRepository;
   let productOptionRepository: ProductOptionRepository;
+  let productInputOptionRepository: ProductInputOptionRepository;
 
   const testNum = 2; // 판매자, 카테고리, 회사의 수
 
@@ -44,6 +47,7 @@ describe('ProductController', () => {
   let products: ProductEntity[] = [];
   let productReqiredOptions: ProductRequiredOptionEntity[] = [];
   let productOptions: ProductOptionEntity[] = [];
+  let productInputOptions: ProductInputOptionEntity[] = [];
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
@@ -59,6 +63,7 @@ describe('ProductController', () => {
     companyRepository = module.get<CompanyRepository>(CompanyRepository);
     productRequiredOptionRepository = module.get<ProductRequiredOptionRepository>(ProductRequiredOptionRepository);
     productOptionRepository = module.get<ProductOptionRepository>(ProductOptionRepository);
+    productInputOptionRepository = module.get<ProductInputOptionRepository>(ProductInputOptionRepository);
 
     /**
      * 조회에 사용할 충분한 상품은 이미 등록되어 있어야 한다.
@@ -168,12 +173,31 @@ describe('ProductController', () => {
       }
     });
     await productOptionRepository.save(productOptions);
+
+    productReqiredOptions.forEach((pro) => {
+      if (pro.id % 2 === 0) {
+        for (let i = 0; i < testMinCount; i++) {
+          productInputOptions.push(
+            new ProductInputOptionEntity({
+              productRequiredOptionId: pro.id,
+              name: `test_${pro.id}_${i}`,
+              value: `test_value`,
+              description: `test_des`,
+              isRequired: true,
+            }),
+          );
+        }
+      }
+    });
+
+    await productInputOptionRepository.save(productInputOptions);
   });
 
   /**
    * 테스트 후 데이터는 삭제한다.
    */
   afterAll(async () => {
+    await productInputOptionRepository.remove(productInputOptions);
     await productOptionRepository.remove(productOptions);
     await productRequiredOptionRepository.remove(productReqiredOptions);
     await repository.remove(products);
@@ -253,7 +277,7 @@ describe('ProductController', () => {
      *  - 즉, '반드시 현재 구매 가능한 상태' 중의 최솟값을 말한다.
      */
 
-    it.only('상품리스트 조회시 대표가격이 노출된다.', async () => {
+    it('상품리스트 조회시 대표가격이 노출된다.', async () => {
       const res = await controller.getProductList({
         page: 1,
         limit: testMinCount,
@@ -305,24 +329,48 @@ describe('ProductController', () => {
   });
 
   describe('typeorm 조인 쿼리를 검증한다.', () => {
-    it.skip('상품 조회시 필수 옵션에 대한 DB 조회를 할 수 있어야 한다.', async () => {
-      const ProductIds = products.map((el) => el.id);
-      const testId = ProductIds[0];
+    it.skip('필수 옵션 조회 시 상품 입력 옵션에 대한 DB 조회를 할 수 있어야 한다.', async () => {
+      const [list, count] = await productRequiredOptionRepository.findAndCount({
+        order: {
+          id: 'ASC',
+        },
+        relations: ['productInputOptions'],
+        where: {
+          isSale: true,
+        },
+        skip: 0,
+        take: testMinCount,
+      });
 
-      const data = await repository
-        .createQueryBuilder('product')
-        .withDeleted()
-        .innerJoinAndSelect('product.productRequiredOptions', 'productRequiredOption')
-        .where('product.id = :id', { id: testId })
-        .andWhere('product.isSale = :isSale', { isSale: true })
-        .andWhere('productRequiredOption.isSale = :isSale', { isSale: true })
+      expect(list !== null).toBe(true);
+
+      if (list !== null) {
+        list.forEach((pro) => {
+          if (pro.id % 2 === 0) {
+            expect(pro['productInputOptions'].every((pio) => pio.productRequiredOptionId === pro.id)).toBe(true);
+          } else {
+            expect(pro['productInputOptions'].length).toBe(0);
+          }
+        });
+      }
+    });
+
+    it.skip('필수 옵션 조회 시 상품 입력 옵션에 대한 DB 조회를 할 수 있어야 한다.', async () => {
+      const ProductRequiredOptionsIds = productReqiredOptions.map((el) => el.id);
+      const testId = ProductRequiredOptionsIds[0];
+
+      const data = await productRequiredOptionRepository
+        .createQueryBuilder('pro')
+        .leftJoinAndSelect('pro.productInputOptions', 'productInputOptions')
+        .where('pro.id = :id', { id: testId })
+        .andWhere('pro.isSale = :isSale', { isSale: true })
         .getOne();
 
       expect(data !== null).toBe(true);
       if (data != null) {
         expect(data.id).toBe(testId);
         expect(data.isSale).toBe(true);
-        expect(data['productRequiredOptions'].every((el) => el.productId === testId)).toBe(true);
+        expect(data['productInputOptions'].every((el) => el.productRequiredOptionId === testId)).toBe(true);
       }
     });
   });
@@ -432,7 +480,7 @@ describe('ProductController', () => {
       expect(resNotsRequiredIds.every((el) => notRquiredIds.includes(el))).toBe(true);
 
       /**
-       * id를 UUID로 바꾼후 테스트에 추가
+       * @todo  id를 UUID로 바꾼후 테스트에 추가
        *
        * expect(resIsRequiredIds.every((el) => notRquiredIds.includes(el))).toBe(false);
        * expect(resNotsRequiredIds.every((el) => isRequiredIds.includes(el))).toBe(false);
@@ -474,11 +522,30 @@ describe('ProductController', () => {
       expect(res.data.list.every((el, i) => el.id === sortedList.at(i))).toBe(true);
     });
 
-    /**
-     * 입력 옵션이 존재할 경우 배열에 담겨서 보여진다.
-     * 없을 경우 빈 배열이며, 빈 배열이면 데이터가 빈 것이 아니라 입력 옵션이 없는 것과 동일하게 처리될 것이다.
-     */
-    it.todo('필수 옵션의 경우, 선택 옵션과 달리 입력 옵션이 있을 경우 입력 옵션들이 함께 보여져야 한다.');
+    it('필수 옵션의 경우, 선택 옵션과 달리 입력 옵션이 있을 경우 입력 옵션들이 함께 보여져야 한다.', async () => {
+      const ProductIds = products.map((el) => el.id);
+      const testProductId = ProductIds[0];
+      const res = await controller.getProduct(testProductId);
+      const { product, productRequiredOptions, productOptions } = res.data as GetProductResponse;
+
+      expect(productRequiredOptions !== null).toBe(true);
+
+      if (productRequiredOptions !== null) {
+        productRequiredOptions.list.forEach((pro) => {
+          /**
+           * 입력 옵션이 존재할 경우 배열에 담겨서 보여진다.
+           * 없을 경우 빈 배열이며, 빈 배열이면 데이터가 빈 것이 아니라 입력 옵션이 없는 것과 동일하게 처리될 것이다.
+           *
+           * productRequiredId가 짝수인 경우에 입력옵션을 가지고 홀수라면 입력옵션을 가지지 않는다.
+           */
+          if (pro.id % 2 === 0) {
+            expect(pro['productInputOptions'].every((pio) => pio.productRequiredOptionId === pro.id)).toBe(true);
+          } else {
+            expect(pro['productInputOptions'].length).toBe(0);
+          }
+        });
+      }
+    });
 
     /**
      * 먼 미래에 도전했으면 하는 사항.

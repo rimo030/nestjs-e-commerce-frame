@@ -9,6 +9,7 @@ import { ProductRequiredOptionEntity } from 'src/entities/product-required-optio
 import { ProductEntity } from 'src/entities/product.entity';
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { ProductElement } from 'src/interfaces/product-element.interface';
+import { ProductInputOptionRepository } from 'src/repositories/product.input.option.repository';
 import { ProductOptionRepository } from 'src/repositories/product.option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
 import { ProductRequiredOptionRepository } from 'src/repositories/products.required.option.repository';
@@ -25,6 +26,9 @@ export class ProductService {
 
     @InjectRepository(ProductOptionRepository)
     private readonly productOptionRepository: ProductOptionRepository,
+
+    @InjectRepository(ProductInputOptionRepository)
+    private readonly productInputOptionRepository: ProductInputOptionRepository,
   ) {}
 
   async getProduct(id: number): Promise<ProductEntity> {
@@ -94,6 +98,7 @@ export class ProductService {
         order: {
           id: 'ASC',
         },
+        relations: ['productInputOptions'],
         where: {
           productId,
           isSale: true,
