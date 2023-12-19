@@ -3,6 +3,7 @@ import { AppModule } from 'src/app.module';
 import { ProductController } from 'src/controllers/product.controller';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
+import { GetProductDto } from 'src/entities/dtos/get-product.dto';
 import { ProductInputOptionEntity } from 'src/entities/product-input-option.entity';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
@@ -149,7 +150,7 @@ describe('ProductController', () => {
           new ProductRequiredOptionEntity({
             productId: p.id,
             name: `test_${p.id}_${i}`,
-            price: i * 1000 + 100,
+            price: i * 1000 + MinPrice,
             isSale: true,
           }),
         );
@@ -390,7 +391,7 @@ describe('ProductController', () => {
     /**
      * 상품의 최초 조회 시 상품의 옵션들이 조회되기 때문에 서비스 로직은 재사용될 수 있어야 한다.
      */
-    it('상품의 상세 페이지를 조회할 수 있어야한다.', async () => {
+    it.only('상품의 상세 페이지를 조회할 수 있어야한다.', async () => {
       const ProductIds = products.map((el) => el.id);
       const testId = ProductIds[0];
 
@@ -428,6 +429,7 @@ describe('ProductController', () => {
         { isRequire: false },
         { page: 0, limit: testMinCount },
       );
+
       /**
        * 페이지네이션으로 조회된 상품 필수/선택옵션의 id는 testId와 같아야 한다.
        */
