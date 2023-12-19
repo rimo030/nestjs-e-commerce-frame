@@ -1,11 +1,9 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
+import { GetProductOptionsDto } from 'src/entities/dtos/get-product-options.dto';
 import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { PaginationDto } from 'src/entities/dtos/pagination.dto';
-import { ProductOptionEntity } from 'src/entities/product-option.entity';
-import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
-import { ProductEntity } from 'src/entities/product.entity';
 import { GetProductListResponse } from 'src/interfaces/get-product-list-response.interface';
 import { GetProductResponse } from 'src/interfaces/get-product-response.interface';
 import { PaginationResponseForm } from 'src/interfaces/pagination-response-form.interface';
@@ -37,7 +35,7 @@ export class ProductController {
     @Param('id', ParseIntPipe) productId: number,
     @Query() isRequireOptionDto: IsRequireOptionDto,
     @Query() paginationDto: PaginationDto,
-  ): Promise<PaginationResponseForm<ProductRequiredOptionEntity | ProductOptionEntity>> {
+  ): Promise<PaginationResponseForm<GetProductOptionsDto>> {
     const response = await this.productService.getProductOptions(productId, isRequireOptionDto, paginationDto);
     return createResponseForm(response, paginationDto);
   }

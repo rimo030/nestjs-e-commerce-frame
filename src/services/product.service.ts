@@ -1,12 +1,12 @@
 import { ILike } from 'typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
 import { GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
+import { GetProductOptionsDto } from 'src/entities/dtos/get-product-options.dto';
 import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { PaginationDto } from 'src/entities/dtos/pagination.dto';
-import { ProductOptionEntity } from 'src/entities/product-option.entity';
-import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
-import { ProductEntity } from 'src/entities/product.entity';
+// import { ProductEntity } from 'src/entities/product.entity';
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { ProductElement } from 'src/interfaces/product-element.interface';
 import { ProductInputOptionRepository } from 'src/repositories/product.input.option.repository';
@@ -31,8 +31,21 @@ export class ProductService {
     private readonly productInputOptionRepository: ProductInputOptionRepository,
   ) {}
 
-  async getProduct(id: number): Promise<ProductEntity> {
+  async getProduct(id: number): Promise<CreateProductDto> {
     const product = await this.productRepository.findOne({
+      select: {
+        id: true,
+        bundleId: true,
+        categoryId: true,
+        companyId: true,
+        isSale: true,
+        name: true,
+        description: true,
+        deliveryType: true,
+        deliveryFreeOver: true,
+        deliveryCharge: true,
+        img: true,
+      },
       where: {
         id,
       },
@@ -89,16 +102,23 @@ export class ProductService {
     productId: number,
     isRequireOptionDto: IsRequireOptionDto,
     paginationDto: PaginationDto,
-  ): Promise<GetResponse<ProductRequiredOptionEntity | ProductOptionEntity>> {
+  ): Promise<GetResponse<GetProductOptionsDto>> {
     const { isRequire } = isRequireOptionDto;
     const { skip, take } = getOffset(paginationDto);
 
     if (isRequire) {
       const [list, count] = await this.productRequiredOptionRepository.findAndCount({
+        select: {
+          id: true,
+          productId: true,
+          name: true,
+          price: true,
+          isSale: true,
+        },
         order: {
           id: 'ASC',
         },
-        relations: ['productInputOptions'],
+        relations: { productInputOptions: true },
         where: {
           productId,
           isSale: true,
@@ -112,6 +132,13 @@ export class ProductService {
       throw new NotFoundException(`There is no required option for product ${productId}.`);
     } else {
       const [list, count] = await this.productOptionRepository.findAndCount({
+        select: {
+          id: true,
+          productId: true,
+          name: true,
+          price: true,
+          isSale: true,
+        },
         order: {
           id: 'ASC',
         },
