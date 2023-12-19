@@ -391,7 +391,7 @@ describe('ProductController', () => {
     /**
      * 상품의 최초 조회 시 상품의 옵션들이 조회되기 때문에 서비스 로직은 재사용될 수 있어야 한다.
      */
-    it.only('상품의 상세 페이지를 조회할 수 있어야한다.', async () => {
+    it('상품의 상세 페이지를 조회할 수 있어야한다.', async () => {
       const ProductIds = products.map((el) => el.id);
       const testId = ProductIds[0];
 
