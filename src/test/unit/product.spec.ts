@@ -541,9 +541,9 @@ describe('ProductController', () => {
            * productRequiredId가 짝수인 경우에 입력옵션을 가지고 홀수라면 입력옵션을 가지지 않는다.
            */
           if (pro.id % 2 === 0) {
-            expect(pro['productInputOptions'].every((pio) => pio.productRequiredOptionId === pro.id)).toBe(true);
+            expect(pro.productInputOptions.every((pio) => pio.productRequiredOptionId === pro.id)).toBe(true);
           } else {
-            expect(pro['productInputOptions'].length).toBe(0);
+            expect(pro.productInputOptions.length).toBe(0);
           }
         });
       }

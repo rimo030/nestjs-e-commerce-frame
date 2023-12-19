@@ -3,10 +3,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
 import { GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
-import { GetProductOptionsDto } from 'src/entities/dtos/get-product-options.dto';
+import { GetProductOptionDto } from 'src/entities/dtos/get-product-options.dto';
+import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-required-option.dto';
 import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { PaginationDto } from 'src/entities/dtos/pagination.dto';
-// import { ProductEntity } from 'src/entities/product.entity';
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { ProductElement } from 'src/interfaces/product-element.interface';
 import { ProductInputOptionRepository } from 'src/repositories/product.input.option.repository';
@@ -102,7 +102,7 @@ export class ProductService {
     productId: number,
     isRequireOptionDto: IsRequireOptionDto,
     paginationDto: PaginationDto,
-  ): Promise<GetResponse<GetProductOptionsDto>> {
+  ): Promise<GetResponse<GetProductRequiredOptionDto | GetProductOptionDto>> {
     const { isRequire } = isRequireOptionDto;
     const { skip, take } = getOffset(paginationDto);
 
@@ -114,6 +114,14 @@ export class ProductService {
           name: true,
           price: true,
           isSale: true,
+          productInputOptions: {
+            id: true,
+            productRequiredOptionId: true,
+            name: true,
+            value: true,
+            description: true,
+            isRequired: true,
+          },
         },
         order: {
           id: 'ASC',
