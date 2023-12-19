@@ -13,9 +13,9 @@ export class CreateProductDto
     Partial<ProductEntity>,
     Pick<ProductEntity, 'categoryId' | 'companyId' | 'isSale' | 'name' | 'deliveryType' | 'deliveryCharge' | 'img'>
 {
-  @ApiProperty({ description: '묶음 배송 그룹 id' })
+  @ApiProperty({ description: '묶음 배송 그룹 id', required: false, nullable: true })
   @IsOptionalNumber()
-  bundleId?: number;
+  bundleId?: number | null;
 
   @ApiProperty({ description: '상품 카테고리 id' })
   @IsNotEmptyNumber()
@@ -33,7 +33,7 @@ export class CreateProductDto
   @IsNotEmptyString(1, 128)
   name!: string;
 
-  @ApiProperty({ description: '상품 설명', required: false })
+  @ApiProperty({ description: '상품 설명', required: false, nullable: true })
   @IsOptionalString(1, 128)
   description?: string | null;
 
@@ -44,7 +44,7 @@ export class CreateProductDto
   /**
    * deliveryType이 FREE | NOT_FREE 라면 null
    */
-  @ApiProperty({ description: '무료 배송 기준' })
+  @ApiProperty({ description: '무료 배송 기준', nullable: true })
   @IsOptionalNumber()
   deliveryFreeOver?: number | null;
 

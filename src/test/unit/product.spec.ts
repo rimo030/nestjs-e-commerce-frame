@@ -3,6 +3,7 @@ import { AppModule } from 'src/app.module';
 import { ProductController } from 'src/controllers/product.controller';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
+import { GetProductDto } from 'src/entities/dtos/get-product.dto';
 import { ProductInputOptionEntity } from 'src/entities/product-input-option.entity';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
@@ -149,7 +150,7 @@ describe('ProductController', () => {
           new ProductRequiredOptionEntity({
             productId: p.id,
             name: `test_${p.id}_${i}`,
-            price: i * 1000 + 100,
+            price: i * 1000 + MinPrice,
             isSale: true,
           }),
         );
@@ -428,6 +429,7 @@ describe('ProductController', () => {
         { isRequire: false },
         { page: 0, limit: testMinCount },
       );
+
       /**
        * 페이지네이션으로 조회된 상품 필수/선택옵션의 id는 testId와 같아야 한다.
        */
@@ -539,9 +541,9 @@ describe('ProductController', () => {
            * productRequiredId가 짝수인 경우에 입력옵션을 가지고 홀수라면 입력옵션을 가지지 않는다.
            */
           if (pro.id % 2 === 0) {
-            expect(pro['productInputOptions'].every((pio) => pio.productRequiredOptionId === pro.id)).toBe(true);
+            expect(pro.productInputOptions.every((pio) => pio.productRequiredOptionId === pro.id)).toBe(true);
           } else {
-            expect(pro['productInputOptions'].length).toBe(0);
+            expect(pro.productInputOptions.length).toBe(0);
           }
         });
       }
