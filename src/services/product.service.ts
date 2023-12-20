@@ -57,7 +57,7 @@ export class ProductService {
     const productIds = list.map((el) => el.id);
 
     if (productIds.length) {
-      const raws = await this.productRequiredOptionRepository.getRequiredOptionsRaw(productIds);
+      const raws = await this.productRequiredOptionRepository.getMiniumPriceRaw(productIds);
 
       return {
         list: list.map((product) => {
