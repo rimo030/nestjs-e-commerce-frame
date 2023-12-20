@@ -9,10 +9,8 @@ export class GetProductRequiredOptionDto extends PickType(ProductRequiredOptionE
   'price',
   'isSale',
 ] as const) {
-  productInputOptions!:
-    | []
-    | Pick<
-        ProductInputOptionEntity,
-        'id' | 'productRequiredOptionId' | 'name' | 'value' | 'description' | 'isRequired'
-      >[];
+  productInputOptions!: Pick<
+    ProductInputOptionEntity,
+    'id' | 'productRequiredOptionId' | 'name' | 'value' | 'description' | 'isRequired'
+  >[];
 }
