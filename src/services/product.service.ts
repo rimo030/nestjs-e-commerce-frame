@@ -41,35 +41,22 @@ export class ProductService {
   async getProductList(dto: GetProductListPaginationDto): Promise<GetResponse<ProductElement>> {
     const { page, limit, search, categoryId, sellerId } = dto;
     const { skip, take } = getOffset({ page, limit });
-    const [list, count] = await this.productRepository.findAndCount({
-      order: {
-        id: 'ASC',
-      },
-      where: {
-        ...{ categoryId: categoryId ?? undefined },
-        ...{ sellerId: sellerId ?? undefined },
-        ...{ name: search ? ILike(`%${search}%`) : undefined },
-      },
-      skip,
-      take,
-    });
+    const [products, count] = await this.productRepository.getProductList(search, categoryId, sellerId, skip, take);
 
-    const productIds = list.map((el) => el.id);
-
-    if (productIds.length) {
-      const raws = await this.productRequiredOptionRepository.getMiniumPriceRaw(productIds);
-
-      return {
-        list: list.map((product) => {
-          const salePrice = raws.find((raw) => raw.productId === product.id)?.minimumPrice ?? 0;
-          return { ...product, salePrice };
-        }),
-        count,
-        take,
-      };
+    if (!products.length) {
+      throw new NotFoundException(`Can't find Products`);
     }
 
-    return { list: [], count, take };
+    const productIds = products.map((el) => el.id);
+    const raws = await this.productRequiredOptionRepository.getMiniumPriceRaw(productIds);
+    return {
+      list: products.map((product) => {
+        const salePrice = raws.find((raw) => raw.productId === product.id)?.minimumPrice ?? 0;
+        return { ...product, salePrice };
+      }),
+      count,
+      take,
+    };
   }
 
   async getProductOptions(
