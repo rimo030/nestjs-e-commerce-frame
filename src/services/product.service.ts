@@ -48,10 +48,10 @@ export class ProductService {
     }
 
     const productIds = products.map((el) => el.id);
-    const raws = await this.productRequiredOptionRepository.getMiniumPriceRaw(productIds);
+    const rows = await this.productRequiredOptionRepository.getMiniumPriceRows(productIds);
     return {
       list: products.map((product) => {
-        const salePrice = raws.find((raw) => raw.productId === product.id)?.minimumPrice ?? 0;
+        const salePrice = rows.find((raw) => raw.productId === product.id)?.minimumPrice ?? 0;
         return { ...product, salePrice };
       }),
       count,
@@ -73,7 +73,7 @@ export class ProductService {
         skip,
         take,
       );
-      if (!list) new NotFoundException(`There is no required option for product ${productId}.`);
+      if (!list.length) new NotFoundException(`There is no required option for product ${productId}.`);
       return { list, count, take };
     } else {
       const [list, count] = await this.productOptionRepository.getProductOptions(productId, skip, take);

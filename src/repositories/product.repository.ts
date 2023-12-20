@@ -44,7 +44,7 @@ export class ProductRepository extends Repository<ProductEntity> {
         img: true,
       },
       order: {
-        id: 'ASC',
+        id: 'DESC',
       },
       where: {
         isSale: true,
