@@ -5,7 +5,7 @@ import { CustomRepository } from '../configs/custom-typeorm.decorator';
 
 @CustomRepository(ProductRequiredOptionEntity)
 export class ProductRequiredOptionRepository extends Repository<ProductRequiredOptionEntity> {
-  async getMiniumPriceRaw(productIds: number[]): Promise<{ productId: number; minimumPrice: number }[]> {
+  async getMiniumPriceRows(productIds: number[]): Promise<{ productId: number; minimumPrice: number }[]> {
     return await this.createQueryBuilder('pro')
       .select('pro.productId as productId')
       .addSelect('MIN(pro.price) as minimumPrice')
