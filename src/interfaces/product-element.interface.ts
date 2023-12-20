@@ -1,22 +1,7 @@
 import { ProductEntity } from 'src/entities/product.entity';
 
 export interface ProductElement
-  extends Pick<
-    ProductEntity,
-    | 'bundleId'
-    | 'categoryId'
-    | 'companyId'
-    | 'createdAt'
-    | 'deletedAt'
-    | 'deliveryCharge'
-    | 'deliveryFreeOver'
-    | 'deliveryType'
-    | 'description'
-    | 'id'
-    | 'name'
-    | 'sellerId'
-    | 'updatedAt'
-  > {
+  extends Pick<ProductEntity, 'id' | 'categoryId' | 'companyId' | 'name' | 'deliveryType' | 'img'> {
   salePrice: number;
 
   /**

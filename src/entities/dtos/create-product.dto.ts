@@ -13,42 +13,42 @@ export class CreateProductDto
     Partial<ProductEntity>,
     Pick<ProductEntity, 'categoryId' | 'companyId' | 'isSale' | 'name' | 'deliveryType' | 'deliveryCharge' | 'img'>
 {
-  @ApiProperty({ description: '묶음 배송 그룹 id', required: false, nullable: true })
+  @ApiProperty({ type: Number, description: '묶음 배송 그룹 id', required: false, nullable: true })
   @IsOptionalNumber()
   bundleId?: number | null;
 
-  @ApiProperty({ description: '상품 카테고리 id' })
+  @ApiProperty({ type: Number, description: '상품 카테고리 id', required: true })
   @IsNotEmptyNumber()
   categoryId!: number;
 
-  @ApiProperty({ description: '제조 회사 id' })
+  @ApiProperty({ type: Number, description: '제조 회사 id', required: true })
   @IsNotEmptyNumber()
   companyId!: number;
 
-  @ApiProperty({ description: '구매 가능 여부' })
+  @ApiProperty({ type: Boolean, description: '구매 가능 여부', required: true })
   @IsNotEmptyBoolean()
   isSale!: boolean;
 
-  @ApiProperty({ description: '상품명' })
+  @ApiProperty({ type: String, description: '상품명', required: true })
   @IsNotEmptyString(1, 128)
   name!: string;
 
-  @ApiProperty({ description: '상품 설명', required: false, nullable: true })
+  @ApiProperty({ type: String, description: '상품 설명', required: false, nullable: true })
   @IsOptionalString(1, 128)
   description?: string | null;
 
-  @ApiProperty({ description: '배송 타입', type: 'enum', enum: deliveryType })
+  @ApiProperty({ type: 'enum', enum: deliveryType, description: '배송 타입', required: true })
   @IsEnum(deliveryType)
   deliveryType!: keyof typeof deliveryType;
 
   /**
    * deliveryType이 FREE | NOT_FREE 라면 null
    */
-  @ApiProperty({ description: '무료 배송 기준', nullable: true })
+  @ApiProperty({ type: Number, description: '무료 배송 기준', required: false, nullable: true })
   @IsOptionalNumber()
   deliveryFreeOver?: number | null;
 
-  @ApiProperty({ description: '배송비' })
+  @ApiProperty({ type: Number, description: '배송비', required: true })
   @IsNotEmptyNumber()
   deliveryCharge!: number;
 
@@ -56,7 +56,7 @@ export class CreateProductDto
    * @todo
    * 확장 예정
    */
-  @ApiProperty({ description: '상품이미지' })
+  @ApiProperty({ type: String, description: '상품이미지', required: true })
   @IsNotEmptyString(1, 128)
   img!: string;
 }

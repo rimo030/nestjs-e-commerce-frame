@@ -26,32 +26,12 @@ export class ProductService {
 
     @InjectRepository(ProductOptionRepository)
     private readonly productOptionRepository: ProductOptionRepository,
-
-    @InjectRepository(ProductInputOptionRepository)
-    private readonly productInputOptionRepository: ProductInputOptionRepository,
   ) {}
 
   async getProduct(id: number): Promise<CreateProductDto> {
-    const product = await this.productRepository.findOne({
-      select: {
-        id: true,
-        bundleId: true,
-        categoryId: true,
-        companyId: true,
-        isSale: true,
-        name: true,
-        description: true,
-        deliveryType: true,
-        deliveryFreeOver: true,
-        deliveryCharge: true,
-        img: true,
-      },
-      where: {
-        id,
-      },
-    });
+    const product = await this.productRepository.getProduct(id);
 
-    if (product === null) {
+    if (!product) {
       throw new NotFoundException(`Can't find product id : ${id}`);
     }
 
@@ -61,41 +41,22 @@ export class ProductService {
   async getProductList(dto: GetProductListPaginationDto): Promise<GetResponse<ProductElement>> {
     const { page, limit, search, categoryId, sellerId } = dto;
     const { skip, take } = getOffset({ page, limit });
-    const [list, count] = await this.productRepository.findAndCount({
-      order: {
-        id: 'ASC',
-      },
-      where: {
-        ...{ categoryId: categoryId ?? undefined },
-        ...{ sellerId: sellerId ?? undefined },
-        ...{ name: search ? ILike(`%${search}%`) : undefined },
-      },
-      skip,
-      take,
-    });
+    const [products, count] = await this.productRepository.getProductList(search, categoryId, sellerId, skip, take);
 
-    const productIds = list.map((el) => el.id);
-
-    if (productIds.length) {
-      const raws: { productId: number; minimumPrice: number }[] = await this.productRequiredOptionRepository
-        .createQueryBuilder('pro')
-        .select('pro.productId as productId')
-        .addSelect('MIN(pro.price) as minimumPrice')
-        .where('pro.productId IN (:...productIds)', { productIds })
-        .groupBy('pro.productId')
-        .getRawMany();
-
-      return {
-        list: list.map((product) => {
-          const salePrice = raws.find((raw) => raw.productId === product.id)?.minimumPrice ?? 0;
-          return { ...product, salePrice };
-        }),
-        count,
-        take,
-      };
+    if (!products.length) {
+      throw new NotFoundException(`Can't find Products`);
     }
 
-    return { list: [], count, take };
+    const productIds = products.map((el) => el.id);
+    const rows = await this.productRequiredOptionRepository.getMiniumPriceRows(productIds);
+    return {
+      list: products.map((product) => {
+        const salePrice = rows.find((raw) => raw.productId === product.id)?.minimumPrice ?? 0;
+        return { ...product, salePrice };
+      }),
+      count,
+      take,
+    };
   }
 
   async getProductOptions(
@@ -107,56 +68,15 @@ export class ProductService {
     const { skip, take } = getOffset(paginationDto);
 
     if (isRequire) {
-      const [list, count] = await this.productRequiredOptionRepository.findAndCount({
-        select: {
-          id: true,
-          productId: true,
-          name: true,
-          price: true,
-          isSale: true,
-          productInputOptions: {
-            id: true,
-            productRequiredOptionId: true,
-            name: true,
-            value: true,
-            description: true,
-            isRequired: true,
-          },
-        },
-        order: {
-          id: 'ASC',
-        },
-        relations: { productInputOptions: true },
-        where: {
-          productId,
-          isSale: true,
-        },
+      const [list, count] = await this.productRequiredOptionRepository.getRequiredOptionJoinInputOptions(
+        productId,
         skip,
         take,
-      });
-
-      if (list.length) return { list, count, take };
-
-      throw new NotFoundException(`There is no required option for product ${productId}.`);
+      );
+      if (!list.length) new NotFoundException(`There is no required option for product ${productId}.`);
+      return { list, count, take };
     } else {
-      const [list, count] = await this.productOptionRepository.findAndCount({
-        select: {
-          id: true,
-          productId: true,
-          name: true,
-          price: true,
-          isSale: true,
-        },
-        order: {
-          id: 'ASC',
-        },
-        where: {
-          productId,
-          isSale: true,
-        },
-        skip,
-        take,
-      });
+      const [list, count] = await this.productOptionRepository.getProductOptions(productId, skip, take);
       return { list, count, take };
     }
   }

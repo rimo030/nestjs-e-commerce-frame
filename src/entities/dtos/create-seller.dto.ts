@@ -7,15 +7,15 @@ export class CreateSellerDto
   extends AuthCredentialsDto
   implements Pick<SellerEntity, 'name' | 'phone' | 'businessNumber'>
 {
-  @ApiProperty({ description: '이름' })
+  @ApiProperty({ type: String, description: '이름', required: true })
   @IsNotEmptyString(1, 128)
   name!: string;
 
-  @ApiProperty({ description: '대표번호 ( - 는 포함하지 않습니다 )' })
+  @ApiProperty({ type: String, description: '대표번호 ( - 는 포함하지 않습니다 )', required: true })
   @IsNotEmptyString(11, 11)
   phone!: string;
 
-  @ApiProperty({ description: '사업자등록번호' })
+  @ApiProperty({ type: String, description: '사업자등록번호', required: true })
   @IsNotEmptyString(1, 128)
   businessNumber!: string;
 }
