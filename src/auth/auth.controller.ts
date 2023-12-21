@@ -6,8 +6,8 @@ import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 import { AccessToken } from 'src/interfaces/access-token.interface';
 import { UserId } from '../decorators/user-id.decorator';
 import { AuthService } from './auth.service';
+import { BuyerJwtAuthGuard } from './guards/buyer-jwt.guard';
 import { BuyerLocalAuthGuard } from './guards/buyer-local.auth.guard';
-import { BuyerJwtAuthGuard } from './guards/buyer.jwt.guard';
 import { SellerLocalAuthGuard } from './guards/seller-local.auth.guard';
 
 @Controller('auth')

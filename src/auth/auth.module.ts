@@ -14,10 +14,10 @@ import { BuyerRepository } from 'src/repositories/buyer.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { BuyerJwtStrategy } from './strategies/buyer.jwt.strategy';
-import { BuyerLocalStrategy } from './strategies/buyer.local.strategy';
-import { SellerJwtStrategy } from './strategies/seller.jwt.strategy';
-import { SellerLocalStrategy } from './strategies/seller.local.strategy';
+import { BuyerJwtStrategy } from './strategies/buyer-jwt.strategy';
+import { BuyerLocalStrategy } from './strategies/buyer-local.strategy';
+import { SellerJwtStrategy } from './strategies/seller-jwt.strategy';
+import { SellerLocalStrategy } from './strategies/seller-local.strategy';
 
 @Module({
   imports: [

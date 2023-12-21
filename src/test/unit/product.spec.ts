@@ -13,10 +13,10 @@ import { GetProductListResponse } from 'src/interfaces/get-product-list-response
 import { GetProductResponse } from 'src/interfaces/get-product-response.interface';
 import { CategoryRepository } from 'src/repositories/category.repository';
 import { CompanyRepository } from 'src/repositories/company.repository';
-import { ProductInputOptionRepository } from 'src/repositories/product.input.option.repository';
-import { ProductOptionRepository } from 'src/repositories/product.option.repository';
+import { ProductInputOptionRepository } from 'src/repositories/product-input-option.repository';
+import { ProductOptionRepository } from 'src/repositories/product-option-repository';
+import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
-import { ProductRequiredOptionRepository } from 'src/repositories/products.required.option.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
 import { ProductService } from 'src/services/product.service';
 

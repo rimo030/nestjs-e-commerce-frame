@@ -7,10 +7,10 @@ import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
 import { ProductEntity } from 'src/entities/product.entity';
-import { ProductBundleRepository } from 'src/repositories/product.bundle.repository';
-import { ProductOptionRepository } from 'src/repositories/product.option.repository';
+import { ProductBundleRepository } from 'src/repositories/product-bundle.repository';
+import { ProductOptionRepository } from 'src/repositories/product-option-repository';
+import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
-import { ProductRequiredOptionRepository } from 'src/repositories/products.required.option.repository';
 
 @Injectable()
 export class SellerService {

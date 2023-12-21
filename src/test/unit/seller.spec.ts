@@ -13,9 +13,9 @@ import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { AccessToken } from 'src/interfaces/access-token.interface';
 import { Payload } from 'src/interfaces/payload.interface';
-import { ProductOptionRepository } from 'src/repositories/product.option.repository';
+import { ProductOptionRepository } from 'src/repositories/product-option-repository';
+import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
-import { ProductRequiredOptionRepository } from 'src/repositories/products.required.option.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
 import { SellerService } from 'src/services/seller.service';
 
