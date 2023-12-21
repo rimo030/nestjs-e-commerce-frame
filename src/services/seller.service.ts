@@ -5,6 +5,7 @@ import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-option
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
 import { GetProductOptionDto } from 'src/entities/dtos/get-product-options.dto';
 import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-required-option.dto';
+import { GetProductDto } from 'src/entities/dtos/get-product.dto';
 import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
@@ -34,8 +35,15 @@ export class SellerService {
     await this.productBundleRepository.save({ sellerId, ...createProductBundleDto });
   }
 
-  async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductEntity> {
-    return await this.productRepository.save({ sellerId, ...createProductDto });
+  async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<GetProductDto> {
+    const { id } = await this.productRepository.createProduct(sellerId, createProductDto);
+    const savedProduct = await this.productRepository.getProduct(id);
+
+    if (!savedProduct) {
+      throw new NotFoundException(`Product Save failed `);
+    }
+
+    return savedProduct;
   }
 
   async createProductOptions(
