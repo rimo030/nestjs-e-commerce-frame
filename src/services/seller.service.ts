@@ -3,6 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
+import { GetProductOptionDto } from 'src/entities/dtos/get-product-options.dto';
+import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-required-option.dto';
 import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
@@ -41,7 +43,7 @@ export class SellerService {
     productId: number,
     isRequireOptionDto: IsRequireOptionDto,
     createProductOptionsDto: CreateProductOptionsDto,
-  ): Promise<ProductOptionEntity | ProductRequiredOptionEntity> {
+  ): Promise<GetProductRequiredOptionDto | GetProductOptionDto> {
     const product = await this.productRepository.getProduct(productId);
 
     if (!product?.id) {
@@ -53,9 +55,23 @@ export class SellerService {
     }
 
     if (isRequireOptionDto.isRequire) {
-      return await this.productRequiredRepository.save({ productId, ...createProductOptionsDto });
+      const { id } = await this.productRequiredRepository.createRequiredOption(productId, createProductOptionsDto);
+      const savedRequiredOption = await this.productRequiredRepository.getRequiredOption(id);
+
+      if (!savedRequiredOption) {
+        throw new NotFoundException(`Product Required Option Save failed `);
+      }
+
+      return savedRequiredOption;
     } else {
-      return await this.productOptionRepository.save({ productId, ...createProductOptionsDto });
+      const { id } = await this.productOptionRepository.createOption(productId, createProductOptionsDto);
+      const savedOption = await this.productOptionRepository.getOption(id);
+
+      if (!savedOption) {
+        throw new NotFoundException(`Product Option Save failed `);
+      }
+
+      return savedOption;
     }
   }
 }
