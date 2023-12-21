@@ -8,7 +8,7 @@ import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-requi
 import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { PaginationDto } from 'src/entities/dtos/pagination.dto';
 import { GetResponse } from 'src/interfaces/get-response.interface';
-import { ProductElement } from 'src/interfaces/product-element.interface';
+import { ProductListElement } from 'src/interfaces/product-list-element.interface';
 import { ProductInputOptionRepository } from 'src/repositories/product-input-option.repository';
 import { ProductOptionRepository } from 'src/repositories/product-option-repository';
 import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
@@ -38,7 +38,7 @@ export class ProductService {
     return product;
   }
 
-  async getProductList(dto: GetProductListPaginationDto): Promise<GetResponse<ProductElement>> {
+  async getProductList(dto: GetProductListPaginationDto): Promise<GetResponse<ProductListElement>> {
     const { page, limit, search, categoryId, sellerId } = dto;
     const { skip, take } = getOffset({ page, limit });
     const [products, count] = await this.productRepository.getProductList(search, categoryId, sellerId, skip, take);
