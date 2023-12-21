@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
+import { GetProductBundleDto } from 'src/entities/dtos/get-product-bundle.dto';
 import { GetProductOptionDto } from 'src/entities/dtos/get-product-options.dto';
 import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-required-option.dto';
 import { GetProductDto } from 'src/entities/dtos/get-product.dto';
@@ -31,8 +32,17 @@ export class SellerService {
     private readonly productOptionRepository: ProductOptionRepository,
   ) {}
 
-  async createProductBundle(sellerId: number, createProductBundleDto: CreateProductBundleDto): Promise<void> {
-    await this.productBundleRepository.save({ sellerId, ...createProductBundleDto });
+  async createProductBundle(
+    sellerId: number,
+    createProductBundleDto: CreateProductBundleDto,
+  ): Promise<GetProductBundleDto> {
+    const { id } = await this.productBundleRepository.createProductBundle(sellerId, createProductBundleDto);
+
+    const savedProductBundle = await this.productBundleRepository.getProductBundle(id);
+    if (!savedProductBundle) {
+      throw new NotFoundException(`Product Bundle Save failed `);
+    }
+    return savedProductBundle;
   }
 
   async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<GetProductDto> {
@@ -58,6 +68,8 @@ export class SellerService {
       throw new NotFoundException(`Can't find product id : ${productId}`);
     }
 
+    console.log(product?.sellerId);
+    console.log(sellerId);
     if (product?.sellerId !== sellerId) {
       throw new UnauthorizedException('You are not seller of this product.');
     }

@@ -5,6 +5,7 @@ import { UserId } from 'src/decorators/user-id.decorator';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
+import { GetProductBundleDto } from 'src/entities/dtos/get-product-bundle.dto';
 import { GetProductOptionDto } from 'src/entities/dtos/get-product-options.dto';
 import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-required-option.dto';
 import { GetProductDto } from 'src/entities/dtos/get-product.dto';
@@ -25,8 +26,8 @@ export class SellerController {
   async createProductBundle(
     @UserId() sellerId: number,
     @Body() createProductBundleDto: CreateProductBundleDto,
-  ): Promise<void> {
-    await this.sellerservice.createProductBundle(sellerId, createProductBundleDto);
+  ): Promise<GetProductBundleDto> {
+    return await this.sellerservice.createProductBundle(sellerId, createProductBundleDto);
   }
 
   @Post('/product')
