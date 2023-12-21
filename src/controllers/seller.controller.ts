@@ -5,6 +5,8 @@ import { UserId } from 'src/decorators/user-id.decorator';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
+import { GetProductOptionDto } from 'src/entities/dtos/get-product-options.dto';
+import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-required-option.dto';
 import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
@@ -42,7 +44,7 @@ export class SellerController {
     @Param('id', ParseIntPipe) productId: number,
     @Query() isRequireOptionDto: IsRequireOptionDto,
     @Body() createProductOptionsDto: CreateProductOptionsDto,
-  ): Promise<ProductRequiredOptionEntity | ProductOptionEntity> {
+  ): Promise<GetProductRequiredOptionDto | GetProductOptionDto> {
     return await this.sellerservice.createProductOptions(
       sellerId,
       productId,
