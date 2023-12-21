@@ -1,4 +1,5 @@
 import { Repository, ILike } from 'typeorm';
+import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
 import { GetProductDto } from 'src/entities/dtos/get-product.dto';
 import { ProductEntity } from 'src/entities/product.entity';
 import { ProductElement } from 'src/interfaces/product-element.interface';
@@ -6,10 +7,16 @@ import { CustomRepository } from '../configs/custom-typeorm.decorator';
 
 @CustomRepository(ProductEntity)
 export class ProductRepository extends Repository<ProductEntity> {
+  async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<{ id: number }> {
+    const { id, ...other } = await this.save({ sellerId, ...createProductDto });
+    return { id };
+  }
+
   async getProduct(id: number): Promise<GetProductDto | null> {
     return await this.findOne({
       select: {
         id: true,
+        sellerId: true,
         bundleId: true,
         categoryId: true,
         companyId: true,
