@@ -9,10 +9,10 @@ import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { PaginationDto } from 'src/entities/dtos/pagination.dto';
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { ProductElement } from 'src/interfaces/product-element.interface';
-import { ProductInputOptionRepository } from 'src/repositories/product.input.option.repository';
-import { ProductOptionRepository } from 'src/repositories/product.option.repository';
+import { ProductInputOptionRepository } from 'src/repositories/product-input-option.repository';
+import { ProductOptionRepository } from 'src/repositories/product-option-repository';
+import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
-import { ProductRequiredOptionRepository } from 'src/repositories/products.required.option.repository';
 import { getOffset } from 'src/util/functions/get-offset.function';
 
 @Injectable()
