@@ -42,11 +42,7 @@ export class SellerService {
     isRequireOptionDto: IsRequireOptionDto,
     createProductOptionsDto: CreateProductOptionsDto,
   ): Promise<ProductOptionEntity | ProductRequiredOptionEntity> {
-    const product = await this.productRepository.findOne({
-      where: {
-        id: productId,
-      },
-    });
+    const product = await this.productRepository.getProduct(productId);
 
     if (!product?.id) {
       throw new NotFoundException(`Can't find product id : ${productId}`);
