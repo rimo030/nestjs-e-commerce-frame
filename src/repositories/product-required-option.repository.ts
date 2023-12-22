@@ -10,9 +10,8 @@ export class ProductRequiredOptionRepository extends Repository<ProductRequiredO
   async createRequiredOption(
     productId: number,
     createProductOptionsDto: CreateProductOptionsDto,
-  ): Promise<{ id: number }> {
-    const { id, ...other } = await this.save({ productId, ...createProductOptionsDto });
-    return { id };
+  ): Promise<GetProductRequiredOptionDto> {
+    return await this.save({ productId, ...createProductOptionsDto });
   }
 
   async getRequiredOption(id: number): Promise<GetProductRequiredOptionDto | null> {

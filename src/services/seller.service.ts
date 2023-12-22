@@ -8,9 +8,7 @@ import { GetProductOptionDto } from 'src/entities/dtos/get-product-options.dto';
 import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-required-option.dto';
 import { GetProductDto } from 'src/entities/dtos/get-product.dto';
 import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
-import { ProductOptionEntity } from 'src/entities/product-option.entity';
-import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
-import { ProductEntity } from 'src/entities/product.entity';
+import { ProductNotFoundException, ProductUnauthrizedException } from 'src/exceptions/seller.exception';
 import { ProductBundleRepository } from 'src/repositories/product-bundle.repository';
 import { ProductOptionRepository } from 'src/repositories/product-option-repository';
 import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
@@ -36,23 +34,12 @@ export class SellerService {
     sellerId: number,
     createProductBundleDto: CreateProductBundleDto,
   ): Promise<GetProductBundleDto> {
-    const { id } = await this.productBundleRepository.createProductBundle(sellerId, createProductBundleDto);
-
-    const savedProductBundle = await this.productBundleRepository.getProductBundle(id);
-    if (!savedProductBundle) {
-      throw new NotFoundException(`Product Bundle Save failed `);
-    }
+    const savedProductBundle = await this.productBundleRepository.createProductBundle(sellerId, createProductBundleDto);
     return savedProductBundle;
   }
 
   async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<GetProductDto> {
-    const { id } = await this.productRepository.createProduct(sellerId, createProductDto);
-    const savedProduct = await this.productRepository.getProduct(id);
-
-    if (!savedProduct) {
-      throw new NotFoundException(`Product Save failed `);
-    }
-
+    const savedProduct = await this.productRepository.createProduct(sellerId, createProductDto);
     return savedProduct;
   }
 
@@ -65,32 +52,21 @@ export class SellerService {
     const product = await this.productRepository.getProduct(productId);
 
     if (!product?.id) {
-      throw new NotFoundException(`Can't find product id : ${productId}`);
+      throw new ProductNotFoundException();
     }
 
-    console.log(product?.sellerId);
-    console.log(sellerId);
     if (product?.sellerId !== sellerId) {
-      throw new UnauthorizedException('You are not seller of this product.');
+      throw new ProductUnauthrizedException();
     }
 
     if (isRequireOptionDto.isRequire) {
-      const { id } = await this.productRequiredRepository.createRequiredOption(productId, createProductOptionsDto);
-      const savedRequiredOption = await this.productRequiredRepository.getRequiredOption(id);
-
-      if (!savedRequiredOption) {
-        throw new NotFoundException(`Product Required Option Save failed `);
-      }
-
+      const savedRequiredOption = await this.productRequiredRepository.createRequiredOption(
+        productId,
+        createProductOptionsDto,
+      );
       return savedRequiredOption;
     } else {
-      const { id } = await this.productOptionRepository.createOption(productId, createProductOptionsDto);
-      const savedOption = await this.productOptionRepository.getOption(id);
-
-      if (!savedOption) {
-        throw new NotFoundException(`Product Option Save failed `);
-      }
-
+      const savedOption = await this.productOptionRepository.createOption(productId, createProductOptionsDto);
       return savedOption;
     }
   }

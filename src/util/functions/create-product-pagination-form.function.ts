@@ -1,11 +1,11 @@
 import { GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
 import { GetProductListResponse } from 'src/interfaces/get-product-list-response.interface';
 import { GetResponse } from 'src/interfaces/get-response.interface';
-import { ProductElement } from 'src/interfaces/product-element.interface';
+import { ProductListElement } from 'src/interfaces/product-list-element.interface';
 import { getTotalPage } from './get-total-page.function';
 
 export function createProductPaginationForm(
-  getResponse: GetResponse<ProductElement>,
+  getResponse: GetResponse<ProductListElement>,
   getProductPagintionDto: GetProductListPaginationDto,
 ): GetProductListResponse {
   const { list, count, take } = getResponse;

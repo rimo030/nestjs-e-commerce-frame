@@ -6,9 +6,11 @@ import { CustomRepository } from '../configs/custom-typeorm.decorator';
 
 @CustomRepository(ProductBundleEntity)
 export class ProductBundleRepository extends Repository<ProductBundleEntity> {
-  async createProductBundle(sellerId: number, createProductBundleDto: CreateProductBundleDto): Promise<{ id: number }> {
-    const { id, ...other } = await this.save({ sellerId, ...createProductBundleDto });
-    return { id };
+  async createProductBundle(
+    sellerId: number,
+    createProductBundleDto: CreateProductBundleDto,
+  ): Promise<GetProductBundleDto> {
+    return await this.save({ sellerId, ...createProductBundleDto });
   }
 
   async getProductBundle(id: number): Promise<GetProductBundleDto | null> {
