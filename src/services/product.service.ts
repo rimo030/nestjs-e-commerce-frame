@@ -7,6 +7,11 @@ import { GetProductOptionDto } from 'src/entities/dtos/get-product-options.dto';
 import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-required-option.dto';
 import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { PaginationDto } from 'src/entities/dtos/pagination.dto';
+import {
+  ProductNotFoundException,
+  ProductRequiredOptionsNotFoundException,
+  ProductsNotFoundException,
+} from 'src/exceptions/product.exception';
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { ProductListElement } from 'src/interfaces/product-list-element.interface';
 import { ProductInputOptionRepository } from 'src/repositories/product-input-option.repository';
@@ -32,7 +37,7 @@ export class ProductService {
     const product = await this.productRepository.getProduct(id);
 
     if (!product) {
-      throw new NotFoundException(`Can't find product id : ${id}`);
+      throw new ProductNotFoundException();
     }
 
     return product;
@@ -44,7 +49,7 @@ export class ProductService {
     const [products, count] = await this.productRepository.getProductList(search, categoryId, sellerId, skip, take);
 
     if (!products.length) {
-      throw new NotFoundException(`Can't find Products`);
+      throw new ProductsNotFoundException();
     }
 
     const productIds = products.map((el) => el.id);
@@ -73,7 +78,7 @@ export class ProductService {
         skip,
         take,
       );
-      if (!list.length) new NotFoundException(`There is no required option for product ${productId}.`);
+      if (!list.length) throw new ProductRequiredOptionsNotFoundException();
       return { list, count, take };
     } else {
       const [list, count] = await this.productOptionRepository.getProductOptions(productId, skip, take);
