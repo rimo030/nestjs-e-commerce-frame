@@ -7,7 +7,6 @@ import { getOffset } from 'src/util/functions/get-offset.function';
 
 @Injectable()
 export class CategoryService {
-  companyRepository: any;
   constructor(private readonly categoryRepository: CategoryRepository) {}
 
   async getCategory(paginationDto: PaginationDto): Promise<GetResponse<GetCategoryDto>> {
