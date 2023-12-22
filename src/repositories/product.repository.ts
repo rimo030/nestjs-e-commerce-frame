@@ -1,15 +1,21 @@
 import { Repository, ILike } from 'typeorm';
+import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
 import { GetProductDto } from 'src/entities/dtos/get-product.dto';
 import { ProductEntity } from 'src/entities/product.entity';
-import { ProductElement } from 'src/interfaces/product-element.interface';
+import { ProductListElement } from 'src/interfaces/product-list-element.interface';
 import { CustomRepository } from '../configs/custom-typeorm.decorator';
 
 @CustomRepository(ProductEntity)
 export class ProductRepository extends Repository<ProductEntity> {
+  async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<GetProductDto> {
+    return await this.save({ sellerId, ...createProductDto });
+  }
+
   async getProduct(id: number): Promise<GetProductDto | null> {
     return await this.findOne({
       select: {
         id: true,
+        sellerId: true,
         bundleId: true,
         categoryId: true,
         companyId: true,
@@ -33,10 +39,11 @@ export class ProductRepository extends Repository<ProductEntity> {
     sellerId: number | undefined | null,
     skip: number,
     take: number,
-  ): Promise<[Omit<ProductElement, 'salePrice'>[], number]> {
+  ): Promise<[Omit<ProductListElement, 'salePrice'>[], number]> {
     return await this.findAndCount({
       select: {
         id: true,
+        sellerId: true,
         categoryId: true,
         companyId: true,
         name: true,

@@ -3,6 +3,8 @@ import { ProductEntity } from '../product.entity';
 
 export class GetProductDto extends PickType(ProductEntity, [
   'id',
+  'sellerId',
+  'bundleId',
   'categoryId',
   'companyId',
   'isSale',

@@ -1,7 +1,7 @@
 import { ProductEntity } from 'src/entities/product.entity';
 
-export interface ProductElement
-  extends Pick<ProductEntity, 'id' | 'categoryId' | 'companyId' | 'name' | 'deliveryType' | 'img'> {
+export interface ProductListElement
+  extends Pick<ProductEntity, 'id' | 'sellerId' | 'categoryId' | 'companyId' | 'name' | 'deliveryType' | 'img'> {
   salePrice: number;
 
   /**

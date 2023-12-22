@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CompanyEntity } from 'src/entities/company.entity';
+import { GetCompanyDto } from 'src/entities/dtos/get-company.dto';
 import { PaginationDto } from 'src/entities/dtos/pagination.dto';
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { CompanyRepository } from 'src/repositories/company.repository';
@@ -13,16 +13,9 @@ export class CompanyService {
     private readonly companyRepository: CompanyRepository,
   ) {}
 
-  async getCompany(paginationDto: PaginationDto): Promise<GetResponse<CompanyEntity>> {
+  async getCompany(paginationDto: PaginationDto): Promise<GetResponse<GetCompanyDto>> {
     const { skip, take } = getOffset(paginationDto);
-    const [list, count] = await this.companyRepository.findAndCount({
-      order: {
-        name: 'ASC',
-        id: 'ASC',
-      },
-      skip,
-      take,
-    });
+    const [list, count] = await this.companyRepository.getCompany(skip, take);
     return { list, count, take };
   }
 }
