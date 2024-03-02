@@ -1,12 +1,12 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
-import { OrderProductBundleEntity } from './order-product-bundle.entity';
 import { OrderProductInputOptionEntity } from './order-product-input-option.entity';
+import { OrderProductEntity } from './order-product.entity';
 
 @Entity({ name: 'order_product_required_option' })
 export class OrderProductRequiredOptionEntity extends CommonEntity {
   @Column()
-  OrderProductBundleId!: number;
+  orderProductId!: number;
 
   @Column({ type: 'varchar', length: 128 })
   name!: string;
@@ -17,9 +17,9 @@ export class OrderProductRequiredOptionEntity extends CommonEntity {
   @Column({ type: 'int' })
   count!: number;
 
-  @ManyToOne(() => OrderProductBundleEntity, (opb) => opb.orderProductRequiredOptions)
+  @ManyToOne(() => OrderProductEntity, (opb) => opb.orderProductRequiredOptions)
   @JoinColumn({ referencedColumnName: 'id' })
-  orderProductBundle!: OrderProductBundleEntity;
+  orderProduct!: OrderProductEntity;
 
   @OneToMany(() => OrderProductInputOptionEntity, (opio) => opio.orderProductRequiredOption)
   orderProductInputOptions!: OrderProductInputOptionEntity[];
