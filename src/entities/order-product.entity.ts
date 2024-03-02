@@ -1,13 +1,15 @@
-import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 import { CartEntity } from './cart.entity';
 import { CommonEntity } from './common/common.entity';
 import { OrderProductBundleEntity } from './order-product-bundle.entity';
+import { OrderProductOptionEntity } from './order-product-option.entity';
+import { OrderProductRequiredOptionEntity } from './order-product-required-option.entity';
 import { ProductEntity } from './product.entity';
 
 @Entity({ name: 'order_product' })
 export class OrderProductEntity extends CommonEntity {
   @Column()
-  orderProductId!: number;
+  orderProductBundleId!: number;
 
   @Column()
   cartId!: number;
@@ -26,4 +28,10 @@ export class OrderProductEntity extends CommonEntity {
   @ManyToOne(() => ProductEntity, (p) => p.orderProducts)
   @JoinColumn({ referencedColumnName: 'id' })
   product!: ProductEntity;
+
+  @OneToMany(() => OrderProductRequiredOptionEntity, (opro) => opro.orderProduct)
+  orderProductRequiredOptions!: OrderProductRequiredOptionEntity[];
+
+  @OneToMany(() => OrderProductOptionEntity, (opo) => opo.orderProduct)
+  orderProductOptions!: OrderProductOptionEntity[];
 }
