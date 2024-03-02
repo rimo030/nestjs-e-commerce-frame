@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, Unique } from 'typeorm';
+import { Column, Entity, OneToMany } from 'typeorm';
 import { BoardEntity } from './board.entity';
 import { CartEntity } from './cart.entity';
 import { CommonEntity } from './common/common.entity';
