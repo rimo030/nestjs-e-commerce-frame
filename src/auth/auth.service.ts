@@ -78,16 +78,16 @@ export class AuthService {
     throw new SellerNotfoundException();
   }
 
-  async buyerLogin(buyerId: number): Promise<AccessToken> {
-    const payload: Payload = { id: buyerId };
+  async buyerLogin(id: number): Promise<{ accessToken: string }> {
+    const payload: { id: number } = { id };
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_SECRET_BUYER') ?? 'JWT_SECRET_BUYER',
     });
     return { accessToken };
   }
 
-  async sellerLogin(sellerId: number): Promise<AccessToken> {
-    const payload: Payload = { id: sellerId };
+  async sellerLogin(id: number): Promise<{ accessToken: string }> {
+    const payload: { id: number } = { id };
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_SECRET_SELLER') ?? 'JWT_SECRET_SELLER',
     });
