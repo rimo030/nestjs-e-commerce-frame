@@ -10,7 +10,7 @@ export class BuyerEntity extends CommonEntity {
   email!: string;
 
   @Column({ type: 'varchar', length: 512 })
-  hashedPassword!: string;
+  password!: string;
 
   @Column({ type: 'varchar', length: 128 })
   name!: string;
