@@ -9,6 +9,15 @@ export class BuyerRepository extends Repository<BuyerEntity> {
     await this.save(createBuyerDto);
   }
 
+  async findById(id: number) {
+    const [user] = await this.find({
+      where: { id },
+      withDeleted: true,
+      take: 1,
+    });
+    return user;
+  }
+
   async findByEmail(email: string) {
     const [user] = await this.find({
       where: { email },
