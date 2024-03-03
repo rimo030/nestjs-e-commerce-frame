@@ -1,11 +1,17 @@
 import bcrypt from 'bcryptjs';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
 import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
+import {
+  BuyerNotfoundException,
+  BuyerUnauthrizedException,
+  SellerNotfoundException,
+  SellerUnauthrizedException,
+} from 'src/exceptions/auth.exception';
 import { AccessToken } from 'src/interfaces/access-token.interface';
 import { BuyerAuthResult } from 'src/interfaces/buyer-auth-result.interface';
 import { Payload } from 'src/interfaces/payload.interface';
@@ -33,7 +39,7 @@ export class AuthService {
       take: 1,
     });
     if (user) {
-      throw new HttpException('this email already exists', HttpStatus.UNAUTHORIZED);
+      throw new BuyerUnauthrizedException();
     }
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
@@ -48,7 +54,7 @@ export class AuthService {
       take: 1,
     });
     if (user) {
-      throw new HttpException('this email already exists', HttpStatus.UNAUTHORIZED);
+      throw new SellerUnauthrizedException();
     }
 
     const salt = await bcrypt.genSalt();
@@ -65,9 +71,9 @@ export class AuthService {
         const { hashedPassword, ...result } = user;
         return result;
       }
-      throw new HttpException('password is incorrect', HttpStatus.UNAUTHORIZED);
+      throw new BuyerNotfoundException();
     }
-    throw new HttpException('this email does not exists', HttpStatus.UNAUTHORIZED);
+    throw new BuyerNotfoundException();
   }
 
   async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<SellerAuthResult> {
@@ -78,9 +84,9 @@ export class AuthService {
         const { hashedPassword, ...result } = user;
         return result;
       }
-      throw new HttpException('password is incorrect', HttpStatus.UNAUTHORIZED);
+      throw new SellerNotfoundException();
     }
-    throw new HttpException('this email does not exists', HttpStatus.UNAUTHORIZED);
+    throw new SellerNotfoundException();
   }
 
   async buyerLogin(buyerId: number): Promise<AccessToken> {
