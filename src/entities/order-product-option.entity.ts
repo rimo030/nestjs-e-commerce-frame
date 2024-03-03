@@ -1,11 +1,11 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
-import { OrderProductBundleEntity } from './order-product-bundle.entity';
+import { OrderProductEntity } from './order-product.entity';
 
 @Entity({ name: 'order_product_option' })
 export class OrderProductOptionEntity extends CommonEntity {
   @Column()
-  OrderProductOptionId!: number;
+  orderProductId!: number;
 
   @Column({ type: 'varchar', length: 128 })
   name!: string;
@@ -16,7 +16,7 @@ export class OrderProductOptionEntity extends CommonEntity {
   @Column({ type: 'int' })
   count!: number;
 
-  @ManyToOne(() => OrderProductBundleEntity, (opb) => opb.orderProductOptions)
+  @ManyToOne(() => OrderProductEntity, (opb) => opb.orderProductOptions)
   @JoinColumn({ referencedColumnName: 'id' })
-  orderProductBundle!: OrderProductBundleEntity;
+  orderProduct!: OrderProductEntity;
 }

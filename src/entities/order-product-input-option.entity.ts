@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { CommonEntity } from './common/common.entity';
-import { OrderProductRequiredOptionEntity } from './order-product-riquired-option.entity';
+import { OrderProductRequiredOptionEntity } from './order-product-required-option.entity';
 
 @Entity({ name: 'order_product_input_option' })
 export class OrderProductInputOptionEntity extends CommonEntity {
