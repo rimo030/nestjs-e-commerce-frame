@@ -32,35 +32,30 @@ export class AuthService {
     readonly configService: ConfigService,
   ) {}
 
-  async buyerSignUp(createUserDto: CreateBuyerDto): Promise<void> {
-    const [user] = await this.buyersRespository.find({
-      where: { email: createUserDto.email },
-      withDeleted: true,
-      take: 1,
-    });
+  async buyerSignUp(createBuyerDto: CreateBuyerDto): Promise<void> {
+    const user = await this.buyersRespository.findByEmail(createBuyerDto.email);
     if (user) {
       throw new BuyerUnauthrizedException();
     }
+
     const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
-    const { password, ...other } = createUserDto;
-    await this.buyersRespository.save({ hashedPassword, ...other });
+    const hashedPassword = await bcrypt.hash(createBuyerDto.password, salt);
+    createBuyerDto.password = hashedPassword;
+
+    await this.buyersRespository.saveBuyer(createBuyerDto);
   }
 
   async sellerSignUp(createSellerDto: CreateSellerDto): Promise<void> {
-    const [user] = await this.sellersRespository.find({
-      where: { email: createSellerDto.email },
-      withDeleted: true,
-      take: 1,
-    });
+    const user = await this.sellersRespository.findByEmail(createSellerDto.email);
     if (user) {
       throw new SellerUnauthrizedException();
     }
 
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(createSellerDto.password, salt);
-    const { password, ...other } = createSellerDto;
-    await this.sellersRespository.save({ hashedPassword, ...other });
+    createSellerDto.password = hashedPassword;
+
+    await this.sellersRespository.saveSeller(createSellerDto);
   }
 
   async validateBuyer(authCredentialsDto: AuthCredentialsDto): Promise<BuyerAuthResult> {
