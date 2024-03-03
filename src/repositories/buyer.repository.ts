@@ -17,4 +17,8 @@ export class BuyerRepository extends Repository<BuyerEntity> {
     });
     return user;
   }
+
+  async deleteById(id: number) {
+    await this.delete({ id });
+  }
 }
