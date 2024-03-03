@@ -1,9 +1,9 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Payload } from 'src/interfaces/payload.interface';
+import { BuyerNotfoundException } from 'src/exceptions/auth.exception';
 import { BuyerRepository } from 'src/repositories/buyer.repository';
 
 @Injectable()
@@ -19,12 +19,12 @@ export class BuyerJwtStrategy extends PassportStrategy(Strategy, 'buyer-jwt') {
     });
   }
 
-  async validate(payload: Payload) {
-    const { id } = payload;
-    const member = await this.buyersRespository.findOneBy({ id });
-    if (member) {
-      return { id };
+  async validate(payload: { id: number }) {
+    console.log(payload.id);
+    const user = await this.buyersRespository.findById(payload.id);
+    if (user) {
+      return { id: payload.id };
     }
-    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new BuyerNotfoundException();
   }
 }
