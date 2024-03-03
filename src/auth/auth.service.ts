@@ -3,21 +3,17 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AuthCredentialsDto } from 'src/entities/dtos/auth-credentials.dto';
-import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
-import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
+import { AuthCredentialsDto } from '../entities/dtos/auth-credentials.dto';
+import { CreateBuyerDto } from '../entities/dtos/create-buyer.dto';
+import { CreateSellerDto } from '../entities/dtos/create-seller.dto';
 import {
   BuyerNotfoundException,
   BuyerUnauthrizedException,
   SellerNotfoundException,
   SellerUnauthrizedException,
-} from 'src/exceptions/auth.exception';
-import { AccessToken } from 'src/interfaces/access-token.interface';
-import { BuyerAuthResult } from 'src/interfaces/buyer-auth-result.interface';
-import { Payload } from 'src/interfaces/payload.interface';
-import { SellerAuthResult } from 'src/interfaces/seller-auth-result.interface';
-import { BuyerRepository } from 'src/repositories/buyer.repository';
-import { SellerRepository } from 'src/repositories/seller.repository';
+} from '../exceptions/auth.exception';
+import { BuyerRepository } from '../repositories/buyer.repository';
+import { SellerRepository } from '../repositories/seller.repository';
 
 @Injectable()
 export class AuthService {
@@ -58,26 +54,24 @@ export class AuthService {
     await this.sellersRespository.saveSeller(createSellerDto);
   }
 
-  async validateBuyer(authCredentialsDto: AuthCredentialsDto): Promise<BuyerAuthResult> {
-    const user = await this.buyersRespository.findOneBy({ email: authCredentialsDto.email });
+  async validateBuyer(authCredentialsDto: AuthCredentialsDto): Promise<{ id: number }> {
+    const user = await this.buyersRespository.findByEmail(authCredentialsDto.email);
     if (user) {
-      const isRightPassword = await bcrypt.compare(authCredentialsDto.password, user.hashedPassword);
+      const isRightPassword = await bcrypt.compare(authCredentialsDto.password, user.password);
       if (isRightPassword) {
-        const { hashedPassword, ...result } = user;
-        return result;
+        return { id: user.id };
       }
       throw new BuyerNotfoundException();
     }
     throw new BuyerNotfoundException();
   }
 
-  async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<SellerAuthResult> {
-    const user = await this.sellersRespository.findOneBy({ email: authCredentialsDto.email });
+  async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<{ id: number }> {
+    const user = await this.sellersRespository.findByEmail(authCredentialsDto.email);
     if (user) {
-      const isRightPassword = await bcrypt.compare(authCredentialsDto.password, user.hashedPassword);
+      const isRightPassword = await bcrypt.compare(authCredentialsDto.password, user.password);
       if (isRightPassword) {
-        const { hashedPassword, ...result } = user;
-        return result;
+        return { id: user.id };
       }
       throw new SellerNotfoundException();
     }
