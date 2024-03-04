@@ -15,7 +15,7 @@ export class SellerEntity extends CommonEntity {
   email!: string;
 
   @Column({ type: 'varchar', length: 512 })
-  hashedPassword!: string;
+  password!: string;
 
   @Column({ type: 'varchar', length: 32 })
   name!: string;

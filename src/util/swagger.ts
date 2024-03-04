@@ -11,6 +11,16 @@ export function setupSwagger(app: INestApplication): void {
     .setTitle('NestJS Commerce Study API Docs')
     .setDescription('NestJS로 커머스 구현하기')
     .setVersion('1.0.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        name: 'JWT',
+        description: 'Enter JWT token',
+        in: 'header',
+      },
+      'token',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, options);
   SwaggerModule.setup('api', app, document);

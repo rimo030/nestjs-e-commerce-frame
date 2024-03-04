@@ -1,10 +1,10 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Payload } from 'src/interfaces/payload.interface';
-import { SellerRepository } from 'src/repositories/seller.repository';
+import { SellerNotfoundException } from '../../exceptions/auth.exception';
+import { SellerRepository } from '../../repositories/seller.repository';
 
 @Injectable()
 export class SellerJwtStrategy extends PassportStrategy(Strategy, 'seller-jwt') {
@@ -19,12 +19,11 @@ export class SellerJwtStrategy extends PassportStrategy(Strategy, 'seller-jwt') 
     });
   }
 
-  async validate(payload: Payload) {
-    const { id } = payload;
-    const member = await this.sellerRepository.findOneBy({ id });
-    if (member) {
-      return { id };
+  async validate(payload: { id: number }): Promise<{ id: number }> {
+    const user = await this.sellerRepository.findById(payload.id);
+    if (user) {
+      return { id: payload.id };
     }
-    throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    throw new SellerNotfoundException();
   }
 }
