@@ -83,4 +83,9 @@ describe('CartController', () => {
     const products = await productRespository.find();
     expect(products.length > 0).toBe(true);
   });
+
+  describe('장바구니 기능에 대한 명세', () => {
+    it.todo('장바구니 조회가 가능하며 아무것도 없을 때는 빈 배열이 조회되어야 한다.');
+    it.todo('장바구니에서 상품을 뺄 수 있어야 한다.');
+  });
 });
