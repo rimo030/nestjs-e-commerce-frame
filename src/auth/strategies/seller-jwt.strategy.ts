@@ -19,7 +19,7 @@ export class SellerJwtStrategy extends PassportStrategy(Strategy, 'seller-jwt') 
     });
   }
 
-  async validate(payload: { id: number }) {
+  async validate(payload: { id: number }): Promise<{ id: number }> {
     const user = await this.sellerRepository.findById(payload.id);
     if (user) {
       return { id: payload.id };

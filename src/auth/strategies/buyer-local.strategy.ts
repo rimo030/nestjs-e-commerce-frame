@@ -9,7 +9,7 @@ export class BuyerLocalStrategy extends PassportStrategy(Strategy, 'buyer-local'
     super({ usernameField: 'email', passwordField: 'password' });
   }
 
-  async validate(email: string, password: string) {
+  async validate(email: string, password: string): Promise<{ id: number }> {
     const id = await this.authService.validateBuyer({ email, password });
     return id;
   }
