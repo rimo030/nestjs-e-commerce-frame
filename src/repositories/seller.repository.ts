@@ -6,7 +6,7 @@ import { SellerEntity } from '../entities/seller.entity';
 @CustomRepository(SellerEntity)
 export class SellerRepository extends Repository<SellerEntity> {
   async saveSeller(createSellerDto: CreateSellerDto) {
-    await this.save(createSellerDto);
+    await this.insert(createSellerDto);
   }
 
   async findById(id: number) {

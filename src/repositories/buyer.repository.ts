@@ -6,7 +6,7 @@ import { CreateBuyerDto } from '../entities/dtos/create-buyer.dto';
 @CustomRepository(BuyerEntity)
 export class BuyerRepository extends Repository<BuyerEntity> {
   async saveBuyer(createBuyerDto: CreateBuyerDto) {
-    await this.save(createBuyerDto);
+    await this.insert(createBuyerDto);
   }
 
   async findById(id: number) {
