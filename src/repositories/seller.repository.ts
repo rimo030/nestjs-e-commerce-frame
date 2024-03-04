@@ -5,11 +5,11 @@ import { SellerEntity } from '../entities/seller.entity';
 
 @CustomRepository(SellerEntity)
 export class SellerRepository extends Repository<SellerEntity> {
-  async saveSeller(createSellerDto: CreateSellerDto) {
+  async saveSeller(createSellerDto: CreateSellerDto): Promise<void> {
     await this.insert(createSellerDto);
   }
 
-  async findById(id: number) {
+  async findById(id: number): Promise<SellerEntity> {
     const [user] = await this.find({
       where: { id },
       withDeleted: true,
@@ -18,7 +18,7 @@ export class SellerRepository extends Repository<SellerEntity> {
     return user;
   }
 
-  async findByEmail(email: string) {
+  async findByEmail(email: string): Promise<SellerEntity> {
     const [user] = await this.find({
       where: { email },
       withDeleted: true,
@@ -27,7 +27,7 @@ export class SellerRepository extends Repository<SellerEntity> {
     return user;
   }
 
-  async deleteById(id: number) {
+  async deleteById(id: number): Promise<void> {
     await this.delete({ id });
   }
 }

@@ -5,11 +5,11 @@ import { CreateBuyerDto } from '../entities/dtos/create-buyer.dto';
 
 @CustomRepository(BuyerEntity)
 export class BuyerRepository extends Repository<BuyerEntity> {
-  async saveBuyer(createBuyerDto: CreateBuyerDto) {
+  async saveBuyer(createBuyerDto: CreateBuyerDto): Promise<void> {
     await this.insert(createBuyerDto);
   }
 
-  async findById(id: number) {
+  async findById(id: number): Promise<BuyerEntity> {
     const [user] = await this.find({
       where: { id },
       withDeleted: true,
@@ -18,7 +18,7 @@ export class BuyerRepository extends Repository<BuyerEntity> {
     return user;
   }
 
-  async findByEmail(email: string) {
+  async findByEmail(email: string): Promise<BuyerEntity> {
     const [user] = await this.find({
       where: { email },
       withDeleted: true,
@@ -27,7 +27,7 @@ export class BuyerRepository extends Repository<BuyerEntity> {
     return user;
   }
 
-  async deleteById(id: number) {
+  async deleteById(id: number): Promise<void> {
     await this.delete({ id });
   }
 }
