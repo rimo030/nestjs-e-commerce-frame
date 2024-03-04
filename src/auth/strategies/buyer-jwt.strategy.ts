@@ -1,4 +1,5 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
+import { ExtractJwt } from 'passport-jwt';
+import { Strategy } from 'passport-strategy';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
@@ -20,7 +21,6 @@ export class BuyerJwtStrategy extends PassportStrategy(Strategy, 'buyer-jwt') {
   }
 
   async validate(payload: { id: number }) {
-    console.log(payload.id);
     const user = await this.buyersRespository.findById(payload.id);
     if (user) {
       return { id: payload.id };
