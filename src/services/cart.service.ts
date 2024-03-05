@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ProductBundleEntity } from 'src/entities/product-bundle.entity';
 import { CartRepository } from 'src/repositories/cart.repository';
 
 @Injectable()
@@ -74,7 +75,24 @@ export class CartService {
       cartOptions: { id: number; price: number; count: number }[];
     }[];
   }[] {
-    return [] as any;
+    const productBundles = [] as any;
+    return productBundles.map((productBundle) => {
+      return { ...productBundle, fixedDeliveryFee: this.productBundleFixDeliveryFee(productBundle) };
+    }) as any;
+  }
+
+  /**
+   * 해당 번들과 내부 장바구니 상품들을 이용해 번들의 최종적인 배송비를 계산한다.
+   *
+   * @param productBundle
+   * @returns
+   */
+  private productBundleFixDeliveryFee(
+    productBundle: Pick<ProductBundleEntity, 'id' | 'chargeStandard'> & {
+      carts: any[];
+    },
+  ): number {
+    return 0;
   }
 
   /**
@@ -87,6 +105,17 @@ export class CartService {
    * @param productIds 상품 아이디 배열
    */
   deleteCart(userId: number, productIds: number[]) {}
+
+  /**
+   * 장바구니 상품의 옵션만을 제거한다.
+   * 제거할 때에는 반드시 필수 옵션이 1개 이상 남아 있어야 한다.
+   *
+   * @param userId
+   * @param cartId
+   * @param cartOptionId
+   * @param cartType
+   */
+  deleteCartOption(userId: number, cartId: number, cartOptionId: number, cartType: 'option' | 'requiredOption') {}
 
   /**
    * 장바구니에 상품을 담는다.
