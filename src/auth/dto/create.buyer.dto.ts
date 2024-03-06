@@ -1,14 +1,11 @@
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmptyNumber } from '../../decorators/is-not-empty-number.decorator';
-import { IsNotEmptyString } from '../../decorators/is-not-empty-string.decorator';
-import { BuyerEntity } from '../buyer.entity';
-import { AuthCredentialsDto } from './auth-credentials.dto';
+import { IsNotEmptyNumber } from 'src/decorators/is-not-empty-number.decorator';
+import { IsNotEmptyString } from 'src/decorators/is-not-empty-string.decorator';
+import { BuyerEntity } from 'src/entities/buyer.entity';
+import { AuthCommonDto } from './auth.common.dto';
 
-export class CreateBuyerDto
-  extends AuthCredentialsDto
-  implements Pick<BuyerEntity, 'name' | 'gender' | 'age' | 'phone'>
-{
+export class CreateBuyerDto extends AuthCommonDto implements Pick<BuyerEntity, 'name' | 'gender' | 'age' | 'phone'> {
   @ApiProperty({ type: String, description: '이름', required: true, example: 'myname' })
   @IsNotEmptyString(1, 128)
   name!: string;

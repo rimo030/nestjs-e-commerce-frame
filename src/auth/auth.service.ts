@@ -3,17 +3,17 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
-import { AuthCredentialsDto } from '../entities/dtos/auth-credentials.dto';
-import { CreateBuyerDto } from '../entities/dtos/create-buyer.dto';
-import { CreateSellerDto } from '../entities/dtos/create-seller.dto';
 import {
-  BuyerNotfoundException,
   BuyerUnauthrizedException,
-  SellerNotfoundException,
   SellerUnauthrizedException,
-} from '../exceptions/auth.exception';
-import { BuyerRepository } from '../repositories/buyer.repository';
-import { SellerRepository } from '../repositories/seller.repository';
+  BuyerNotfoundException,
+  SellerNotfoundException,
+} from 'src/exceptions/auth.exception';
+import { BuyerRepository } from 'src/repositories/buyer.repository';
+import { SellerRepository } from 'src/repositories/seller.repository';
+import { AuthCommonDto } from './dto/auth.common.dto';
+import { CreateBuyerDto } from './dto/create.buyer.dto';
+import { CreateSellerDto } from './dto/create.seller.dto';
 
 @Injectable()
 export class AuthService {
@@ -54,7 +54,7 @@ export class AuthService {
     await this.sellersRespository.saveSeller(createSellerDto);
   }
 
-  async validateBuyer(authCredentialsDto: AuthCredentialsDto): Promise<{ id: number }> {
+  async validateBuyer(authCredentialsDto: AuthCommonDto): Promise<{ id: number }> {
     const user = await this.buyersRespository.findByEmail(authCredentialsDto.email);
     if (user) {
       const isRightPassword = await bcrypt.compare(authCredentialsDto.password, user.password);
@@ -66,7 +66,7 @@ export class AuthService {
     throw new BuyerNotfoundException();
   }
 
-  async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<{ id: number }> {
+  async validateSeller(authCredentialsDto: AuthCommonDto): Promise<{ id: number }> {
     const user = await this.sellersRespository.findByEmail(authCredentialsDto.email);
     if (user) {
       const isRightPassword = await bcrypt.compare(authCredentialsDto.password, user.password);

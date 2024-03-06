@@ -1,11 +1,11 @@
 import { Body, Controller, HttpCode, Post, UseGuards, Request } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthCredentialsDto } from '../entities/dtos/auth-credentials.dto';
-import { CreateBuyerDto } from '../entities/dtos/create-buyer.dto';
-import { CreateSellerDto } from '../entities/dtos/create-seller.dto';
 import { AuthService } from './auth.service';
-import { BuyerLocalAuthGuard } from './guards/buyer-local.auth.guard';
-import { SellerLocalAuthGuard } from './guards/seller-local.auth.guard';
+import { AuthCommonDto } from './dto/auth.common.dto';
+import { CreateBuyerDto } from './dto/create.buyer.dto';
+import { CreateSellerDto } from './dto/create.seller.dto';
+import { BuyerLocalAuthGuard } from './guards/buyer.local.auth.guard';
+import { SellerLocalAuthGuard } from './guards/seller.local.auth.guard';
 
 @Controller('auth')
 @ApiTags('Auth API')
@@ -23,7 +23,7 @@ export class AuthController {
   @HttpCode(201)
   @Post('/signin')
   @ApiOperation({ summary: 'buyer 로그인 API', description: 'buyer 비밀번호 매칭' })
-  buyerSignIn(@Body() authCredentialsDto: AuthCredentialsDto, @Request() req): Promise<{ accessToken: string }> {
+  buyerSignIn(@Body() authCredentialsDto: AuthCommonDto, @Request() req): Promise<{ accessToken: string }> {
     return this.authService.buyerLogin(req.user.id);
   }
 
@@ -38,7 +38,7 @@ export class AuthController {
   @HttpCode(201)
   @Post('/signin-seller')
   @ApiOperation({ summary: 'seller 로그인 API', description: 'seller 비밀번호 매칭' })
-  sellerSignIn(@Body() authCredentialsDto: AuthCredentialsDto, @Request() req): Promise<{ accessToken: string }> {
+  sellerSignIn(@Body() authCredentialsDto: AuthCommonDto, @Request() req): Promise<{ accessToken: string }> {
     return this.authService.sellerLogin(req.user.id);
   }
 }

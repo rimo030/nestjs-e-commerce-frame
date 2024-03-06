@@ -1,3 +1,3 @@
-import { AuthCredentialsDto } from './auth-credentials.dto';
+import { AuthCommonDto } from '../../auth/dto/auth.common.dto';
 
-export class CreateBoardDto extends AuthCredentialsDto {}
+export class CreateBoardDto extends AuthCommonDto {}

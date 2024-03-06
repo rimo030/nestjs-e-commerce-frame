@@ -1,6 +1,6 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
-import { SellerJwtAuthGuard } from 'src/auth/guards/seller-jwt.guard';
+import { SellerJwtAuthGuard } from 'src/auth/guards/seller.jwt.guard';
 import { UserId } from 'src/decorators/user-id.decorator';
 import { CompanyEntity } from 'src/entities/company.entity';
 import { GetCompanyDto } from 'src/entities/dtos/get-company.dto';

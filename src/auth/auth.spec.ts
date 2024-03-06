@@ -2,12 +2,12 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
-import { CreateBuyerDto } from 'src/entities/dtos/create-buyer.dto';
-import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
 import { BuyerRepository } from 'src/repositories/buyer.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { CreateBuyerDto } from './dto/create.buyer.dto';
+import { CreateSellerDto } from './dto/create.seller.dto';
 
 describe('Controller', () => {
   let controller: AuthController;
