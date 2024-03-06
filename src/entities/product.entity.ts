@@ -12,11 +12,6 @@ import { SellerEntity } from './seller.entity';
 
 @Entity({ name: 'product' })
 export class ProductEntity extends CommonEntity {
-  constructor(dto: Partial<ProductEntity>) {
-    super();
-
-    Object.assign(this, dto);
-  }
   @Column()
   sellerId!: number;
 

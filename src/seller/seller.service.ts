@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { ProductEntity } from 'src/entities/product.entity';
 import { ProductNotFoundException, ProductUnauthrizedException } from 'src/exceptions/seller.exception';
 import { ProductBundleRepository } from 'src/repositories/product.bundle.repository';
 import { ProductOptionRepository } from 'src/repositories/product.option.repository';
@@ -38,9 +39,9 @@ export class SellerService {
     return savedProductBundle;
   }
 
-  async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<GetProductDto> {
-    const savedProduct = await this.productRepository.createProduct(sellerId, createProductDto);
-    return savedProduct;
+  async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<{ id: number }> {
+    const { id, ...rest } = await this.productRepository.saveProduct(sellerId, createProductDto);
+    return { id };
   }
 
   async createProductOptions(

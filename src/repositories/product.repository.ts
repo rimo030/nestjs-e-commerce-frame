@@ -7,8 +7,11 @@ import { GetProductDto } from 'src/seller/dto/get.product.dto';
 
 @CustomRepository(ProductEntity)
 export class ProductRepository extends Repository<ProductEntity> {
-  async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<GetProductDto> {
+  async saveProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductEntity> {
     return await this.save({ sellerId, ...createProductDto });
+  }
+  async findById(id: number): Promise<ProductEntity | null> {
+    return await this.findOne({ where: { id } });
   }
 
   async getProduct(id: number): Promise<GetProductDto | null> {
