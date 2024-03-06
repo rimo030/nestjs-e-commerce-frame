@@ -31,12 +31,9 @@ export class SellerService {
     private readonly productOptionRepository: ProductOptionRepository,
   ) {}
 
-  async createProductBundle(
-    sellerId: number,
-    createProductBundleDto: CreateProductBundleDto,
-  ): Promise<GetProductBundleDto> {
-    const savedProductBundle = await this.productBundleRepository.createProductBundle(sellerId, createProductBundleDto);
-    return savedProductBundle;
+  async createProductBundle(sellerId: number, createProductBundleDto: CreateProductBundleDto): Promise<{ id: number }> {
+    const { id, ...rest } = await this.productBundleRepository.saveProductBundle(sellerId, createProductBundleDto);
+    return { id };
   }
 
   async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<{ id: number }> {

@@ -20,11 +20,9 @@ export class SellerController {
 
   @Post('/product-bundle')
   @ApiOperation({ summary: '묶음 배송 그룹 등록 API', description: 'seller는 묶음 배송 그룹을 등록할 수 있다.' })
-  async createProductBundle(
-    @UserId() sellerId: number,
-    @Body() createProductBundleDto: CreateProductBundleDto,
-  ): Promise<GetProductBundleDto> {
-    return await this.sellerservice.createProductBundle(sellerId, createProductBundleDto);
+  async createProductBundle(@UserId() sellerId: number, @Body() createProductBundleDto: CreateProductBundleDto) {
+    const productBundle = await this.sellerservice.createProductBundle(sellerId, createProductBundleDto);
+    return { data: productBundle };
   }
 
   @HttpCode(201)

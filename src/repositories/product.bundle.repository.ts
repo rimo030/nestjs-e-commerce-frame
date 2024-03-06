@@ -6,11 +6,15 @@ import { GetProductBundleDto } from 'src/seller/dto/get.product.bundle.dto';
 
 @CustomRepository(ProductBundleEntity)
 export class ProductBundleRepository extends Repository<ProductBundleEntity> {
-  async createProductBundle(
+  async saveProductBundle(
     sellerId: number,
     createProductBundleDto: CreateProductBundleDto,
-  ): Promise<GetProductBundleDto> {
+  ): Promise<ProductBundleEntity> {
     return await this.save({ sellerId, ...createProductBundleDto });
+  }
+
+  async findById(id: number): Promise<ProductBundleEntity | null> {
+    return await this.findOne({ where: { id } });
   }
 
   async getProductBundle(id: number): Promise<GetProductBundleDto | null> {

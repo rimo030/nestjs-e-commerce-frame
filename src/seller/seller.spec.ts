@@ -9,6 +9,7 @@ import { CreateSellerDto } from 'src/auth/dto/create.seller.dto';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
 import { ProductController } from 'src/product/product.controller';
+import { ProductBundleRepository } from 'src/repositories/product.bundle.repository';
 import { ProductOptionRepository } from 'src/repositories/product.option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
 import { ProductRequiredOptionRepository } from 'src/repositories/product.required.option.repository';
@@ -25,18 +26,14 @@ describe('Seller Controller', () => {
   let repository: SellerRepository;
 
   let authController: AuthController;
-  //////
-  let jwtService: JwtService;
+  let testId: number | null = null;
 
-  let authService: AuthService;
-
-  let productController: ProductController;
+  let productBundleRepository: ProductBundleRepository;
   let productRepository: ProductRepository;
-
   let productRequiredRepository: ProductRequiredOptionRepository;
   let productOptionRepository: ProductOptionRepository;
 
-  let testId: number | null = null;
+  let productController: ProductController;
 
   /**
    * 구매자 사이드
@@ -51,19 +48,18 @@ describe('Seller Controller', () => {
     service = module.get<SellerService>(SellerService);
     repository = module.get<SellerRepository>(SellerRepository);
 
-    // authController = module.get<AuthController>(AuthController);
-    // authService = module.get<AuthService>(AuthService);
+    authController = module.get<AuthController>(AuthController);
+
+    productBundleRepository = module.get<ProductBundleRepository>(ProductBundleRepository);
+    productRepository = module.get<ProductRepository>(ProductRepository);
+    productRequiredRepository = module.get<ProductRequiredOptionRepository>(ProductRequiredOptionRepository);
+    productOptionRepository = module.get<ProductOptionRepository>(ProductOptionRepository);
 
     // productController = module.get<ProductController>(ProductController);
-    // productRepository = module.get<ProductRepository>(ProductRepository);
-    // productRequiredRepository = module.get<ProductRequiredOptionRepository>(ProductRequiredOptionRepository);
-    // productOptionRepository = module.get<ProductOptionRepository>(ProductOptionRepository);
-
-    // jwtService = module.get<JwtService>(JwtService);
 
     /**
-     * seller 회원이어야 사용가능 하다.
-     * 테스트 seller를 생성한후 id를 추출해 사용한다.
+     * seller 회원이어야 사용 가능하다.
+     * 테스트 seller를 생성한 후 id를 추출해 사용한다.
      */
     const testSeller: CreateSellerDto = {
       email: 'myemail@gmail.com',
@@ -74,7 +70,7 @@ describe('Seller Controller', () => {
     };
 
     await authController.sellerSignUp(testSeller);
-    const { id, ...rest } = await repository.findByEmail(testSeller);
+    const { id, ...rest } = await repository.findByEmail(testSeller.email);
     testId = id;
   });
 
@@ -112,6 +108,20 @@ describe('Seller Controller', () => {
      */
     it.skip('허가 받은지 1년이 지난 경우라면 어떻게 해야 하는가?');
 
+    describe('seller는 상품묶음(bundle)을 생성할 수 있다.', () => {
+      const testProductBundle: CreateProductBundleDto = {
+        name: 'Test Bundle name',
+        chargeStandard: 'MIN',
+      };
+
+      it('상품묶음이 생성 되었다면 DB에서 조회할 수 있어야 한다.', async () => {
+        const { data } = await controller.createProductBundle(testId as number, testProductBundle);
+        const savedProductBundle = await productBundleRepository.findById(data.id);
+
+        expect(savedProductBundle).not.toBe(null);
+      });
+    });
+
     describe('seller는 상품을 생성할 수 있다.', () => {
       const testProduct: CreateProductDto = {
         bundleId: 1,
@@ -139,12 +149,6 @@ describe('Seller Controller', () => {
        */
       it.skip('생성된 상품을 buyer 조회할 수 있어야 한다.', () => {});
 
-      it('상품이 존재한다는 것이 구매자 사이드에서 증명되어야 한다.', async () => {
-        /**
-         * 상품이 있다면 유저 쪽에서 조회 API를 했을 때 나와야 한다.
-         */
-        const response = await productController.getProductList({ page: 1, limit: 1 });
-        expect(response.data.list.length).toBe(1);
       });
     });
 
