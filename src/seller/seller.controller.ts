@@ -1,19 +1,16 @@
-import { Controller, UseGuards, Post, Body, Param, ParseIntPipe, Query, ParseBoolPipe } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, UseGuards, Post, Body, Param, ParseIntPipe, Query } from '@nestjs/common';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { SellerJwtAuthGuard } from 'src/auth/guards/seller.jwt.guard';
 import { UserId } from 'src/decorators/user-id.decorator';
-import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
-import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
-import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
-import { GetProductBundleDto } from 'src/entities/dtos/get-product-bundle.dto';
-import { GetProductOptionDto } from 'src/entities/dtos/get-product-options.dto';
-import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-required-option.dto';
-import { GetProductDto } from 'src/entities/dtos/get-product.dto';
-import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
-import { ProductOptionEntity } from 'src/entities/product-option.entity';
-import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
-import { ProductEntity } from 'src/entities/product.entity';
-import { SellerService } from 'src/services/seller.service';
+import { CreateProductBundleDto } from './dto/create.product.bundle.dto';
+import { CreateProductDto } from './dto/create.product.dto';
+import { CreateProductOptionsDto } from './dto/create.product.options.dto';
+import { GetProductBundleDto } from './dto/get.product.bundle.dto';
+import { GetProductDto } from './dto/get.product.dto';
+import { GetProductOptionDto } from './dto/get.product.options.dto';
+import { GetProductRequiredOptionDto } from './dto/get.product.required.option.dto';
+import { IsRequireOptionDto } from './dto/is.require.option.dto';
+import { SellerService } from './seller.service';
 
 @Controller('seller')
 @ApiTags('Seller API')
@@ -22,7 +19,7 @@ export class SellerController {
   constructor(private readonly sellerservice: SellerService) {}
 
   @Post('/product-bundle')
-  @ApiOperation({ summary: '묶음 배송 그룹 등록 API', description: 'seller는 묶음배송그룹을 등록할 수 있다.' })
+  @ApiOperation({ summary: '묶음 배송 그룹 등록 API', description: 'seller는 묶음 배송 그룹을 등록할 수 있다.' })
   async createProductBundle(
     @UserId() sellerId: number,
     @Body() createProductBundleDto: CreateProductBundleDto,

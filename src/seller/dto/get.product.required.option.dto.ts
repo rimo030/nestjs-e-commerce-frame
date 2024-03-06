@@ -1,6 +1,6 @@
 import { PickType } from '@nestjs/swagger';
-import { ProductInputOptionEntity } from '../product-input-option.entity';
-import { ProductRequiredOptionEntity } from '../product-required-option.entity';
+import { ProductInputOptionEntity } from 'src/entities/product-input-option.entity';
+import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
 
 export class GetProductRequiredOptionDto extends PickType(ProductRequiredOptionEntity, [
   'id',

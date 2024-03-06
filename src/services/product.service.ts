@@ -1,11 +1,7 @@
 import { ILike } from 'typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
 import { GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
-import { GetProductOptionDto } from 'src/entities/dtos/get-product-options.dto';
-import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-required-option.dto';
-import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { PaginationDto } from 'src/entities/dtos/pagination.dto';
 import {
   ProductNotFoundException,
@@ -14,10 +10,14 @@ import {
 } from 'src/exceptions/product.exception';
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { ProductListElement } from 'src/interfaces/product-list-element.interface';
-import { ProductInputOptionRepository } from 'src/repositories/product-input-option.repository';
-import { ProductOptionRepository } from 'src/repositories/product-option-repository';
-import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
+import { ProductInputOptionRepository } from 'src/repositories/product.input.option.repository';
+import { ProductOptionRepository } from 'src/repositories/product.option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
+import { ProductRequiredOptionRepository } from 'src/repositories/product.required.option.repository';
+import { CreateProductDto } from 'src/seller/dto/create.product.dto';
+import { GetProductOptionDto } from 'src/seller/dto/get.product.options.dto';
+import { GetProductRequiredOptionDto } from 'src/seller/dto/get.product.required.option.dto';
+import { IsRequireOptionDto } from 'src/seller/dto/is.require.option.dto';
 import { getOffset } from 'src/util/functions/get-offset.function';
 
 @Injectable()

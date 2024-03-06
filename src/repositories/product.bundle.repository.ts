@@ -1,8 +1,8 @@
 import { Repository } from 'typeorm';
-import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
-import { GetProductBundleDto } from 'src/entities/dtos/get-product-bundle.dto';
+import { CustomRepository } from 'src/configs/custom-typeorm.decorator';
 import { ProductBundleEntity } from 'src/entities/product-bundle.entity';
-import { CustomRepository } from '../configs/custom-typeorm.decorator';
+import { CreateProductBundleDto } from 'src/seller/dto/create.product.bundle.dto';
+import { GetProductBundleDto } from 'src/seller/dto/get.product.bundle.dto';
 
 @CustomRepository(ProductBundleEntity)
 export class ProductBundleRepository extends Repository<ProductBundleEntity> {

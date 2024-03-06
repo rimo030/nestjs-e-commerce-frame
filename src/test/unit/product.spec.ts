@@ -3,7 +3,6 @@ import { AppModule } from 'src/app.module';
 import { ProductController } from 'src/controllers/product.controller';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
-import { GetProductDto } from 'src/entities/dtos/get-product.dto';
 import { ProductInputOptionEntity } from 'src/entities/product-input-option.entity';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
@@ -13,11 +12,12 @@ import { GetProductListResponse } from 'src/interfaces/get-product-list-response
 import { GetProductResponse } from 'src/interfaces/get-product-response.interface';
 import { CategoryRepository } from 'src/repositories/category.repository';
 import { CompanyRepository } from 'src/repositories/company.repository';
-import { ProductInputOptionRepository } from 'src/repositories/product-input-option.repository';
-import { ProductOptionRepository } from 'src/repositories/product-option-repository';
-import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
+import { ProductInputOptionRepository } from 'src/repositories/product.input.option.repository';
+import { ProductOptionRepository } from 'src/repositories/product.option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
+import { ProductRequiredOptionRepository } from 'src/repositories/product.required.option.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
+import { GetProductDto } from 'src/seller/dto/get.product.dto';
 import { ProductService } from 'src/services/product.service';
 
 describe('ProductController', () => {

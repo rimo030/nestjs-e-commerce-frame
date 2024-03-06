@@ -1,9 +1,8 @@
 import { Repository } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
-import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
-import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-required-option.dto';
+import { CustomRepository } from 'src/configs/custom-typeorm.decorator';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
-import { CustomRepository } from '../configs/custom-typeorm.decorator';
+import { CreateProductOptionsDto } from 'src/seller/dto/create.product.options.dto';
+import { GetProductRequiredOptionDto } from 'src/seller/dto/get.product.required.option.dto';
 
 @CustomRepository(ProductRequiredOptionEntity)
 export class ProductRequiredOptionRepository extends Repository<ProductRequiredOptionEntity> {

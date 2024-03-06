@@ -5,19 +5,17 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { AuthController } from 'src/auth/auth.controller';
 import { AuthService } from 'src/auth/auth.service';
+import { CreateSellerDto } from 'src/auth/dto/create.seller.dto';
 import { ProductController } from 'src/controllers/product.controller';
-import { SellerController } from 'src/controllers/seller.controller';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
-import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
-import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
-import { AccessToken } from 'src/interfaces/access-token.interface';
-import { Payload } from 'src/interfaces/payload.interface';
-import { ProductOptionRepository } from 'src/repositories/product-option-repository';
-import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
+import { ProductOptionRepository } from 'src/repositories/product.option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
+import { ProductRequiredOptionRepository } from 'src/repositories/product.required.option.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
-import { SellerService } from 'src/services/seller.service';
+import { IsRequireOptionDto } from './dto/is.require.option.dto';
+import { SellerController } from './seller.controller';
+import { SellerService } from './seller.service';
 
 describe('SellerController', () => {
   let jwtService: JwtService;

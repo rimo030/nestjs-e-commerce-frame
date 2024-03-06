@@ -1,9 +1,9 @@
 import { Repository, ILike } from 'typeorm';
-import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
-import { GetProductDto } from 'src/entities/dtos/get-product.dto';
+import { CustomRepository } from 'src/configs/custom-typeorm.decorator';
 import { ProductEntity } from 'src/entities/product.entity';
 import { ProductListElement } from 'src/interfaces/product-list-element.interface';
-import { CustomRepository } from '../configs/custom-typeorm.decorator';
+import { CreateProductDto } from 'src/seller/dto/create.product.dto';
+import { GetProductDto } from 'src/seller/dto/get.product.dto';
 
 @CustomRepository(ProductEntity)
 export class ProductRepository extends Repository<ProductEntity> {

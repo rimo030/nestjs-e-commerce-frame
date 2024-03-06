@@ -1,8 +1,8 @@
 import { Repository } from 'typeorm';
-import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
-import { GetProductOptionDto } from 'src/entities/dtos/get-product-options.dto';
+import { CustomRepository } from 'src/configs/custom-typeorm.decorator';
 import { ProductOptionEntity } from 'src/entities/product-option.entity';
-import { CustomRepository } from '../configs/custom-typeorm.decorator';
+import { CreateProductOptionsDto } from 'src/seller/dto/create.product.options.dto';
+import { GetProductOptionDto } from 'src/seller/dto/get.product.options.dto';
 
 @CustomRepository(ProductOptionEntity)
 export class ProductOptionRepository extends Repository<ProductOptionEntity> {
