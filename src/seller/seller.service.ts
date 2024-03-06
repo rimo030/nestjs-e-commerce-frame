@@ -1,19 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ProductEntity } from 'src/entities/product.entity';
-import { ProductNotFoundException, ProductUnauthrizedException } from 'src/exceptions/seller.exception';
+import { ProductNotFoundException } from 'src/exceptions/product.exception';
+import { ProductUnauthrizedException } from 'src/exceptions/seller.exception';
 import { ProductBundleRepository } from 'src/repositories/product.bundle.repository';
 import { ProductOptionRepository } from 'src/repositories/product.option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
 import { ProductRequiredOptionRepository } from 'src/repositories/product.required.option.repository';
-import { CreateProductBundleDto } from 'src/seller/dto/create.product.bundle.dto';
-import { CreateProductDto } from 'src/seller/dto/create.product.dto';
-import { CreateProductOptionsDto } from 'src/seller/dto/create.product.options.dto';
-import { GetProductBundleDto } from 'src/seller/dto/get.product.bundle.dto';
-import { GetProductDto } from 'src/seller/dto/get.product.dto';
-import { GetProductOptionDto } from 'src/seller/dto/get.product.options.dto';
-import { GetProductRequiredOptionDto } from 'src/seller/dto/get.product.required.option.dto';
-import { IsRequireOptionDto } from 'src/seller/dto/is.require.option.dto';
+import { CreateProductBundleDto } from './dto/create.product.bundle.dto';
+import { CreateProductDto } from './dto/create.product.dto';
+import { CreateProductOptionsDto } from './dto/create.product.options.dto';
+import { IsRequireOptionDto } from './dto/is.require.option.dto';
 
 @Injectable()
 export class SellerService {
@@ -46,26 +42,26 @@ export class SellerService {
     productId: number,
     isRequireOptionDto: IsRequireOptionDto,
     createProductOptionsDto: CreateProductOptionsDto,
-  ): Promise<GetProductRequiredOptionDto | GetProductOptionDto> {
-    const product = await this.productRepository.getProduct(productId);
+  ): Promise<{ id: number }> {
+    const product = await this.productRepository.findById(productId);
 
-    if (!product?.id) {
+    if (!product) {
       throw new ProductNotFoundException();
     }
 
-    if (product?.sellerId !== sellerId) {
+    if (product.sellerId !== sellerId) {
       throw new ProductUnauthrizedException();
     }
 
     if (isRequireOptionDto.isRequire) {
-      const savedRequiredOption = await this.productRequiredRepository.createRequiredOption(
+      const { id, ...rest } = await this.productRequiredRepository.saveRequiredOption(
         productId,
         createProductOptionsDto,
       );
-      return savedRequiredOption;
+      return { id };
     } else {
-      const savedOption = await this.productOptionRepository.createOption(productId, createProductOptionsDto);
-      return savedOption;
+      const { id, ...rest } = await this.productOptionRepository.saveOption(productId, createProductOptionsDto);
+      return { id };
     }
   }
 }

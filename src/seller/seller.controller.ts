@@ -1,14 +1,10 @@
-import { Controller, UseGuards, Post, Body, Param, ParseIntPipe, Query, HttpCode } from '@nestjs/common';
+import { Controller, UseGuards, Post, Body, HttpCode, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { SellerJwtAuthGuard } from 'src/auth/guards/seller.jwt.guard';
 import { UserId } from 'src/util/decorator/userId.decorator';
 import { CreateProductBundleDto } from './dto/create.product.bundle.dto';
 import { CreateProductDto } from './dto/create.product.dto';
 import { CreateProductOptionsDto } from './dto/create.product.options.dto';
-import { GetProductBundleDto } from './dto/get.product.bundle.dto';
-import { GetProductDto } from './dto/get.product.dto';
-import { GetProductOptionDto } from './dto/get.product.options.dto';
-import { GetProductRequiredOptionDto } from './dto/get.product.required.option.dto';
 import { IsRequireOptionDto } from './dto/is.require.option.dto';
 import { SellerService } from './seller.service';
 
@@ -18,6 +14,7 @@ import { SellerService } from './seller.service';
 export class SellerController {
   constructor(private readonly sellerservice: SellerService) {}
 
+  @HttpCode(201)
   @Post('/product-bundle')
   @ApiOperation({ summary: '묶음 배송 그룹 등록 API', description: 'seller는 묶음 배송 그룹을 등록할 수 있다.' })
   async createProductBundle(@UserId() sellerId: number, @Body() createProductBundleDto: CreateProductBundleDto) {
@@ -33,6 +30,7 @@ export class SellerController {
     return { data: product };
   }
 
+  @HttpCode(201)
   @Post('/product/:id/options')
   @ApiOperation({
     summary: 'product 옵션, 선택옵션 등록 API',
@@ -40,15 +38,16 @@ export class SellerController {
   })
   async createProductOptions(
     @UserId() sellerId: number,
-    @Param('id', ParseIntPipe) productId: number,
+    @Param('productId', ParseIntPipe) productId: number,
     @Query() isRequireOptionDto: IsRequireOptionDto,
     @Body() createProductOptionsDto: CreateProductOptionsDto,
-  ): Promise<GetProductRequiredOptionDto | GetProductOptionDto> {
-    return await this.sellerservice.createProductOptions(
+  ) {
+    const option = await this.sellerservice.createProductOptions(
       sellerId,
       productId,
       isRequireOptionDto,
       createProductOptionsDto,
     );
+    return { data: option };
   }
 }

@@ -6,13 +6,13 @@ import { GetProductOptionDto } from 'src/seller/dto/get.product.options.dto';
 
 @CustomRepository(ProductOptionEntity)
 export class ProductOptionRepository extends Repository<ProductOptionEntity> {
-  async createOption(
-    productId: number,
-    createProductOptionsDto: CreateProductOptionsDto,
-  ): Promise<GetProductOptionDto> {
+  async saveOption(productId: number, createProductOptionsDto: CreateProductOptionsDto): Promise<ProductOptionEntity> {
     return this.save({ productId, ...createProductOptionsDto });
   }
 
+  async findById(id: number): Promise<ProductOptionEntity | null> {
+    return await this.findOneBy({ id });
+  }
   async getOption(id: number): Promise<GetProductOptionDto | null> {
     return await this.findOne({
       select: {

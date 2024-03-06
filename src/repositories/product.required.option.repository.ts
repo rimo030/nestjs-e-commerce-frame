@@ -6,11 +6,15 @@ import { GetProductRequiredOptionDto } from 'src/seller/dto/get.product.required
 
 @CustomRepository(ProductRequiredOptionEntity)
 export class ProductRequiredOptionRepository extends Repository<ProductRequiredOptionEntity> {
-  async createRequiredOption(
+  async saveRequiredOption(
     productId: number,
     createProductOptionsDto: CreateProductOptionsDto,
-  ): Promise<GetProductRequiredOptionDto> {
+  ): Promise<ProductRequiredOptionEntity> {
     return await this.save({ productId, ...createProductOptionsDto });
+  }
+
+  async findById(id: number): Promise<ProductRequiredOptionEntity | null> {
+    return await this.findOneBy({ id });
   }
 
   async getRequiredOption(id: number): Promise<GetProductRequiredOptionDto | null> {
