@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmptyString } from 'src/decorators/is-not-empty-string.decorator';
 import { SellerEntity } from 'src/entities/seller.entity';
+import { IsNotEmptyString } from 'src/util/decorator/validate.decorater';
 import { AuthCommonDto } from './auth.common.dto';
 
 export class CreateSellerDto extends AuthCommonDto implements Pick<SellerEntity, 'name' | 'phone' | 'businessNumber'> {

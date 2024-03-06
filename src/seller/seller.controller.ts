@@ -1,7 +1,7 @@
 import { Controller, UseGuards, Post, Body, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { SellerJwtAuthGuard } from 'src/auth/guards/seller.jwt.guard';
-import { UserId } from 'src/decorators/user-id.decorator';
+import { UserId } from 'src/util/decorator/userId.decorator';
 import { CreateProductBundleDto } from './dto/create.product.bundle.dto';
 import { CreateProductDto } from './dto/create.product.dto';
 import { CreateProductOptionsDto } from './dto/create.product.options.dto';

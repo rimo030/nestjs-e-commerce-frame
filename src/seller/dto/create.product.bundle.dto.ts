@@ -1,8 +1,8 @@
 import { IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmptyString } from 'src/decorators/is-not-empty-string.decorator';
+import { ProductBundleEntity } from 'src/entities/product-bundle.entity';
 import { feeStandard as chargeStandard } from 'src/types/enums/fee-standard.enum';
-import { ProductBundleEntity } from '../../entities/product-bundle.entity';
+import { IsNotEmptyString } from 'src/util/decorator/validate.decorater';
 
 export class CreateProductBundleDto implements Pick<ProductBundleEntity, 'name' | 'chargeStandard'> {
   @ApiProperty({ type: String, description: '묶음 배송 이름', required: true })

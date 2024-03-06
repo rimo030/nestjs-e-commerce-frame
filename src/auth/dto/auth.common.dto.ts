@@ -1,6 +1,6 @@
 import { IsEmail, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmptyString } from 'src/decorators/is-not-empty-string.decorator';
+import { IsNotEmptyString } from 'src/util/decorator/validate.decorater';
 
 export class AuthCommonDto {
   @ApiProperty({ type: String, description: '이메일', required: true, example: 'myemail@gmail.com' })
