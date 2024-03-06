@@ -1,8 +1,6 @@
 import { ILike } from 'typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
 import {
   ProductNotFoundException,
   ProductRequiredOptionsNotFoundException,
@@ -10,6 +8,7 @@ import {
 } from 'src/exceptions/product.exception';
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { ProductListElement } from 'src/interfaces/product-list-element.interface';
+import { GetProductListPaginationDto } from 'src/product/dto/get-product-list-pagination.dto';
 import { ProductInputOptionRepository } from 'src/repositories/product.input.option.repository';
 import { ProductOptionRepository } from 'src/repositories/product.option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
@@ -19,6 +18,7 @@ import { GetProductOptionDto } from 'src/seller/dto/get.product.options.dto';
 import { GetProductRequiredOptionDto } from 'src/seller/dto/get.product.required.option.dto';
 import { IsRequireOptionDto } from 'src/seller/dto/is.require.option.dto';
 import { getOffset } from 'src/util/functions/get-offset.function';
+import { PaginationDto } from 'src/util/pagination/pagination.dto';
 
 @Injectable()
 export class ProductService {

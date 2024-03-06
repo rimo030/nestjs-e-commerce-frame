@@ -8,7 +8,7 @@ import { typeORMConfig } from 'src/configs/typeorm.config';
 import { CartModule } from 'src/modules/cart.module';
 import { CategoryModule } from 'src/modules/category.module';
 import { CompanyModule } from 'src/modules/company.module';
-import { ProductModule } from 'src/modules/product.module';
+import { ProductModule } from 'src/product/product.module';
 import { BuyerRepository } from 'src/repositories/buyer.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
 import { SellerModule } from 'src/seller/seller.module';

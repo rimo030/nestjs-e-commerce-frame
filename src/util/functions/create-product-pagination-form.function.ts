@@ -1,7 +1,7 @@
-import { GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
 import { GetProductListResponse } from 'src/interfaces/get-product-list-response.interface';
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { ProductListElement } from 'src/interfaces/product-list-element.interface';
+import { GetProductListPaginationDto } from 'src/product/dto/get-product-list-pagination.dto';
 import { getTotalPage } from './get-total-page.function';
 
 export function createProductPaginationForm(

@@ -2,9 +2,9 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { CompanyController } from 'src/controllers/company.controller';
 import { CompanyEntity } from 'src/entities/company.entity';
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
 import { CompanyRepository } from 'src/repositories/company.repository';
 import { CompanyService } from 'src/services/company.service';
+import { PaginationDto } from 'src/util/pagination/pagination.dto';
 
 describe('Company Test suite', () => {
   let controller: CompanyController;

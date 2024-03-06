@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { GetCompanyDto } from 'src/entities/dtos/get-company.dto';
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { CompanyRepository } from 'src/repositories/company.repository';
 import { getOffset } from 'src/util/functions/get-offset.function';
+import { PaginationDto } from 'src/util/pagination/pagination.dto';
 
 @Injectable()
 export class CompanyService {

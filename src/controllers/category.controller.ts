@@ -2,10 +2,10 @@ import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { GetCategoryDto } from 'src/entities/dtos/get-category.dto';
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
 import { PaginationResponseForm } from 'src/interfaces/pagination-response-form.interface';
 import { CategoryService } from 'src/services/category.service';
 import { createResponseForm } from 'src/util/functions/create-response-form.function';
+import { PaginationDto } from 'src/util/pagination/pagination.dto';
 
 @Controller('category')
 @ApiTags('Categry API')

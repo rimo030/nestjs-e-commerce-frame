@@ -1,4 +1,4 @@
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
+import { PaginationDto } from 'src/util/pagination/pagination.dto';
 
 /**
  * 아무런 page와 limit와 주지 않으면

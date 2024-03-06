@@ -1,6 +1,5 @@
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
-import { ProductController } from 'src/controllers/product.controller';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
 import { ProductInputOptionEntity } from 'src/entities/product-input-option.entity';
@@ -10,6 +9,8 @@ import { ProductEntity } from 'src/entities/product.entity';
 import { SellerEntity } from 'src/entities/seller.entity';
 import { GetProductListResponse } from 'src/interfaces/get-product-list-response.interface';
 import { GetProductResponse } from 'src/interfaces/get-product-response.interface';
+import { ProductController } from 'src/product/product.controller';
+import { ProductService } from 'src/product/product.service';
 import { CategoryRepository } from 'src/repositories/category.repository';
 import { CompanyRepository } from 'src/repositories/company.repository';
 import { ProductInputOptionRepository } from 'src/repositories/product.input.option.repository';
@@ -18,7 +19,6 @@ import { ProductRepository } from 'src/repositories/product.repository';
 import { ProductRequiredOptionRepository } from 'src/repositories/product.required.option.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
 import { GetProductDto } from 'src/seller/dto/get.product.dto';
-import { ProductService } from 'src/services/product.service';
 
 describe('ProductController', () => {
   let controller: ProductController;

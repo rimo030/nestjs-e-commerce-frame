@@ -1,7 +1,7 @@
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { PaginationResponseForm } from 'src/interfaces/pagination-response-form.interface';
 import { ResponseForm } from 'src/interfaces/response-form.interface';
+import { PaginationDto } from 'src/util/pagination/pagination.dto';
 import { isPaginationResponseTypeGuard } from '../type-guards/is-pagination-response-type-guard';
 import { getTotalPage } from './get-total-page.function';
 

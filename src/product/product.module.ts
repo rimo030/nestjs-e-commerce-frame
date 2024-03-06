@@ -4,8 +4,8 @@ import { ProductInputOptionRepository } from 'src/repositories/product.input.opt
 import { ProductOptionRepository } from 'src/repositories/product.option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
 import { ProductRequiredOptionRepository } from 'src/repositories/product.required.option.repository';
-import { ProductController } from '../controllers/product.controller';
-import { ProductService } from '../services/product.service';
+import { ProductController } from './product.controller';
+import { ProductService } from './product.service';
 
 @Module({
   imports: [

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptionalString, IsOptionalNumber } from 'src/util/decorator/validate.decorater';
-import { PaginationDto } from './pagination.dto';
+import { PaginationDto } from '../../util/pagination/pagination.dto';
 
 export class GetProductListPaginationDto extends PaginationDto {
   /**

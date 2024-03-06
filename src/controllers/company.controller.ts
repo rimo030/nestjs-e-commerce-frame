@@ -3,11 +3,11 @@ import { ApiTags } from '@nestjs/swagger';
 import { SellerJwtAuthGuard } from 'src/auth/guards/seller.jwt.guard';
 import { CompanyEntity } from 'src/entities/company.entity';
 import { GetCompanyDto } from 'src/entities/dtos/get-company.dto';
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
 import { PaginationResponseForm } from 'src/interfaces/pagination-response-form.interface';
 import { CompanyService } from 'src/services/company.service';
 import { UserId } from 'src/util/decorator/userId.decorator';
 import { createResponseForm } from 'src/util/functions/create-response-form.function';
+import { PaginationDto } from 'src/util/pagination/pagination.dto';
 
 @Controller('company')
 @ApiTags('Company API')

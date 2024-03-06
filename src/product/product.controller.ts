@@ -1,17 +1,17 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
 import { GetProductListResponse } from 'src/interfaces/get-product-list-response.interface';
 import { GetProductResponse } from 'src/interfaces/get-product-response.interface';
 import { PaginationResponseForm } from 'src/interfaces/pagination-response-form.interface';
 import { ResponseForm } from 'src/interfaces/response-form.interface';
+import { GetProductListPaginationDto } from 'src/product/dto/get-product-list-pagination.dto';
+import { ProductService } from 'src/product/product.service';
 import { GetProductOptionDto } from 'src/seller/dto/get.product.options.dto';
 import { GetProductRequiredOptionDto } from 'src/seller/dto/get.product.required.option.dto';
 import { IsRequireOptionDto } from 'src/seller/dto/is.require.option.dto';
-import { ProductService } from 'src/services/product.service';
 import { createProductPaginationForm } from 'src/util/functions/create-product-pagination-form.function';
 import { createResponseForm } from 'src/util/functions/create-response-form.function';
+import { PaginationDto } from 'src/util/pagination/pagination.dto';
 
 @Controller('products')
 @ApiTags('Product API')
