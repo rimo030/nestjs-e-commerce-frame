@@ -5,7 +5,7 @@
  * limit : 한번에 읽어올 요소의 수
  *
  */
-export const getTotalPage = (totalCount = 0, limit = 0): { totalPage: number } => {
+export const getTotalPage = (totalCount = 0, limit = 0): number => {
   const totalPage = totalCount % limit === 0 ? totalCount / limit : Math.floor(totalCount / limit) + 1;
-  return { totalPage };
+  return totalPage;
 };
