@@ -1,17 +1,11 @@
 import { Controller, Get, Param, ParseIntPipe, Query } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
-import { GetProductOptionDto } from 'src/entities/dtos/get-product-options.dto';
-import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-required-option.dto';
 import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
+import { PaginationResponseDto } from 'src/entities/dtos/pagination-response.dto';
 import { PaginationDto } from 'src/entities/dtos/pagination.dto';
-import { GetProductListResponse } from 'src/interfaces/get-product-list-response.interface';
-import { GetProductResponse } from 'src/interfaces/get-product-response.interface';
-import { PaginationResponseForm } from 'src/interfaces/pagination-response-form.interface';
-import { ResponseForm } from 'src/interfaces/response-form.interface';
+import { ProductListDto } from 'src/entities/dtos/product-list.dto';
 import { ProductService } from 'src/services/product.service';
-import { createProductPaginationForm } from 'src/util/functions/create-product-pagination-form.function';
-import { createResponseForm } from 'src/util/functions/create-response-form.function';
 
 @Controller('products')
 @ApiTags('Product API')
@@ -36,27 +30,22 @@ export class ProductController {
     @Param('id', ParseIntPipe) productId: number,
     @Query() isRequireOptionDto: IsRequireOptionDto,
     @Query() paginationDto: PaginationDto,
-  ): Promise<PaginationResponseForm<GetProductRequiredOptionDto | GetProductOptionDto>> {
-    const response = await this.productService.getProductOptions(productId, isRequireOptionDto, paginationDto);
-    return createResponseForm(response, paginationDto);
+  ) {
+    return await this.productService.getProductOptions(productId, isRequireOptionDto, paginationDto);
   }
 
   @Get('/:id')
   @ApiOperation({ summary: '상품 상세 조회 API', description: '등록된 상품의 정보를 확인할 수 있다.' })
-  async getProduct(@Param('id', ParseIntPipe) id: number): Promise<ResponseForm<GetProductResponse>> {
-    const [product, productRequiredOptions, productOptions] = await Promise.all([
-      this.productService.getProduct(id),
-      this.productService.getProductOptions(id, { isRequire: true }, { page: 1, limit: 10 }),
-      this.productService.getProductOptions(id, { isRequire: false }, { page: 1, limit: 10 }),
-    ]);
-
-    return createResponseForm({ product, productRequiredOptions, productOptions });
+  async getProduct(@Param('id', ParseIntPipe) id: number) {
+    const productAllOption = await this.productService.getProduct(id);
+    return { data: productAllOption };
   }
 
   @Get()
   @ApiOperation({ summary: '상품 리스트 조회 API', description: '모든 사용자는 등록된 상품 리스트를 확인할 수 있다.' })
-  async getProductList(@Query() productPaginationDto: GetProductListPaginationDto): Promise<GetProductListResponse> {
-    const response = await this.productService.getProductList(productPaginationDto);
-    return createProductPaginationForm(response, productPaginationDto);
+  async getProductList(
+    @Query() getProductListPaginationDto: GetProductListPaginationDto,
+  ): Promise<PaginationResponseDto<ProductListDto>> {
+    return await this.productService.getProductList(getProductListPaginationDto);
   }
 }

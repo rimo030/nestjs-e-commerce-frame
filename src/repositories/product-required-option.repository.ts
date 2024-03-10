@@ -1,20 +1,20 @@
 import { Repository } from 'typeorm';
-import { NotFoundException } from '@nestjs/common';
+import { CustomRepository } from 'src/configs/custom-typeorm.decorator';
 import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
-import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-required-option.dto';
+import { ProductRequiredOptionDto } from 'src/entities/dtos/product-required-option.dto';
+import { ProductRequiredOptionJoinInputOptionDto } from 'src/entities/dtos/product-rquired-option-join-input-option.dto';
 import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
-import { CustomRepository } from '../configs/custom-typeorm.decorator';
 
 @CustomRepository(ProductRequiredOptionEntity)
 export class ProductRequiredOptionRepository extends Repository<ProductRequiredOptionEntity> {
-  async createRequiredOption(
+  async saveRequiredOption(
     productId: number,
     createProductOptionsDto: CreateProductOptionsDto,
-  ): Promise<GetProductRequiredOptionDto> {
+  ): Promise<ProductRequiredOptionEntity> {
     return await this.save({ productId, ...createProductOptionsDto });
   }
 
-  async getRequiredOption(id: number): Promise<GetProductRequiredOptionDto | null> {
+  async getRequiredOption(id: number): Promise<ProductRequiredOptionDto | null> {
     return await this.findOne({
       select: {
         id: true,
@@ -42,7 +42,7 @@ export class ProductRequiredOptionRepository extends Repository<ProductRequiredO
     productId: number,
     skip: number,
     take: number,
-  ): Promise<[GetProductRequiredOptionDto[], number]> {
+  ): Promise<[ProductRequiredOptionJoinInputOptionDto[], number]> {
     return await this.findAndCount({
       select: {
         id: true,
