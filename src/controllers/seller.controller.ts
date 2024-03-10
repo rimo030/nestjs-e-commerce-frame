@@ -1,5 +1,5 @@
 import { Controller, UseGuards, HttpCode, Post, Body, Param, ParseIntPipe, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { SellerJwtAuthGuard } from 'src/auth/guards/seller-jwt.guard';
 import { UserId } from 'src/decorators/user-id.decorator';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
@@ -9,6 +9,7 @@ import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { SellerService } from 'src/services/seller.service';
 
 @Controller('seller')
+@ApiBearerAuth('token')
 @ApiTags('Seller API')
 @UseGuards(SellerJwtAuthGuard) // seller 로그인 후 접속가능
 export class SellerController {
