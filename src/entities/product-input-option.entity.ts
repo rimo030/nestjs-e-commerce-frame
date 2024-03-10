@@ -5,11 +5,6 @@ import { ProductRequiredOptionEntity } from './product-required-option.entity';
 
 @Entity({ name: 'product_input_option' })
 export class ProductInputOptionEntity extends CommonEntity {
-  constructor(dto: Partial<ProductInputOptionEntity>) {
-    super();
-
-    Object.assign(this, dto);
-  }
   @Column()
   productRequiredOptionId!: number;
 
