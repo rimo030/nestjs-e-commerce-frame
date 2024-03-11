@@ -1,16 +1,16 @@
 import { ProductEntity } from '../product.entity';
 import { PaginationResponseDto } from './pagination-response.dto';
 import { ProductOptionDto } from './product-option.dto';
-import { ProductRequiredOptionDto } from './product-required-option.dto';
+import { ProductRequiredOptionJoinInputOptionDto } from './product-rquired-option-join-input-option.dto';
 import { ProductDto } from './product.dto';
 
 export class ProductAllOptionsDto extends ProductDto {
-  productRequiredOptions: PaginationResponseDto<ProductRequiredOptionDto>;
+  productRequiredOptions: PaginationResponseDto<ProductRequiredOptionJoinInputOptionDto>;
   productOptions: PaginationResponseDto<ProductOptionDto>;
 
   constructor(
     product: ProductEntity,
-    productRequiredOptions: PaginationResponseDto<ProductRequiredOptionDto>,
+    productRequiredOptions: PaginationResponseDto<ProductRequiredOptionJoinInputOptionDto>,
     productOptions: PaginationResponseDto<ProductOptionDto>,
   ) {
     super(product);
