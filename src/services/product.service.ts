@@ -38,7 +38,14 @@ export class ProductService {
     if (!product) {
       throw new ProductNotFoundException();
     }
-    return new ProductAllOptionsDto(product, paginationRequirdOptions, paginationOptions);
+    /**
+     * @todo remove as
+     */
+    return new ProductAllOptionsDto(
+      product,
+      paginationRequirdOptions as PaginationResponseDto<ProductRequiredOptionJoinInputOptionDto>,
+      paginationOptions as PaginationResponseDto<ProductOptionDto>,
+    );
   }
 
   async getProductList(
