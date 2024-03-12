@@ -9,9 +9,25 @@ export class CreateCartDto implements Pick<CartEntity, 'productId'> {
   @IsNotEmptyNumber()
   productId!: number;
 
-  @ApiProperty({ type: Number, description: '장바구니에 담길 필수옵션의 정보', required: true, example: 1 })
+  @ApiProperty({
+    type: Number,
+    description: '장바구니에 담길 필수옵션의 정보',
+    required: true,
+    example: [
+      { productRequiredOptionId: 1, count: 2 },
+      { productRequiredOptionId: 2, count: 1 },
+    ],
+  })
   cartRequiredOptions!: CreateCartRequiredOptionDto[];
 
-  @ApiProperty({ type: Number, description: '장바구니에 담길 선택옵션의 정보', required: false, example: 1 })
+  @ApiProperty({
+    type: Number,
+    description: '장바구니에 담길 선택옵션의 정보',
+    required: false,
+    example: [
+      { productOptionId: 1, count: 2 },
+      { productOptionId: 2, count: 1 },
+    ],
+  })
   cartOptions!: CreateCartOptionDto[];
 }
