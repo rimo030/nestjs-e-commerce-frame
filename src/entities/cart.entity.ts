@@ -14,8 +14,8 @@ export class CartEntity extends CommonEntity {
   @Column()
   productId!: number;
 
-  @Column({ type: 'int' })
-  count!: number;
+  // @Column({ type: 'int' })
+  // count!: number;
 
   /**
    * relations
