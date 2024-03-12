@@ -1,10 +1,65 @@
 import { Injectable } from '@nestjs/common';
+import { CartDto } from 'src/entities/dtos/cart.dto';
+import { CreateCartDto } from 'src/entities/dtos/create-cart.dto';
 import { ProductBundleEntity } from 'src/entities/product-bundle.entity';
+import { CartOptionRepository } from 'src/repositories/cart-option.repository';
+import { CartRequiredOptionRepository } from 'src/repositories/cart-required-option.repository';
 import { CartRepository } from 'src/repositories/cart.repository';
 
 @Injectable()
 export class CartService {
-  constructor(private readonly cartRepository: CartRepository) {}
+  constructor(
+    private readonly cartRepository: CartRepository,
+    private readonly cartRequiredOptionRepository: CartRequiredOptionRepository,
+    private readonly cartOptionRepository: CartOptionRepository,
+  ) {}
+
+  /**
+   * 1. 장바구니를 조회한다.
+   * 2. 장바구니에 아직 없는 상품인 경우 그대로 장바구니, 장바구니 옵션, 장바구니 선택 옵션을 담는다.
+   * 3. 장바구니에 이미 있는 상품일 경우
+   * 3-1. 이미 존재하는 옵션인지 체크하고, 존재할 경우에는 수량만 더해주고 없을 경우에는 장바구니 옵션을 추가한다.
+   * 3-2. 선택 옵션도 동일하게 처리한다.
+   */
+  async addCart(buyerId: number, createCartDto: CreateCartDto): Promise<CartDto> {
+    const cart = await this.cartRepository.findCart(buyerId, createCartDto.productId);
+
+    if (!cart) {
+      const newCart = await this.cartRepository.saveCart(buyerId, createCartDto.productId);
+
+      const cartRequiedOptions = await this.cartRequiredOptionRepository.saveCart(
+        newCart.id,
+        createCartDto.cartRequiredOptions,
+      );
+      const cartOptions = await this.cartOptionRepository.saveCart(newCart.id, createCartDto.cartOptions);
+
+      return new CartDto(newCart, [], cartRequiedOptions, [], cartOptions);
+    } else {
+      const ExistRequriedOptions = createCartDto.cartRequiredOptions.filter((d) =>
+        cart.cartRequiredOptions.some((c) => c.productRequiredOptionId === d.productRequiredOptionId),
+      );
+      const notExistRequriedOptions = createCartDto.cartRequiredOptions.filter(
+        (d) => !cart.cartRequiredOptions.some((c) => c.productRequiredOptionId === d.productRequiredOptionId),
+      );
+
+      const existRequiredIds = ExistRequriedOptions.map((e) => e.productRequiredOptionId);
+      const updateRequiredOptions = await this.cartRequiredOptionRepository.increaseCount(existRequiredIds);
+      const newRequiredOptions = await this.cartRequiredOptionRepository.saveCart(cart.id, notExistRequriedOptions);
+
+      const ExistOptions = createCartDto.cartOptions.filter((d) =>
+        cart.cartOptions.some((c) => c.productOptionId === d.productOptionId),
+      );
+      const notExistOptions = createCartDto.cartOptions.filter(
+        (d) => !cart.cartOptions.some((c) => c.productOptionId === d.productOptionId),
+      );
+
+      const existOptionIds = ExistOptions.map((e) => e.productOptionId);
+      const updateOptions = await this.cartOptionRepository.increaseCount(existOptionIds);
+      const newOptions = await this.cartOptionRepository.saveCart(cart.id, notExistOptions);
+
+      return new CartDto(cart, updateRequiredOptions, newRequiredOptions, updateOptions, newOptions);
+    }
+  }
   /**
    * 유저의 장바구니를 읽습니다.
    *
@@ -116,41 +171,4 @@ export class CartService {
    * @param cartType
    */
   deleteCartOption(userId: number, cartId: number, cartOptionId: number, cartType: 'option' | 'requiredOption') {}
-
-  /**
-   * 장바구니에 상품을 담는다.
-   * 옵션을 담아야 한다.
-   * 상품 선택 옵션만 존재할 수는 없다.
-   *
-   * @param userId 상품을 담는 유저
-   * @param product 담을 상품의 정보로, 상품
-   */
-  addCart(
-    userId: number,
-    product: {
-      /**
-       * 상품의 아이디
-       */
-      id: number;
-
-      /**
-       * 해당 상품 아이디에 속하는 필수 옵션들의 정보
-       */
-      productRequiredOptions: { id: number; price: number; count: number }[];
-
-      /**
-       * 해당 상품 아이디에 속하는 옵션들의 정보
-       */
-      productOptions: { id: number; price: number; count: number }[];
-    },
-  ) {
-    /**
-     * 1. 장바구니를 조회한다.
-     * 2. 장바구니에 아직 없는 상품인 경우 그대로 장바구니, 장바구니 옵션, 장바구니 선택 옵션을 담는다.
-     * 3. 장바구니에 이미 있는 상품일 경우
-     * 3-1. 이미 존재하는 옵션인지 체크하고, 존재할 경우에는 수량만 더해주고 없을 경우에는 장바구니 옵션을 추가한다.
-     * 3-2. 선택 옵션도 동일하게 처리한다.
-     */
-    return [] as any;
-  }
 }
