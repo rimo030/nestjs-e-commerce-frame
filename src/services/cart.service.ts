@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { CartEntity } from 'src/entities/cart.entity';
 import { CartDto } from 'src/entities/dtos/cart.dto';
+import { CreateCartOptionDto } from 'src/entities/dtos/create-cart-option.dto';
+import { CreateCartRequiredOptionDto } from 'src/entities/dtos/create-cart-required-option.dto';
 import { CreateCartDto } from 'src/entities/dtos/create-cart.dto';
+import { UpdateCartDto } from 'src/entities/dtos/update-cart.dto';
 import { ProductBundleEntity } from 'src/entities/product-bundle.entity';
+import { CartIntercnalServerErrorException } from 'src/exceptions/cart.exception';
 import { CartOptionRepository } from 'src/repositories/cart-option.repository';
 import { CartRequiredOptionRepository } from 'src/repositories/cart-required-option.repository';
 import { CartRepository } from 'src/repositories/cart.repository';
@@ -21,49 +26,100 @@ export class CartService {
    * 3-1. 이미 존재하는 옵션인지 체크하고, 존재할 경우에는 수량만 더해주고 없을 경우에는 장바구니 옵션을 추가한다.
    * 3-2. 선택 옵션도 동일하게 처리한다.
    */
-  async addCart(buyerId: number, createCartDto: CreateCartDto): Promise<CartDto> {
+  async addCart(buyerId: number, createCartDto: CreateCartDto): Promise<CartDto | UpdateCartDto> {
     const cart = await this.cartRepository.findCart(buyerId, createCartDto.productId);
-
     if (!cart) {
-      const newCart = await this.cartRepository.saveCart(buyerId, createCartDto.productId);
-
-      const cartRequiedOptions = await this.cartRequiredOptionRepository.saveCart(
-        newCart.id,
-        createCartDto.cartRequiredOptions,
-      );
-      const cartOptions = await this.cartOptionRepository.saveCart(newCart.id, createCartDto.cartOptions);
-
-      return new CartDto(newCart, [], cartRequiedOptions, [], cartOptions);
+      const newCart = await this.createCartWithOptions(buyerId, createCartDto);
+      return newCart;
     } else {
-      const ExistRequriedOptions = cart.cartRequiredOptions.filter((d) =>
-        createCartDto.cartRequiredOptions.some((c) => c.productRequiredOptionId === d.productRequiredOptionId),
-      );
-      const notExistRequriedOptions = createCartDto.cartRequiredOptions.filter(
-        (d) => !cart.cartRequiredOptions.some((c) => c.productRequiredOptionId === d.productRequiredOptionId),
-      );
-
-      const existRequiredIds = ExistRequriedOptions.map((e) => e.id);
-      const updateRequiredOptions = await this.cartRequiredOptionRepository.increaseCount(existRequiredIds);
-      const newRequiredOptions = await this.cartRequiredOptionRepository.saveCart(cart.id, notExistRequriedOptions);
-
-      if (createCartDto.cartOptions.length) {
-        const ExistOptions = cart.cartOptions.filter((d) =>
-          createCartDto.cartOptions.some((c) => c.productOptionId === d.productOptionId),
-        );
-        const notExistOptions = createCartDto.cartOptions.filter(
-          (d) => !cart.cartOptions.some((c) => c.productOptionId === d.productOptionId),
-        );
-
-        const existOptionIds = ExistOptions.map((e) => e.id);
-        const updateOptions = await this.cartOptionRepository.increaseCount(existOptionIds);
-        const newOptions = await this.cartOptionRepository.saveCart(cart.id, notExistOptions);
-
-        return new CartDto(cart, updateRequiredOptions, newRequiredOptions, updateOptions, newOptions);
-      }
-
-      return new CartDto(cart, updateRequiredOptions, newRequiredOptions, [], []);
+      const updateCart = await this.updateCartWithOptions(cart, createCartDto);
+      return updateCart;
     }
   }
+  private async createCartWithOptions(buyerId: number, createCartDto: CreateCartDto): Promise<CartDto> {
+    const { productId, cartRequiredOptions, cartOptions } = createCartDto;
+    const newCart = await this.cartRepository.saveCart(buyerId, productId);
+
+    const [savedRequriedOptions, savedOptions] = await Promise.all([
+      this.createCartRequiredOption(newCart.id, cartRequiredOptions),
+      this.createCartOption(newCart.id, cartOptions),
+    ]);
+    return new CartDto(newCart, savedRequriedOptions, savedOptions);
+  }
+
+  private async updateCartWithOptions(cart: CartEntity, createCartDto: CreateCartDto): Promise<UpdateCartDto> {
+    const { productId, cartRequiredOptions, cartOptions } = createCartDto;
+
+    const existRequiredOptionIds = await this.findExistingCartRequiredOptionIds(cart, cartRequiredOptions);
+    const updateRequiredOptionResult = await this.cartRequiredOptionRepository.increaseCount(existRequiredOptionIds);
+    if (existRequiredOptionIds.length !== updateRequiredOptionResult.affected) {
+      throw new CartIntercnalServerErrorException();
+    }
+
+    const notExistRequriedOptions = cartRequiredOptions.filter(
+      (d) => !cart.cartRequiredOptions.some((c) => c.productRequiredOptionId === d.productRequiredOptionId),
+    );
+    const newRequiredOptions = await this.createCartRequiredOption(cart.id, notExistRequriedOptions);
+
+    if (cartOptions.length) {
+      const existOptionIds = await this.findExistingCartOptionIds(cart, cartOptions);
+
+      const updateOptionResult = await this.cartOptionRepository.increaseCount(existOptionIds);
+      if (existOptionIds.length !== updateOptionResult.affected) {
+        throw new CartIntercnalServerErrorException();
+      }
+
+      const notExistOptions = cartOptions.filter(
+        (d) => !cart.cartOptions.some((c) => c.productOptionId === d.productOptionId),
+      );
+      const newOptions = await this.createCartOption(cart.id, notExistOptions);
+      return new UpdateCartDto({
+        cart,
+        updateCartRequiredOptionIds: existRequiredOptionIds,
+        cartRequiredOptions: newRequiredOptions,
+        updateCartOptionIds: existOptionIds,
+        cartOptions: newOptions,
+      });
+    }
+    return new UpdateCartDto({
+      cart,
+      updateCartRequiredOptionIds: existRequiredOptionIds,
+      cartRequiredOptions: newRequiredOptions,
+      updateCartOptionIds: [],
+      cartOptions: [],
+    });
+  }
+
+  private async createCartRequiredOption(cartId: number, createCartRequiredOptionDto: CreateCartRequiredOptionDto[]) {
+    return await this.cartRequiredOptionRepository.saveCart(cartId, createCartRequiredOptionDto);
+  }
+
+  private async createCartOption(cartId: number, createCartOptionDto: CreateCartOptionDto[]) {
+    return await this.cartOptionRepository.saveCart(cartId, createCartOptionDto);
+  }
+
+  private async findExistingCartRequiredOptionIds(
+    cart: CartEntity,
+    createCartRequiredOptionDto: CreateCartRequiredOptionDto[],
+  ): Promise<number[]> {
+    const existingRequiredOptions = cart.cartRequiredOptions.filter((c) =>
+      createCartRequiredOptionDto.some((d) => c.productRequiredOptionId === d.productRequiredOptionId),
+    );
+    const ids = existingRequiredOptions.map((e) => e.id);
+    return ids;
+  }
+
+  private async findExistingCartOptionIds(
+    cart: CartEntity,
+    createCartOptionDto: CreateCartOptionDto[],
+  ): Promise<number[]> {
+    const existingOptions = cart.cartOptions.filter((c) =>
+      createCartOptionDto.some((d) => c.productOptionId === d.productOptionId),
+    );
+    const ids = existingOptions.map((e) => e.id);
+    return ids;
+  }
+
   /**
    * 유저의 장바구니를 읽습니다.
    *
