@@ -35,29 +35,33 @@ export class CartService {
 
       return new CartDto(newCart, [], cartRequiedOptions, [], cartOptions);
     } else {
-      const ExistRequriedOptions = createCartDto.cartRequiredOptions.filter((d) =>
-        cart.cartRequiredOptions.some((c) => c.productRequiredOptionId === d.productRequiredOptionId),
+      const ExistRequriedOptions = cart.cartRequiredOptions.filter((d) =>
+        createCartDto.cartRequiredOptions.some((c) => c.productRequiredOptionId === d.productRequiredOptionId),
       );
       const notExistRequriedOptions = createCartDto.cartRequiredOptions.filter(
         (d) => !cart.cartRequiredOptions.some((c) => c.productRequiredOptionId === d.productRequiredOptionId),
       );
 
-      const existRequiredIds = ExistRequriedOptions.map((e) => e.productRequiredOptionId);
+      const existRequiredIds = ExistRequriedOptions.map((e) => e.id);
       const updateRequiredOptions = await this.cartRequiredOptionRepository.increaseCount(existRequiredIds);
       const newRequiredOptions = await this.cartRequiredOptionRepository.saveCart(cart.id, notExistRequriedOptions);
 
-      const ExistOptions = createCartDto.cartOptions.filter((d) =>
-        cart.cartOptions.some((c) => c.productOptionId === d.productOptionId),
-      );
-      const notExistOptions = createCartDto.cartOptions.filter(
-        (d) => !cart.cartOptions.some((c) => c.productOptionId === d.productOptionId),
-      );
+      if (createCartDto.cartOptions.length) {
+        const ExistOptions = cart.cartOptions.filter((d) =>
+          createCartDto.cartOptions.some((c) => c.productOptionId === d.productOptionId),
+        );
+        const notExistOptions = createCartDto.cartOptions.filter(
+          (d) => !cart.cartOptions.some((c) => c.productOptionId === d.productOptionId),
+        );
 
-      const existOptionIds = ExistOptions.map((e) => e.productOptionId);
-      const updateOptions = await this.cartOptionRepository.increaseCount(existOptionIds);
-      const newOptions = await this.cartOptionRepository.saveCart(cart.id, notExistOptions);
+        const existOptionIds = ExistOptions.map((e) => e.id);
+        const updateOptions = await this.cartOptionRepository.increaseCount(existOptionIds);
+        const newOptions = await this.cartOptionRepository.saveCart(cart.id, notExistOptions);
 
-      return new CartDto(cart, updateRequiredOptions, newRequiredOptions, updateOptions, newOptions);
+        return new CartDto(cart, updateRequiredOptions, newRequiredOptions, updateOptions, newOptions);
+      }
+
+      return new CartDto(cart, updateRequiredOptions, newRequiredOptions, [], []);
     }
   }
   /**
