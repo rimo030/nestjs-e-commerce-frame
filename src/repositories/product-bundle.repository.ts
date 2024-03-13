@@ -1,28 +1,22 @@
 import { Repository } from 'typeorm';
+import { CustomRepository } from 'src/configs/custom-typeorm.decorator';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
-import { GetProductBundleDto } from 'src/entities/dtos/get-product-bundle.dto';
+import { ProductBundleDto } from 'src/entities/dtos/product-bundle.dto';
 import { ProductBundleEntity } from 'src/entities/product-bundle.entity';
-import { CustomRepository } from '../configs/custom-typeorm.decorator';
 
 @CustomRepository(ProductBundleEntity)
 export class ProductBundleRepository extends Repository<ProductBundleEntity> {
-  async createProductBundle(
+  async saveProductBundle(
     sellerId: number,
     createProductBundleDto: CreateProductBundleDto,
-  ): Promise<GetProductBundleDto> {
+  ): Promise<ProductBundleEntity> {
     return await this.save({ sellerId, ...createProductBundleDto });
   }
 
-  async getProductBundle(id: number): Promise<GetProductBundleDto | null> {
-    return this.findOne({
-      select: {
-        id: true,
-        name: true,
-        chargeStandard: true,
-      },
-      where: {
-        id,
-      },
+  async getProductBundle(id: number): Promise<ProductBundleDto | null> {
+    return await this.findOne({
+      select: { id: true, sellerId: true, name: true, chargeStandard: true },
+      where: { id },
     });
   }
 }

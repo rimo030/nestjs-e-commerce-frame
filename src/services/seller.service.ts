@@ -1,14 +1,15 @@
-import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
-import { GetProductBundleDto } from 'src/entities/dtos/get-product-bundle.dto';
-import { GetProductOptionDto } from 'src/entities/dtos/get-product-options.dto';
-import { GetProductRequiredOptionDto } from 'src/entities/dtos/get-product-required-option.dto';
-import { GetProductDto } from 'src/entities/dtos/get-product.dto';
 import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
-import { ProductNotFoundException, ProductUnauthrizedException } from 'src/exceptions/seller.exception';
+import { ProductBundleDto } from 'src/entities/dtos/product-bundle.dto';
+import { ProductOptionDto } from 'src/entities/dtos/product-option.dto';
+import { ProductRequiredOptionDto } from 'src/entities/dtos/product-required-option.dto';
+import { ProductDto } from 'src/entities/dtos/product.dto';
+import { ProductNotFoundException } from 'src/exceptions/product.exception';
+import { ProductUnauthrizedException } from 'src/exceptions/seller.exception';
 import { ProductBundleRepository } from 'src/repositories/product-bundle.repository';
 import { ProductOptionRepository } from 'src/repositories/product-option-repository';
 import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
@@ -33,14 +34,14 @@ export class SellerService {
   async createProductBundle(
     sellerId: number,
     createProductBundleDto: CreateProductBundleDto,
-  ): Promise<GetProductBundleDto> {
-    const savedProductBundle = await this.productBundleRepository.createProductBundle(sellerId, createProductBundleDto);
-    return savedProductBundle;
+  ): Promise<ProductBundleDto> {
+    const productBundle = await this.productBundleRepository.saveProductBundle(sellerId, createProductBundleDto);
+    return new ProductBundleDto(productBundle);
   }
 
-  async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<GetProductDto> {
-    const savedProduct = await this.productRepository.createProduct(sellerId, createProductDto);
-    return savedProduct;
+  async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductDto> {
+    const product = await this.productRepository.saveProduct(sellerId, createProductDto);
+    return new ProductDto(product);
   }
 
   async createProductOptions(
@@ -48,26 +49,26 @@ export class SellerService {
     productId: number,
     isRequireOptionDto: IsRequireOptionDto,
     createProductOptionsDto: CreateProductOptionsDto,
-  ): Promise<GetProductRequiredOptionDto | GetProductOptionDto> {
-    const product = await this.productRepository.getProduct(productId);
+  ): Promise<ProductRequiredOptionDto | ProductOptionDto> {
+    const savedProduct = await this.productRepository.getProductSellerId(productId);
 
-    if (!product?.id) {
+    if (!savedProduct) {
       throw new ProductNotFoundException();
     }
 
-    if (product?.sellerId !== sellerId) {
+    if (savedProduct.sellerId !== sellerId) {
       throw new ProductUnauthrizedException();
     }
 
     if (isRequireOptionDto.isRequire) {
-      const savedRequiredOption = await this.productRequiredRepository.createRequiredOption(
+      const requiredOption = await this.productRequiredRepository.saveRequiredOption(
         productId,
         createProductOptionsDto,
       );
-      return savedRequiredOption;
+      return new ProductRequiredOptionDto(requiredOption);
     } else {
-      const savedOption = await this.productOptionRepository.createOption(productId, createProductOptionsDto);
-      return savedOption;
+      const option = await this.productOptionRepository.saveOption(productId, createProductOptionsDto);
+      return new ProductOptionDto(option);
     }
   }
 }

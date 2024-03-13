@@ -1,41 +1,30 @@
-import { v4 } from 'uuid';
 import { UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { AuthController } from 'src/auth/auth.controller';
-import { AuthService } from 'src/auth/auth.service';
-import { ProductController } from 'src/controllers/product.controller';
 import { SellerController } from 'src/controllers/seller.controller';
-import { CategoryEntity } from 'src/entities/category.entity';
-import { CompanyEntity } from 'src/entities/company.entity';
+import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
+import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
-import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
-import { AccessToken } from 'src/interfaces/access-token.interface';
-import { Payload } from 'src/interfaces/payload.interface';
+import { ProductBundleRepository } from 'src/repositories/product-bundle.repository';
 import { ProductOptionRepository } from 'src/repositories/product-option-repository';
 import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
 import { SellerService } from 'src/services/seller.service';
 
-describe('SellerController', () => {
-  let jwtService: JwtService;
-
-  let sellercontroller: SellerController;
-  let sellerservice: SellerService;
-  let sellerRepository: SellerRepository;
+describe('Seller Controller', () => {
+  let controller: SellerController;
+  let service: SellerService;
+  let repository: SellerRepository;
 
   let authController: AuthController;
-  let authService: AuthService;
+  let testId: number | null = null;
 
-  let productController: ProductController;
+  let productBundleRepository: ProductBundleRepository;
   let productRepository: ProductRepository;
-
   let productRequiredRepository: ProductRequiredOptionRepository;
   let productOptionRepository: ProductOptionRepository;
-
-  let accessToken: string | null = null;
 
   /**
    * 구매자 사이드
@@ -46,146 +35,109 @@ describe('SellerController', () => {
       imports: [AppModule],
     }).compile();
 
-    sellercontroller = module.get<SellerController>(SellerController);
-    sellerservice = module.get<SellerService>(SellerService);
-    sellerRepository = module.get<SellerRepository>(SellerRepository);
+    controller = module.get<SellerController>(SellerController);
+    service = module.get<SellerService>(SellerService);
+    repository = module.get<SellerRepository>(SellerRepository);
 
     authController = module.get<AuthController>(AuthController);
-    authService = module.get<AuthService>(AuthService);
 
-    productController = module.get<ProductController>(ProductController);
+    productBundleRepository = module.get<ProductBundleRepository>(ProductBundleRepository);
     productRepository = module.get<ProductRepository>(ProductRepository);
     productRequiredRepository = module.get<ProductRequiredOptionRepository>(ProductRequiredOptionRepository);
     productOptionRepository = module.get<ProductOptionRepository>(ProductOptionRepository);
 
-    jwtService = module.get<JwtService>(JwtService);
-
     /**
-     * 판매자 계정생성 및 로그인
+     * seller 회원이어야 사용 가능하다.
+     * 테스트 seller를 생성한 후 id를 추출해 사용한다.
      */
-    const randomStringForTest = v4();
-    const createSellerDto: CreateSellerDto = {
-      email: randomStringForTest,
-      password: randomStringForTest,
-      name: randomStringForTest.slice(0, 32),
-      phone: randomStringForTest.slice(0, 11),
-      businessNumber: randomStringForTest,
+    const testSeller: CreateSellerDto = {
+      email: 'myemail@gmail.com',
+      password: 'mypassword1!',
+      name: 'myname',
+      phone: '01012341234',
+      businessNumber: '12341234',
     };
 
-    await authController.sellerSignUp(createSellerDto);
-
-    const createdSeller = await sellerRepository.findOne({
-      select: {
-        id: true,
-      },
-      where: {
-        email: randomStringForTest,
-      },
-    });
-
-    const tokenDto: AccessToken = await authService.sellerLogin(createdSeller?.id as number);
-    accessToken = tokenDto.accessToken;
+    await authController.sellerSignUp(testSeller);
+    const { id, ...rest } = await repository.findByEmail(testSeller.email);
+    testId = id;
   });
 
   it('should be defined.', async () => {
-    expect(sellercontroller).toBeDefined();
-    expect(sellerservice).toBeDefined();
+    expect(controller).toBeDefined();
+    expect(service).toBeDefined();
+    expect(repository).toBeDefined();
     expect(authController).toBeDefined();
   });
 
-  it('테스트 시작 전에 토큰이 만들어졌는지 체크한다.', () => {
-    expect(accessToken).toBeDefined();
-    expect(accessToken !== null).toBe(true);
+  it('seller 회원이어야 사용가능 하다.', () => {
+    expect(testId).toBeDefined();
+    expect(testId !== null).toBe(true);
   });
 
-  describe.only('POST /product (상품 생성하기)', () => {
+  describe('POST', () => {
     /**
-     * 백엔드 시점
+     * 1. 상품 생성 허가 기능이 추가될 경우
      *
-     * 상품 생성에 허가가 필요하다면 칼럼을 두고 관리를 해야 한다.
-     * 단, 여기선 어떻게 기획 의도가 바뀔지 모르기 때문에 허가 받은 날짜를 명시하는 것이 더 나을 것 같다.
-     * 따라서 `상품 판매 허가` 날짜 칼럼을 만든다. -> 기획자에게 허가가 취소될 수 있는건지도 물어본다.
-     *  - 필요 시 로그로 관리하기 위해 날짜 칼럼이 아니라 `허가 로그 테이블`을 만든다.
-     *      - 이번에는 이것에 대한 테스트는 하지 않는다.
+     * 상품 생성 허가를 구현하기 위해서는 별도의 칼럼이 필요하다.
+     * - 허가 받은 날짜를 명시하는 컬럼을 추가해 구현
+     * - 허가 취소를 구현할 경우, 허가가 삭제된 날짜를 명시하는 컬럼 또한 필요할 수 있다.
+     * - 필요 시 로그로 관리하기 위해 날짜 칼럼이 아니라 `허가 로그 테이블`을 만든다.
      *
-     * 상품을 생성할 때는 회사의 아이디로 회사를 조회해서 회사의 `상품 판매 허가`를 확인한 후 생성을 해줘야 한다.
-     * 만약 아직 허가 받지 않은 회사라면, 상품을 등록하지 않고 허가를 받으라는 에러 메시지를 출력한다. -> 디자이너에게 문구를 받아야 한다.
+     * product 생성 시 해당 seller가 허가를 받았는지 확인한다.
+     * 만약 아직 허가 받지 않은 회사라면, product을 등록하지 않고 허가를 받으라는 에러 메시지를 출력한다.
      */
     it.todo('상품을 생성할 때에는 우리 측의 허가를 받은 회사만 생성 가능하다.');
 
     /**
-     * 로그 테이블로 관리하는 것의 장점
-     * - 만약 허가 받고, 거절 당하고 그 이력을 관리하고 싶다면?
-     *      - 허가 받은지
+     * 1-1. 로그 테이블 관리의 장점
+     * 허가/거절 이력을 관리하고 싶을때 유용하다.
      */
     it.todo('허가 받은지 1년이 지난 경우라면 어떻게 해야 하는가?');
 
-    /**
-     * 판매자는 상품의 이름, 상품의 이미지를 입력해야 한다.
-     *    - 단, 별도의 API를 이용해서 수정이 가능해야 한다.
-     *        - 여기서 말하는 별도의 옵션이란, 사실 수정이 아니라 옵션을 추가하고 이미지를 추가하는 행위를 말한다.
-     *
-     * 여기서는 상품에, 이미지 1개에 옵션 1개가 있다는 가정으로 생성한다.
-     */
-    describe('상품 등록 시 상품이 추가되는 것을 검증한다.', () => {
-      it('상품이 존재한다는 것이 데이터베이스 레벨에서 증명된다.', async () => {
-        /**
-         * 상품을 만든다.
-         */
-        const decoded: Payload = jwtService.decode(accessToken!);
-        const product = await sellercontroller.createProduct(decoded.id, {
-          categoryId: (await new CategoryEntity({ name: v4() }).save()).id,
-          companyId: (await new CompanyEntity({ name: v4() }).save()).id,
-          isSale: true,
-          name: 'name',
-          description: 'description',
-          deliveryCharge: 3000,
-          deliveryFreeOver: 30000,
-          deliveryType: 'COUNT_FREE',
-          img: 'img.jpg',
-        });
+    describe('seller는 상품묶음(bundle)을 생성할 수 있다.', () => {
+      const testProductBundle: CreateProductBundleDto = {
+        name: 'Test Bundle name',
+        chargeStandard: 'MIN',
+      };
 
-        /**
-         * 데이터베이스에 있음을 검증
-         */
-
-        const createdInDatabase = await productRepository.findOne({ where: { id: product.id } });
-        expect(createdInDatabase).toBeDefined();
-      });
-
-      it.skip('상품이 존재한다는 것이 판매자 사이드에서 증명되어야 한다.', () => {});
-
-      /**
-       * 여기서 말하는 구매자는 구매자 API를 호출했을 때를 의미하며,
-       * 이 API는 로그인과 무관하게 동작해야 한다.
-       *
-       * 이 부분은 추후 구매자 플로우에서 증명을 다시 한다.
-       */
-      it('상품이 존재한다는 것이 구매자 사이드에서 증명되어야 한다.', async () => {
-        /**
-         * 상품을 만든다.
-         */
-        const decoded: Payload = jwtService.decode(accessToken!);
-        const product = await sellercontroller.createProduct(decoded.id, {
-          categoryId: (await new CategoryEntity({ name: v4() }).save()).id,
-          companyId: (await new CompanyEntity({ name: v4() }).save()).id,
-          isSale: true,
-          name: 'name',
-          description: 'description',
-          deliveryCharge: 3000,
-          deliveryFreeOver: 30000,
-          deliveryType: 'COUNT_FREE',
-          img: 'img.jpg',
-        });
-
-        /**
-         * 상품이 있다면 유저 쪽에서 조회 API를 했을 때 나와야 한다.
-         */
-        const response = await productController.getProductList({ page: 1, limit: 1 });
-        expect(response.data.list.length).toBe(1);
+      it('상품 묶음이 생성 되었다면 DB에서 조회할 수 있어야 한다.', async () => {
+        const { data } = await controller.createProductBundle(testId as number, testProductBundle);
+        const savedProductBundle = await productBundleRepository.getProductBundle(data.id);
+        expect(savedProductBundle).not.toBe(null);
       });
     });
 
+    describe('seller는 상품을 생성할 수 있다.', () => {
+      const testProduct: CreateProductDto = {
+        bundleId: 1,
+        categoryId: 1,
+        companyId: 1,
+        isSale: true,
+        name: 'test product',
+        description: '테스트 상품 입니다!',
+        deliveryType: 'FREE',
+        deliveryFreeOver: null,
+        deliveryCharge: 0,
+        img: 'test.img',
+      };
+
+      it('상품이 생성 되었다면 DB에서 조회할 수 있어야 한다.', async () => {
+        const { data } = await controller.createProduct(testId as number, testProduct);
+        const savedProduct = await productRepository.getProduct(data.id);
+
+        expect(savedProduct).not.toBe(null);
+      });
+
+      /**
+       * 로그인과 무관하게 동작해야 한다.
+       * 이 부분은 추후 구매자 플로우에서 다시 증명 한다.
+       */
+      it.skip('생성된 상품을 buyer 조회할 수 있어야 한다.', () => {});
+    });
+  });
+
+  describe('seller는 등록된 상품에 대하여 필수 옵션/선택옵션을 추가할 수 있다.', () => {
     /**
      * 판매자는 등록한 상품에 대해 id를 발급받는다.
      *
@@ -201,81 +153,85 @@ describe('SellerController', () => {
      * 판매자는 id가 발급된 필수 옵션에 대하여 입력 옵션을 추가/조회/삭제 할 수 있다.
      *
      */
-    describe('등록된 상품에 대하여 필수 옵션/ 선택옵션이 추가되는 것을 검증한다.', () => {
-      it('필수 옵션과 선택옵션이 추가되면 그 id를 DB에서 조회할 수 있어야 한다.', async () => {
-        /**
-         * 상품 1개 가져오기
-         */
-        const product = await productController.getProductList({
-          limit: 1,
-          page: 1,
-        });
+    const testProduct: CreateProductDto = {
+      bundleId: 1,
+      categoryId: 1,
+      companyId: 1,
+      isSale: true,
+      name: 'test product',
+      description: '테스트 상품 입니다!',
+      deliveryType: 'FREE',
+      deliveryFreeOver: null,
+      deliveryCharge: 0,
+      img: 'test.img',
+    };
 
-        const Require = new IsRequireOptionDto();
-        Require.isRequire = true;
+    it('필수 옵션이 추가되면 그 id를 DB에서 조회할 수 있어야 한다.', async () => {
+      const { data } = await controller.createProduct(testId as number, testProduct);
+      const savedProduct = await productRepository.getProduct(data.id);
+      expect(savedProduct).not.toBe(null);
+      expect(savedProduct?.sellerId).toBe(testId);
 
-        if (product) {
-          const productId = product.data.list[0].id;
-          const sellerId = product.data.list[0].sellerId;
-
-          /**
-           * 필수 옵션 추가
-           */
-
-          const requireOption = await sellercontroller.createProductOptions(sellerId, productId, Require, {
-            name: 'name',
-            price: 0,
+      if (savedProduct) {
+        const { data } = await controller.createProductOptions(
+          testId as number,
+          savedProduct.id,
+          { isRequire: true },
+          {
+            name: 'test options name',
+            price: 10000,
             isSale: true,
-          });
-          /**
-           * 선택 옵션 추가
-           */
+          },
+        );
+        const requirdOption = await productRequiredRepository.getRequiredOption(data.id);
+        expect(requirdOption).not.toBe(null);
+      }
+    });
 
-          Require.isRequire = false;
-          const option = await sellercontroller.createProductOptions(sellerId, productId, Require, {
-            name: 'name',
-            price: 0,
+    it('선택 옵션이 추가되면 그 id를 DB에서 조회할 수 있어야 한다.', async () => {
+      const { data } = await controller.createProduct(testId as number, testProduct);
+      const savedProduct = await productRepository.getProduct(data.id);
+      expect(savedProduct).not.toBe(null);
+      expect(savedProduct?.sellerId).toBe(testId);
+
+      if (savedProduct) {
+        const { data } = await controller.createProductOptions(
+          testId as number,
+          savedProduct.id,
+          { isRequire: false },
+          {
+            name: 'test options name',
+            price: 10000,
             isSale: true,
-          });
+          },
+        );
+        const option = await productOptionRepository.getOption(data.id);
+        expect(option).not.toBe(null);
+      }
+    });
 
-          /**
-           * 데이터 베이스에서 조회
-           */
-          const ro = await productRequiredRepository.findOneBy({ id: requireOption.id });
-          const o = await productOptionRepository.findOneBy({ id: option.id });
-          expect(ro === null).toBe(false);
-          expect(o === null).toBe(false);
-        }
-      });
+    it('해당 상품을 생성한 판매자가 아닐 경우 권한 에러를 던져야 한다.', async () => {
+      const { data } = await controller.createProduct(testId as number, testProduct);
+      const savedProduct = await productRepository.getProduct(data.id);
+      expect(savedProduct).not.toBe(null);
 
-      it('해당 상품을 생성한 판매자가 아닐 경우 권한 에러를 던져야 한다.', async () => {
-        /**
-         * 상품 1개 가져오기
-         */
-        const decoded: Payload = jwtService.decode(accessToken!);
-        const product = await productController.getProductList({
-          limit: 1,
-          page: 1,
-        });
-
-        if (product) {
-          const productId = product.data.list[0].id;
-          const Require = new IsRequireOptionDto();
-          Require.isRequire = true;
-
-          try {
-            const anotherSeller = await sellercontroller.createProductOptions(1234567890, productId, Require, {
-              name: 'name',
-              price: 0,
+      if (savedProduct) {
+        try {
+          await controller.createProductOptions(
+            (testId as number) + 1,
+            savedProduct.id,
+            { isRequire: true },
+            {
+              name: 'test required options name',
+              price: 10000,
               isSale: true,
-            });
-
-            expect(1).toBe('판매자가 다른 데도 불구하고 에러가 나지 않은 케이스');
-          } catch (err) {
-            expect(err).toBeInstanceOf(UnauthorizedException);
-          }
+            },
+          );
+          expect(1).toBe('판매자가 다른 데도 불구하고 에러가 나지 않은 케이스');
+        } catch (err) {
+          expect(err).toBeInstanceOf(UnauthorizedException);
         }
-      });
+      }
     });
   });
 });

@@ -13,7 +13,7 @@ export function createProductPaginationForm(
 
   const lastProductId = list.at(list.length - 1)?.id;
   const result: GetProductListResponse = {
-    data: { list, ...totalPage, lastProductId: lastProductId ?? null },
+    data: { list, totalPage, lastProductId: lastProductId ?? null },
     meta: getProductPagintionDto,
   };
 

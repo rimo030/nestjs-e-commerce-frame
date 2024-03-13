@@ -1,36 +1,28 @@
 import { Repository, ILike } from 'typeorm';
+import { CustomRepository } from 'src/configs/custom-typeorm.decorator';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
-import { GetProductDto } from 'src/entities/dtos/get-product.dto';
+import { ProductDto } from 'src/entities/dtos/product.dto';
 import { ProductEntity } from 'src/entities/product.entity';
-import { ProductListElement } from 'src/interfaces/product-list-element.interface';
-import { CustomRepository } from '../configs/custom-typeorm.decorator';
 
 @CustomRepository(ProductEntity)
 export class ProductRepository extends Repository<ProductEntity> {
-  async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<GetProductDto> {
+  async saveProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductEntity> {
     return await this.save({ sellerId, ...createProductDto });
   }
 
-  async getProduct(id: number): Promise<GetProductDto | null> {
+  async getProductSellerId(id: number): Promise<{ sellerId: number } | null> {
     return await this.findOne({
       select: {
-        id: true,
         sellerId: true,
-        bundleId: true,
-        categoryId: true,
-        companyId: true,
-        isSale: true,
-        name: true,
-        description: true,
-        deliveryType: true,
-        deliveryFreeOver: true,
-        deliveryCharge: true,
-        img: true,
       },
       where: {
         id,
       },
     });
+  }
+
+  async getProduct(id: number): Promise<ProductEntity | null> {
+    return await this.findOne({ where: { id } });
   }
 
   async getProductList(
@@ -39,7 +31,7 @@ export class ProductRepository extends Repository<ProductEntity> {
     sellerId: number | undefined | null,
     skip: number,
     take: number,
-  ): Promise<[Omit<ProductListElement, 'salePrice'>[], number]> {
+  ): Promise<[ProductDto[], number]> {
     return await this.findAndCount({
       select: {
         id: true,

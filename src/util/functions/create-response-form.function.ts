@@ -8,7 +8,7 @@ import { getTotalPage } from './get-total-page.function';
 function createPaginationForm<T>(getResponse: GetResponse<T>, paginationDto: PaginationDto): PaginationResponseForm<T> {
   const { list, count, take } = getResponse;
   const totalPage = getTotalPage(count, take);
-  return { data: { ...totalPage, list }, meta: { ...paginationDto } };
+  return { data: { totalPage, list }, meta: { ...paginationDto } };
 }
 
 export function createResponseForm<T>(data: object | boolean | string | number | BigInt): ResponseForm<T>;
