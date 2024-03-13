@@ -12,14 +12,14 @@ export class CartDto {
   updateRequiredOptionsResult: UpdateResult | [];
   cartRequiredOptions: CartRequiredOptionDto[];
   updateOptionsResult: UpdateResult | [];
-  cartOptions: CartOptionDto[];
+  cartOptions: CartOptionDto[] | [];
 
   constructor(
     cart: CartEntity,
     updateRequiredOptionsResult: UpdateResult | [],
     cartRequiredOptions: CartRequiredOptionEntity[],
     updateOptionsResult: UpdateResult | [],
-    cartOptionDto: CartOptionEntity[],
+    cartOptionDto: CartOptionEntity[] | [],
   ) {
     this.id = cart.id;
     this.productId = cart.productId;

@@ -1,3 +1,5 @@
+import { Type } from 'class-transformer';
+import { ArrayNotEmpty, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmptyNumber } from 'src/decorators/is-not-empty-number.decorator';
 import { CartEntity } from '../cart.entity';
@@ -10,7 +12,7 @@ export class CreateCartDto implements Pick<CartEntity, 'productId'> {
   productId!: number;
 
   @ApiProperty({
-    type: Number,
+    type: CreateCartRequiredOptionDto,
     description: '장바구니에 담길 필수옵션의 정보',
     required: true,
     example: [
@@ -18,10 +20,13 @@ export class CreateCartDto implements Pick<CartEntity, 'productId'> {
       { productRequiredOptionId: 2, count: 1 },
     ],
   })
+  @IsArray()
+  @ArrayNotEmpty()
+  @Type(() => CreateCartRequiredOptionDto)
   cartRequiredOptions!: CreateCartRequiredOptionDto[];
 
   @ApiProperty({
-    type: Number,
+    type: CreateCartOptionDto,
     description: '장바구니에 담길 선택옵션의 정보',
     required: false,
     example: [
@@ -29,5 +34,7 @@ export class CreateCartDto implements Pick<CartEntity, 'productId'> {
       { productOptionId: 2, count: 1 },
     ],
   })
-  cartOptions!: CreateCartOptionDto[];
+  @IsArray()
+  @Type(() => CreateCartOptionDto)
+  cartOptions!: CreateCartOptionDto[] | [];
 }
