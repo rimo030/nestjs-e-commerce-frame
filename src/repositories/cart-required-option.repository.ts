@@ -1,4 +1,4 @@
-import { Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CartRequiredOptionEntity } from 'src/entities/cart-required-option.entity';
 import { CreateCartRequiredOptionDto } from 'src/entities/dtos/create-cart-required-option.dto';
 import { CustomRepository } from '../configs/custom-typeorm.decorator';
@@ -13,11 +13,13 @@ export class CartRequiredOptionRepository extends Repository<CartRequiredOptionE
     return await this.save(entitiesToSave);
   }
 
-  async increaseCount(ids: number[]): Promise<UpdateResult> {
-    return await this.createQueryBuilder()
+  async increaseCount(ids: number[]): Promise<{ affected: number }> {
+    const updateResult = await this.createQueryBuilder()
       .update(CartRequiredOptionEntity)
       .set({ count: () => `count + ${1}` })
       .where('id IN (:...ids)', { ids: ids })
       .execute();
+
+    return { affected: updateResult.affected ?? 0 };
   }
 }
