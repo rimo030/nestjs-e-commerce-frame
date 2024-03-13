@@ -36,5 +36,5 @@ export class CreateCartDto implements Pick<CartEntity, 'productId'> {
   })
   @IsArray()
   @Type(() => CreateCartOptionDto)
-  cartOptions!: CreateCartOptionDto[] | [];
+  cartOptions!: CreateCartOptionDto[];
 }
