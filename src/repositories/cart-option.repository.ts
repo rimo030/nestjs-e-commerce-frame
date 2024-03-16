@@ -5,17 +5,23 @@ import { CustomRepository } from '../configs/custom-typeorm.decorator';
 
 @CustomRepository(CartOptionEntity)
 export class CartOptionRepository extends Repository<CartOptionEntity> {
-  async saveCart(cartId: number, createCartOptionDto: CreateCartOptionDto[]): Promise<CartOptionEntity[]> {
+  async saveCartOptions(cartId: number, createCartOptionDto: CreateCartOptionDto[]): Promise<CartOptionEntity[]> {
     const entitiesToSave = createCartOptionDto.map((dto) => ({ cartId, ...dto }));
     return await this.save(entitiesToSave);
   }
 
-  async increaseCount(ids: number[]): Promise<{ affected: number }> {
-    const updateResult = await this.createQueryBuilder()
-      .update(CartOptionEntity)
-      .set({ count: () => `count + ${1}` })
-      .where('id IN (:...ids)', { ids: ids })
-      .execute();
-    return { affected: updateResult.affected ?? 0 };
+  async increaseOptionsCount(options: { id: number; count: number }[]): Promise<number[]> {
+    const updatedIds: number[] = [];
+
+    console.log(options);
+    await Promise.all(
+      options.map(async (option) => {
+        const updateResult = await this.increment({ id: option.id }, 'count', option.count);
+        if (updateResult.affected !== 0) {
+          updatedIds.push(option.id);
+        }
+      }),
+    );
+    return updatedIds;
   }
 }
