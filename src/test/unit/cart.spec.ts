@@ -26,6 +26,7 @@ describe('Cart Controller', () => {
   let testProduct: ProductAllOptionsDto;
   let testRequiredOption: ProductRequiredOptionJoinInputOptionDto;
   let testOption: ProductOptionDto;
+  let testCount = 0;
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
@@ -99,11 +100,17 @@ describe('Cart Controller', () => {
    * 장바구니, 장바구니 옵션, 장바구니 선택 옵션을 저장한다.
    */
   describe('장바구니 생성', () => {
+    const setTestCount = () => {
+      testCount = Math.floor(Math.random() * 100);
+    };
+
     it('저장된 장바구니는 데이터 베이스에서 조회가능해야 한다.', async () => {
+      setTestCount();
+      console.log(testCount);
       const testCartDto: CreateCartDto = {
         productId: testProductId as number,
-        cartRequiredOptions: [{ productRequiredOptionId: testRequiredOption.id as number, count: 1 }],
-        cartOptions: [{ productOptionId: testOption.id as number, count: 1 }],
+        cartRequiredOptions: [{ productRequiredOptionId: testRequiredOption.id as number, count: testCount }],
+        cartOptions: [{ productOptionId: testOption.id as number, count: testCount }],
       };
 
       const { data } = await controller.addCart(testBuyerId as number, testCartDto);
@@ -122,10 +129,12 @@ describe('Cart Controller', () => {
       }
     });
     it('이미 존재하는 필수/선택옵션인지 확인하고, 존재할 경우에는 수량만 더해준다.', async () => {
+      setTestCount();
+      console.log(testCount);
       const testCartDto: CreateCartDto = {
         productId: testProductId as number,
-        cartRequiredOptions: [{ productRequiredOptionId: testRequiredOption.id as number, count: 1 }],
-        cartOptions: [{ productOptionId: testOption.id as number, count: 1 }],
+        cartRequiredOptions: [{ productRequiredOptionId: testRequiredOption.id as number, count: testCount }],
+        cartOptions: [{ productOptionId: testOption.id as number, count: testCount }],
       };
 
       const getCart = await respository.findCart(testBuyerId as number, testProductId as number);
@@ -139,11 +148,11 @@ describe('Cart Controller', () => {
       if (getCart && savedCart) {
         expect(data).toBeInstanceOf(UpdateCartDto);
         expect(getCart.cartRequiredOptions.at(0)?.id).toBe(savedCart.cartRequiredOptions.at(0)?.id);
-        expect((getCart.cartRequiredOptions.at(0)?.count as number) + 1).toBe(
+        expect((getCart.cartRequiredOptions.at(0)?.count as number) + testCount).toBe(
           savedCart.cartRequiredOptions.at(0)?.count,
         );
         expect(getCart.cartOptions.at(0)?.id).toBe(savedCart.cartOptions.at(0)?.id);
-        expect((getCart.cartOptions.at(0)?.count as number) + 1).toBe(savedCart.cartOptions.at(0)?.count);
+        expect((getCart.cartOptions.at(0)?.count as number) + testCount).toBe(savedCart.cartOptions.at(0)?.count);
       }
     });
   });
