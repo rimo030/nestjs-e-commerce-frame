@@ -10,6 +10,6 @@ export class CreateCartRequiredOptionDto
   productRequiredOptionId!: number;
 
   @ApiProperty({ type: Number, description: '개수', required: true, example: 1 })
-  @IsNotEmptyNumber()
+  @IsNotEmptyNumber('int', { min: 0 })
   count!: number;
 }
