@@ -11,13 +11,28 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const request = ctx.getRequest<Request>();
     const status = exception.getStatus();
 
+    const body = request.body;
+    const params = request.params;
+    const query = request.query;
+
+    const paramMessage = Object.keys(params).length ? ` \n params: ${JSON.stringify(params, null, 2)}` : '';
+    const queryMessage = Object.keys(query).length ? ` \n query: ${JSON.stringify(query, null, 2)}` : '';
+    const bodyMessage = Object.keys(body).length ? ` \n body: ${JSON.stringify(body, null, 2)}` : '';
+
+    let errorMessage: any = exception.getResponse();
+    if (typeof errorMessage === 'object') {
+      errorMessage = errorMessage.message;
+    }
+
     this.logger.error(
-      `${request.method} ${request.url} - ${status} - ${JSON.stringify(exception.getResponse(), null, 2)}`,
+      `Error to ${request.method} ${request.url} ${paramMessage} ${queryMessage} ${bodyMessage} 
+      \n statusCode : ${status} 
+      \n message : ${JSON.stringify(errorMessage, null, 2)}`,
     );
 
     response.status(status).json({
       statusCode: status,
-      message: exception.getResponse(),
+      message: errorMessage,
       path: request.url,
       timestamp: new Date().toISOString(),
     });
