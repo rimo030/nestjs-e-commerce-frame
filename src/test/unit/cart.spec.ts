@@ -106,7 +106,6 @@ describe('Cart Controller', () => {
 
     it('저장된 장바구니는 데이터 베이스에서 조회가능해야 한다.', async () => {
       setTestCount();
-      console.log(testCount);
       const testCartDto: CreateCartDto = {
         productId: testProductId as number,
         cartRequiredOptions: [{ productRequiredOptionId: testRequiredOption.id as number, count: testCount }],
@@ -130,7 +129,6 @@ describe('Cart Controller', () => {
     });
     it('이미 존재하는 필수/선택옵션인지 확인하고, 존재할 경우에는 수량만 더해준다.', async () => {
       setTestCount();
-      console.log(testCount);
       const testCartDto: CreateCartDto = {
         productId: testProductId as number,
         cartRequiredOptions: [{ productRequiredOptionId: testRequiredOption.id as number, count: testCount }],
