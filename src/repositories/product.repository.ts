@@ -55,4 +55,25 @@ export class ProductRepository extends Repository<ProductEntity> {
       take,
     });
   }
+
+  async getProductsByBundleGroup(
+    ids: number[],
+  ): Promise<{ bundleId: number; chargeStandard: string; productIds: number[] }[]> {
+    const results = await this.createQueryBuilder('product')
+      .leftJoinAndSelect('product.bundle', 'bundle')
+      .select([
+        'product.bundleId AS bundleId',
+        'bundle.chargeStandard As chargeStandard',
+        'GROUP_CONCAT(product.id) AS productIds',
+      ])
+      .whereInIds(ids)
+      .groupBy('product.bundleId')
+      .getRawMany();
+
+    return results.map((result) => ({
+      bundleId: result.bundleId,
+      chargeStandard: result.chargeStandard,
+      productIds: result.productIds.split(',').map((id) => parseInt(id)),
+    }));
+  }
 }
