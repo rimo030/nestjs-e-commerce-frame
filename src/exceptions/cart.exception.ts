@@ -5,3 +5,9 @@ export class CartNotFoundException extends HttpException {
     super(`Can't find cart`, HttpStatus.NOT_FOUND);
   }
 }
+
+export class CartIntercnalServerErrorException extends HttpException {
+  constructor() {
+    super(`Cart update error`, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+}

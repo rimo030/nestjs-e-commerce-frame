@@ -1,7 +1,12 @@
 import { Injectable } from '@nestjs/common';
+import { CartEntity } from 'src/entities/cart.entity';
 import { CartDto } from 'src/entities/dtos/cart.dto';
+import { CreateCartOptionDto } from 'src/entities/dtos/create-cart-option.dto';
+import { CreateCartRequiredOptionDto } from 'src/entities/dtos/create-cart-required-option.dto';
 import { CreateCartDto } from 'src/entities/dtos/create-cart.dto';
+import { UpdateCartDto } from 'src/entities/dtos/update-cart.dto';
 import { ProductBundleEntity } from 'src/entities/product-bundle.entity';
+import { CartIntercnalServerErrorException } from 'src/exceptions/cart.exception';
 import { CartOptionRepository } from 'src/repositories/cart-option.repository';
 import { CartRequiredOptionRepository } from 'src/repositories/cart-required-option.repository';
 import { CartRepository } from 'src/repositories/cart.repository';
@@ -15,55 +20,138 @@ export class CartService {
   ) {}
 
   /**
-   * 1. 장바구니를 조회한다.
-   * 2. 장바구니에 아직 없는 상품인 경우 그대로 장바구니, 장바구니 옵션, 장바구니 선택 옵션을 담는다.
-   * 3. 장바구니에 이미 있는 상품일 경우
-   * 3-1. 이미 존재하는 옵션인지 체크하고, 존재할 경우에는 수량만 더해주고 없을 경우에는 장바구니 옵션을 추가한다.
-   * 3-2. 선택 옵션도 동일하게 처리한다.
+   * 장바구니와 옵션을 생성한다.
+   *
+   * @param buyerId 구매자의 아이디
+   * @param createCartDto 생성하려는 장바구니의 정보
+   * @returns 성공 시 장바구니를 담은 Dto를 리턴한다.
    */
-  async addCart(buyerId: number, createCartDto: CreateCartDto): Promise<CartDto> {
+  async addCart(buyerId: number, createCartDto: CreateCartDto): Promise<CartDto | UpdateCartDto> {
     const cart = await this.cartRepository.findCart(buyerId, createCartDto.productId);
-
     if (!cart) {
-      const newCart = await this.cartRepository.saveCart(buyerId, createCartDto.productId);
-
-      const cartRequiedOptions = await this.cartRequiredOptionRepository.saveCart(
-        newCart.id,
-        createCartDto.cartRequiredOptions,
-      );
-      const cartOptions = await this.cartOptionRepository.saveCart(newCart.id, createCartDto.cartOptions);
-
-      return new CartDto(newCart, [], cartRequiedOptions, [], cartOptions);
+      const newCart = await this.createCartWithOptions(buyerId, createCartDto);
+      return newCart;
     } else {
-      const ExistRequriedOptions = cart.cartRequiredOptions.filter((d) =>
-        createCartDto.cartRequiredOptions.some((c) => c.productRequiredOptionId === d.productRequiredOptionId),
-      );
-      const notExistRequriedOptions = createCartDto.cartRequiredOptions.filter(
-        (d) => !cart.cartRequiredOptions.some((c) => c.productRequiredOptionId === d.productRequiredOptionId),
-      );
-
-      const existRequiredIds = ExistRequriedOptions.map((e) => e.id);
-      const updateRequiredOptions = await this.cartRequiredOptionRepository.increaseCount(existRequiredIds);
-      const newRequiredOptions = await this.cartRequiredOptionRepository.saveCart(cart.id, notExistRequriedOptions);
-
-      if (createCartDto.cartOptions.length) {
-        const ExistOptions = cart.cartOptions.filter((d) =>
-          createCartDto.cartOptions.some((c) => c.productOptionId === d.productOptionId),
-        );
-        const notExistOptions = createCartDto.cartOptions.filter(
-          (d) => !cart.cartOptions.some((c) => c.productOptionId === d.productOptionId),
-        );
-
-        const existOptionIds = ExistOptions.map((e) => e.id);
-        const updateOptions = await this.cartOptionRepository.increaseCount(existOptionIds);
-        const newOptions = await this.cartOptionRepository.saveCart(cart.id, notExistOptions);
-
-        return new CartDto(cart, updateRequiredOptions, newRequiredOptions, updateOptions, newOptions);
-      }
-
-      return new CartDto(cart, updateRequiredOptions, newRequiredOptions, [], []);
+      const updateCart = await this.updateCartWithOptions(cart, createCartDto);
+      return updateCart;
     }
   }
+
+  /**
+   * 새로운 상품을 장바구니에 추가하려는 경우.
+   * 새로운 장바구니를 생성 한다.
+   * @param buyerId 구매자의 아이디
+   * @param createCartDto 생성하려는 장바구니의 정보. 선택옵션은 존재하지 않을수 있다.
+   * @returns CartDto : 생성한 장바구니의 정보를 담아 리턴한다.
+   */
+  private async createCartWithOptions(buyerId: number, createCartDto: CreateCartDto): Promise<CartDto> {
+    const { productId, cartRequiredOptions, cartOptions } = createCartDto;
+    const newCart = await this.cartRepository.saveCart(buyerId, productId);
+
+    const savedCartRequriedOptions = await this.createCartRequiredOption(newCart.id, cartRequiredOptions);
+    if (cartOptions.length) {
+      const savedOptions = await this.createCartOption(newCart.id, cartOptions);
+      return new CartDto(newCart, savedCartRequriedOptions, savedOptions);
+    }
+    return new CartDto(newCart, savedCartRequriedOptions, []);
+  }
+
+  /**
+   * 이미 해당 상품이 장바구니에 저장되어 있는 경우
+   * 새로운 옵션이라면 추가한다.
+   * 이미 존재하는 옵션이라면 수량을 더해준다.
+   *
+   * @param cart 조회된 장바구니의 정보
+   * @param createCartDto 생성하려는 장바구니의 정보. 선택옵션은 존재하지 않을수 있다.
+   * @returns UpdateCartDto : 수정된 장바구니의 정보를 리턴한다.
+   */
+  private async updateCartWithOptions(cart: CartEntity, createCartDto: CreateCartDto): Promise<UpdateCartDto> {
+    const { productId, cartRequiredOptions, cartOptions } = createCartDto;
+
+    const existCartRequiredOptionCounts = this.findExistingCartRequiredOptionCounts(cart, cartRequiredOptions);
+    const updateCartRequiredOptionIds =
+      await this.cartRequiredOptionRepository.increaseRequiredOptionsCount(existCartRequiredOptionCounts);
+    if (existCartRequiredOptionCounts.length !== updateCartRequiredOptionIds.length) {
+      throw new CartIntercnalServerErrorException();
+    }
+
+    const notExistCartRequriedOptions = cartRequiredOptions.filter(
+      (d) => !cart.cartRequiredOptions.some((c) => c.productRequiredOptionId === d.productRequiredOptionId),
+    );
+    const newCartRequiredOptions = await this.createCartRequiredOption(cart.id, notExistCartRequriedOptions);
+
+    if (cartOptions.length) {
+      const existCartOptionCounts = this.findExistingCartOptionCounts(cart, cartOptions);
+
+      const updateCartOptionIds = await this.cartOptionRepository.increaseOptionsCount(existCartOptionCounts);
+      if (existCartOptionCounts.length !== updateCartOptionIds.length) {
+        throw new CartIntercnalServerErrorException();
+      }
+
+      const notExistCartOptions = cartOptions.filter(
+        (d) => !cart.cartOptions.some((c) => c.productOptionId === d.productOptionId),
+      );
+      const newOptions = await this.createCartOption(cart.id, notExistCartOptions);
+      return new UpdateCartDto({
+        cart,
+        updateCartRequiredOptionIds,
+        cartRequiredOptions: newCartRequiredOptions,
+        updateCartOptionIds,
+        cartOptions: newOptions,
+      });
+    }
+    return new UpdateCartDto({
+      cart,
+      updateCartRequiredOptionIds,
+      cartRequiredOptions: newCartRequiredOptions,
+      updateCartOptionIds: [],
+      cartOptions: [],
+    });
+  }
+
+  private async createCartRequiredOption(cartId: number, createCartRequiredOptionDto: CreateCartRequiredOptionDto[]) {
+    return await this.cartRequiredOptionRepository.saveCartRequiredOptions(cartId, createCartRequiredOptionDto);
+  }
+
+  private async createCartOption(cartId: number, createCartOptionDto: CreateCartOptionDto[]) {
+    return await this.cartOptionRepository.saveCartOptions(cartId, createCartOptionDto);
+  }
+
+  private findExistingCartRequiredOptionCounts(
+    cart: CartEntity,
+    createCartRequiredOptionDto: CreateCartRequiredOptionDto[],
+  ): { id: number; count: number }[] {
+    const counts: { id: number; count: number }[] = [];
+
+    for (const requiredOptionDto of createCartRequiredOptionDto) {
+      const existingOption = cart.cartRequiredOptions.find(
+        (cart) => cart.productRequiredOptionId === requiredOptionDto.productRequiredOptionId,
+      );
+
+      if (existingOption) {
+        counts.push({ id: existingOption.id, count: requiredOptionDto.count });
+      }
+    }
+    return counts;
+  }
+
+  private findExistingCartOptionCounts(
+    cart: CartEntity,
+    createCartOptionDto: CreateCartOptionDto[],
+  ): { id: number; count: number }[] {
+    const counts: { id: number; count: number }[] = [];
+
+    for (const optionDto of createCartOptionDto) {
+      const existingOption = cart.cartOptions.find((cart) => cart.productOptionId === optionDto.productOptionId);
+
+      if (existingOption) {
+        counts.push({ id: existingOption.id, count: optionDto.count });
+      }
+    }
+
+    return counts;
+  }
+
   /**
    * 유저의 장바구니를 읽습니다.
    *

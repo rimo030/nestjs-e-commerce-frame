@@ -1,11 +1,11 @@
-import { Repository, UpdateResult } from 'typeorm';
+import { Repository } from 'typeorm';
 import { CartRequiredOptionEntity } from 'src/entities/cart-required-option.entity';
 import { CreateCartRequiredOptionDto } from 'src/entities/dtos/create-cart-required-option.dto';
 import { CustomRepository } from '../configs/custom-typeorm.decorator';
 
 @CustomRepository(CartRequiredOptionEntity)
 export class CartRequiredOptionRepository extends Repository<CartRequiredOptionEntity> {
-  async saveCart(
+  async saveCartRequiredOptions(
     cartId: number,
     createCartRequiredOptionDto: CreateCartRequiredOptionDto[],
   ): Promise<CartRequiredOptionEntity[]> {
@@ -13,11 +13,17 @@ export class CartRequiredOptionRepository extends Repository<CartRequiredOptionE
     return await this.save(entitiesToSave);
   }
 
-  async increaseCount(ids: number[]): Promise<UpdateResult> {
-    return await this.createQueryBuilder()
-      .update(CartRequiredOptionEntity)
-      .set({ count: () => `count + ${1}` })
-      .where('id IN (:...ids)', { ids: ids })
-      .execute();
+  async increaseRequiredOptionsCount(options: { id: number; count: number }[]): Promise<number[]> {
+    const updatedIds: number[] = [];
+
+    await Promise.all(
+      options.map(async (option) => {
+        const updateResult = await this.increment({ id: option.id }, 'count', option.count);
+        if (updateResult.affected !== 0) {
+          updatedIds.push(option.id);
+        }
+      }),
+    );
+    return updatedIds;
   }
 }

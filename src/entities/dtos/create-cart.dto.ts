@@ -1,5 +1,5 @@
 import { Type } from 'class-transformer';
-import { ArrayNotEmpty, IsArray } from 'class-validator';
+import { ArrayNotEmpty, IsArray, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmptyNumber } from 'src/decorators/is-not-empty-number.decorator';
 import { CartEntity } from '../cart.entity';
@@ -22,6 +22,7 @@ export class CreateCartDto implements Pick<CartEntity, 'productId'> {
   })
   @IsArray()
   @ArrayNotEmpty()
+  @ValidateNested({ each: true })
   @Type(() => CreateCartRequiredOptionDto)
   cartRequiredOptions!: CreateCartRequiredOptionDto[];
 
@@ -35,6 +36,7 @@ export class CreateCartDto implements Pick<CartEntity, 'productId'> {
     ],
   })
   @IsArray()
+  @ValidateNested({ each: true })
   @Type(() => CreateCartOptionDto)
-  cartOptions!: CreateCartOptionDto[] | [];
+  cartOptions!: CreateCartOptionDto[];
 }

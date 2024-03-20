@@ -1,16 +1,13 @@
 import { Type } from 'class-transformer';
-import { IsInt, IsNotEmpty, IsNumber } from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, Max, Min } from 'class-validator';
 import { applyDecorators } from '@nestjs/common';
 
-/**
- * @todo
- * Number 데코레이터들은 int인지 모든 숫자인지 따로 받아야 한다.
- *
- */
-export function IsNotEmptyNumber(type: 'number' | 'int' = 'number') {
+export function IsNotEmptyNumber(type: 'number' | 'int' = 'number', option?: { min?: number; max?: number }) {
   return applyDecorators(
     IsNotEmpty(),
     type === 'int' ? IsInt() : IsNumber(),
+    ...(typeof option?.min === 'number' ? [Min(option.min)] : []),
+    ...(typeof option?.max === 'number' ? [Max(option.max)] : []),
     Type(() => Number),
   );
 }
