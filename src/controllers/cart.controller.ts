@@ -1,7 +1,8 @@
-import { Body, Controller, HttpCode, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BuyerJwtAuthGuard } from 'src/auth/guards/buyer-jwt.guard';
 import { UserId } from 'src/decorators/user-id.decorator';
+import { CartGroupByProductBundleDto } from 'src/entities/dtos/cart-group-by-product-bundle.dto';
 import { CartDto } from 'src/entities/dtos/cart.dto';
 import { CreateCartDto } from 'src/entities/dtos/create-cart.dto';
 import { UpdateCartDto } from 'src/entities/dtos/update-cart.dto';
@@ -25,5 +26,17 @@ export class CartController {
   }> {
     const cart = await this.cartService.addCart(buyerId, createCartDto);
     return { data: cart };
+  }
+
+  @Get()
+  @ApiOperation({ summary: '장바구니 조회 API', description: '모든 사용자는 담은 상품을 장바구니에서 조회할 수 있다.' })
+  async readCarts(@UserId() buyerId: number): Promise<{
+    data: {
+      carts: CartGroupByProductBundleDto[];
+      deliveryFee: number;
+    };
+  }> {
+    const carts = await this.cartService.readCarts(buyerId);
+    return { data: carts };
   }
 }

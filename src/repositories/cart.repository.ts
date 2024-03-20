@@ -9,11 +9,22 @@ export class CartRepository extends Repository<CartEntity> {
   }
   async findCart(buyerId: number, productId: number): Promise<CartEntity | null> {
     const cart = await this.createQueryBuilder('cart')
-      .leftJoinAndSelect('cart.cartRequiredOptions', 'cartRequiredOption')
+      .innerJoinAndSelect('cart.cartRequiredOptions', 'cartRequiredOption')
       .leftJoinAndSelect('cart.cartOptions', 'cartOption')
       .where('cart.buyerId = :buyerId', { buyerId })
       .andWhere('cart.productId = :productId', { productId })
       .getOne();
     return cart;
+  }
+  async findCartDetail(buyerId: number): Promise<CartEntity[]> {
+    const carts = await this.createQueryBuilder('cart')
+      .innerJoinAndSelect('cart.cartRequiredOptions', 'cartRequiredOption')
+      .leftJoinAndSelect('cart.cartOptions', 'cartOption')
+      .leftJoinAndSelect('cart.product', 'product')
+      .leftJoinAndSelect('cartRequiredOption.productRequiredOption', 'productRequiredOption')
+      .leftJoinAndSelect('cartOption.productOption', 'productOption')
+      .where('cart.buyerId = :buyerId', { buyerId })
+      .getMany();
+    return carts;
   }
 }
