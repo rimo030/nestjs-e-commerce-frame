@@ -203,7 +203,7 @@ export class CartService {
         for (const productId of bundle.productIds) {
           const productCarts = bundleCarts.filter((c) => c.productId === productId);
           const cartDetail = productCarts.map((b) => new CartProductDetailDto(b));
-          const fixedDeliveryFee = 1;
+          const fixedDeliveryFee = productCarts.reduce((acc, cart) => acc + this.productFixDeliveryFee(cart), 0);
 
           result.push({
             bundleId: null,
@@ -232,6 +232,23 @@ export class CartService {
     } else {
       return Math.max(...charges);
     }
+  }
+
+  /**
+   * @todo 상품 묶음이 존재하지 않을때의 배송비를 계산합니다.
+   * @param carts
+   * @returns
+   */
+  private productFixDeliveryFee(carts: CartEntity): number {
+    /**
+     * product(상품)의 deliveryType(배송비)에 따라 배송비를 책정합니다.
+     *  - FREE : 무료
+     *  - NOT_FREE : 유료
+     *  - COUNT_FREE : 몇 개 이상 무료 (deliveryFreeOver에 기준 수량 입력)
+     *  - PRICE_FREE : 가격 이상 무료 (deliveryFreeOver에 기준 가격 입력)
+     */
+
+    return carts.product.deliveryCharge;
   }
 
   /**
