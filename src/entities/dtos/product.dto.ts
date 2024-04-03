@@ -1,4 +1,4 @@
-import { deliveryType } from 'src/types/enums/fee-type.enum';
+import { deliveryType } from 'src/types/enums/delivery-type.enum';
 import { ProductEntity } from '../product.entity';
 
 export class ProductDto {
