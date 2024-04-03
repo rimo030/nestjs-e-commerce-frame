@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CartEntity } from 'src/entities/cart.entity';
 import { CartGroupByProductBundleDto } from 'src/entities/dtos/cart-group-by-product-bundle.dto';
+import { CartProductDetailDto } from 'src/entities/dtos/cart-product-detail.dto';
 import { CartDto } from 'src/entities/dtos/cart.dto';
 import { CreateCartOptionDto } from 'src/entities/dtos/create-cart-option.dto';
 import { CreateCartRequiredOptionDto } from 'src/entities/dtos/create-cart-required-option.dto';
@@ -173,7 +174,9 @@ export class CartService {
   }
 
   /**
-   *상품 정보를 묶음(bundle) 별로 배송비와 함께 그룹화 합니다.
+   * 장바구니, 상품, 상품옵션 정보를 묶음(bundle) 별로 배송비와 함께 그룹화 합니다.
+   *
+   * 묶음이 있는 경우라면 묶음별로, 묶음이 없다면 각 상품을 하나의 묶음으로 취급합니다.
    *
    * @param carts 장바구니 및 상품에 대한 모든 정보
    */
@@ -181,16 +184,37 @@ export class CartService {
   async groupByProductBundle(carts: CartEntity[]): Promise<CartGroupByProductBundleDto[]> {
     const productIds = carts.map((c) => c.productId);
     const bundleGroup = await this.productRepository.getProductsByBundleGroup(productIds);
+    const result: CartGroupByProductBundleDto[] = [];
 
-    return bundleGroup.map((bundle) => {
+    for (const bundle of bundleGroup) {
       const bundleCarts = carts.filter((c) => bundle.productIds.includes(c.productId));
-      return new CartGroupByProductBundleDto({
-        bundleId: bundle.bundleId,
-        chargeStandard: bundle.chargeStandard,
-        fixedDeliveryFee: this.productBundleFixDeliveryFee(bundle.chargeStandard, bundleCarts),
-        carts: bundleCarts,
-      });
-    });
+
+      if (bundle.bundleId !== null) {
+        const cartDetail = bundleCarts.map((b) => new CartProductDetailDto(b));
+        const fixedDeliveryFee = this.productBundleFixDeliveryFee(bundle.chargeStandard, bundleCarts);
+
+        result.push({
+          bundleId: bundle.bundleId,
+          chargeStandard: bundle.chargeStandard,
+          fixedDeliveryFee: fixedDeliveryFee,
+          cartDetail: cartDetail,
+        });
+      } else {
+        for (const productId of bundle.productIds) {
+          const productCarts = bundleCarts.filter((c) => c.productId === productId);
+          const cartDetail = productCarts.map((b) => new CartProductDetailDto(b));
+          const fixedDeliveryFee = 1;
+
+          result.push({
+            bundleId: null,
+            chargeStandard: null,
+            fixedDeliveryFee: fixedDeliveryFee,
+            cartDetail: cartDetail,
+          });
+        }
+      }
+    }
+    return result;
   }
 
   /**
@@ -205,13 +229,8 @@ export class CartService {
     const charges = carts.map((c) => c.product.deliveryCharge);
     if (chargeStandard === feeStandard.MIN) {
       return Math.min(...charges);
-    } else if (chargeStandard === feeStandard.MAX) {
-      return Math.max(...charges);
     } else {
-      /**
-       * @todo 상품 묶음이 없는 경우
-       */
-      return 1 as any;
+      return Math.max(...charges);
     }
   }
 
