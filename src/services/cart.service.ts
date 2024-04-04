@@ -7,11 +7,12 @@ import { CreateCartOptionDto } from 'src/entities/dtos/create-cart-option.dto';
 import { CreateCartRequiredOptionDto } from 'src/entities/dtos/create-cart-required-option.dto';
 import { CreateCartDto } from 'src/entities/dtos/create-cart.dto';
 import { UpdateCartDto } from 'src/entities/dtos/update-cart.dto';
-import { CartIntercnalServerErrorException } from 'src/exceptions/cart.exception';
+import { CartDeliveryTypeNotFoundException, CartIntercnalServerErrorException } from 'src/exceptions/cart.exception';
 import { CartOptionRepository } from 'src/repositories/cart-option.repository';
 import { CartRequiredOptionRepository } from 'src/repositories/cart-required-option.repository';
 import { CartRepository } from 'src/repositories/cart.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
+import { deliveryType } from 'src/types/enums/delivery-type.enum';
 import { feeStandard } from 'src/types/enums/fee-standard.enum';
 
 @Injectable()
@@ -203,7 +204,7 @@ export class CartService {
         for (const productId of bundle.productIds) {
           const productCarts = bundleCarts.filter((c) => c.productId === productId);
           const cartDetail = productCarts.map((b) => new CartProductDetailDto(b));
-          const fixedDeliveryFee = productCarts.reduce((acc, cart) => acc + this.productFixDeliveryFee(cart), 0);
+          const fixedDeliveryFee = cartDetail.reduce((acc, c) => acc + this.productFixDeliveryFee(c), 0);
 
           result.push({
             bundleId: null,
@@ -235,20 +236,38 @@ export class CartService {
   }
 
   /**
-   * @todo 상품 묶음이 존재하지 않을때의 배송비를 계산합니다.
-   * @param carts
-   * @returns
+   * 상품 묶음이 존재하지 않을 경우 배송비를 계산합니다.
+   * product(상품)의 deliveryType(배송비)에 따라 배송비를 책정합니다.
+   *
+   * @param cart 장바구니에 담긴 상품의 정보
+   * @returns 상품의 배송비
    */
-  private productFixDeliveryFee(carts: CartEntity): number {
-    /**
-     * product(상품)의 deliveryType(배송비)에 따라 배송비를 책정합니다.
-     *  - FREE : 무료
-     *  - NOT_FREE : 유료
-     *  - COUNT_FREE : 몇 개 이상 무료 (deliveryFreeOver에 기준 수량 입력)
-     *  - PRICE_FREE : 가격 이상 무료 (deliveryFreeOver에 기준 가격 입력)
-     */
+  private productFixDeliveryFee(cart: CartProductDetailDto): number {
+    const cartProduct = cart.product;
+    const cartDeliveryType = cartProduct.deliveryType;
+    const cartDeliveryFreeOver = cartProduct.deliveryFreeOver;
 
-    return carts.product.deliveryCharge;
+    if (cartDeliveryType === deliveryType.FREE) {
+      return 0;
+    } else if (cartDeliveryType === deliveryType.NOT_FREE) {
+      return cartProduct.deliveryCharge;
+    } else if (
+      cartDeliveryType === deliveryType.COUNT_FREE &&
+      cartDeliveryFreeOver !== null &&
+      cartDeliveryFreeOver !== undefined
+    ) {
+      const count = cart.cartRequiredOptions.reduce((acc, requiredOption) => acc + requiredOption.count, 0);
+      return count >= cartDeliveryFreeOver ? 0 : cartProduct.deliveryCharge;
+    } else if (
+      cartDeliveryType === deliveryType.PRICE_FREE &&
+      cartDeliveryFreeOver !== null &&
+      cartDeliveryFreeOver !== undefined
+    ) {
+      const price = cart.cartRequiredOptions.reduce((acc, ro) => acc + ro.count * ro.price, 0);
+      return price >= cartDeliveryFreeOver ? 0 : cartProduct.deliveryCharge;
+    }
+
+    throw new CartDeliveryTypeNotFoundException();
   }
 
   /**
