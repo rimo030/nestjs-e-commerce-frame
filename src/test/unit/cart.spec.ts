@@ -19,10 +19,10 @@ describe('Cart Controller', () => {
   let respository: CartRepository;
 
   let buyerRepository: BuyerRepository;
-  let testBuyerId: number | undefined;
+  let testBuyerId: number;
   let productController: ProductController;
 
-  let testProductId: number | undefined;
+  let testProductId: number;
   let testProduct: ProductAllOptionsDto;
   let testRequiredOption: ProductRequiredOptionJoinInputOptionDto;
   let testOption: ProductOptionDto;
@@ -55,7 +55,7 @@ describe('Cart Controller', () => {
      * 상품은 1개 이상의 필수/선택 옵션을 가져야 한다.
      */
     const products = await productController.getProductList({});
-    testProductId = products.data.at(0)?.id;
+    testProductId = products.data.at(0)?.id as number;
   });
 
   it('should be defined.', async () => {
@@ -92,12 +92,24 @@ describe('Cart Controller', () => {
   });
 
   it('현재 테스트 데이터에 대하여 장바구니는 존재하지 않아야 한다.', async () => {
-    const test = await respository.findCart(testBuyerId as number, testProductId as number);
+    const test = await respository.findCart(testBuyerId, testProductId);
     expect(test).toBe(null);
   });
 
   /**
-   * 장바구니, 장바구니 옵션, 장바구니 선택 옵션을 저장한다.
+   * 테스트 시작시에 해당 buyer의 장바구니는 비워져 있어야 합니다.
+   */
+  describe('장바구니 조회 - 1 (상품이 담기기전 장바구니 조회를 검증합니다.)', () => {
+    it('장바구니 조회가 가능하며 아무것도 없을 때는 빈 배열이 조회되어야 한다.', async () => {
+      const { data } = await controller.readCarts(testBuyerId);
+
+      expect(data.carts.length).toBe(0);
+      expect(data.deliveryFee).toBe(0);
+    });
+  });
+
+  /**
+   * 장바구니, 장바구니 옵션, 장바구니 선택 옵션을 저장 합니다.
    */
   describe('장바구니 생성', () => {
     const setTestCount = () => {
@@ -105,16 +117,20 @@ describe('Cart Controller', () => {
     };
 
     it('저장된 장바구니는 데이터 베이스에서 조회가능해야 한다.', async () => {
+      /**
+       * 장바구니의 담을 옵션의 개수를 테스트 마다 다르게 설정합니다.
+       */
       setTestCount();
+
       const testCartDto: CreateCartDto = {
-        productId: testProductId as number,
-        cartRequiredOptions: [{ productRequiredOptionId: testRequiredOption.id as number, count: testCount }],
-        cartOptions: [{ productOptionId: testOption.id as number, count: testCount }],
+        productId: testProductId,
+        cartRequiredOptions: [{ productRequiredOptionId: testRequiredOption.id, count: testCount }],
+        cartOptions: [{ productOptionId: testOption.id, count: testCount }],
       };
 
-      const { data } = await controller.addCart(testBuyerId as number, testCartDto);
+      const { data } = await controller.addCart(testBuyerId, testCartDto);
 
-      const savedCart = await respository.findCart(testBuyerId as number, testProductId as number);
+      const savedCart = await respository.findCart(testBuyerId, testProductId);
       expect(savedCart).not.toBe(null);
 
       if (savedCart) {
@@ -128,23 +144,34 @@ describe('Cart Controller', () => {
       }
     });
     it('이미 존재하는 필수/선택옵션인지 확인하고, 존재할 경우에는 수량만 더해준다.', async () => {
+      /**
+       * 장바구니의 담을 옵션의 개수를 테스트 마다 다르게 설정합니다.
+       */
       setTestCount();
+
       const testCartDto: CreateCartDto = {
-        productId: testProductId as number,
-        cartRequiredOptions: [{ productRequiredOptionId: testRequiredOption.id as number, count: testCount }],
-        cartOptions: [{ productOptionId: testOption.id as number, count: testCount }],
+        productId: testProductId,
+        cartRequiredOptions: [{ productRequiredOptionId: testRequiredOption.id, count: testCount }],
+        cartOptions: [{ productOptionId: testOption.id, count: testCount }],
       };
 
-      const getCart = await respository.findCart(testBuyerId as number, testProductId as number);
+      const getCart = await respository.findCart(testBuyerId, testProductId);
       expect(getCart).not.toBe(null);
 
-      const { data } = await controller.addCart(testBuyerId as number, testCartDto);
+      /**
+       *  동일한 물품의 동일한 옵션을 장바구니에 추가합니다.
+       */
+      const { data } = await controller.addCart(testBuyerId, testCartDto);
 
-      const savedCart = await respository.findCart(testBuyerId as number, testProductId as number);
+      const savedCart = await respository.findCart(testBuyerId, testProductId);
       expect(savedCart).not.toBe(null);
 
+      /**
+       * 이미 존재하는 장바구니 임이 검증되었을 때
+       */
       if (getCart && savedCart) {
         expect(data).toBeInstanceOf(UpdateCartDto);
+
         expect(getCart.cartRequiredOptions.at(0)?.id).toBe(savedCart.cartRequiredOptions.at(0)?.id);
         expect((getCart.cartRequiredOptions.at(0)?.count as number) + testCount).toBe(
           savedCart.cartRequiredOptions.at(0)?.count,
@@ -155,14 +182,10 @@ describe('Cart Controller', () => {
     });
   });
 
-  describe('장바구니 조회', () => {
-    it.todo('장바구니 조회가 가능하며 아무것도 없을 때는 빈 배열이 조회되어야 한다.');
-    it.todo('장바구니 상품들은 배송비 계산을 위해 상품 묶음을 기준으로 묶여서 조회되어야 한다.');
+  describe('장바구니 조회 - 2 (상품이 담긴 이후의 장바구니 조회를 검증합니다.)', () => {
+    it('장바구니 상품들은 배송비 계산을 위해 상품 묶음(product bundle id)을 기준으로 묶여서 조회되어야 한다.', async () => {});
     it.todo('어떤 상품 묶음에도 속하지 않은 상품의 장바구니들도 동일한 구조로써 상품 묶음 ( = 빈 묶음)에 묶여야 한다.');
 
-    /**
-     * 테스트할 함수를 내부 함수로 잘게 분리해두면 DB에서 데이터를 꺼낼 필요 없이 가능하다.
-     */
     it.todo('각 번들은 배송비 계산 기준에 맞게 계산이 되어야 한다.');
   });
 
