@@ -1,11 +1,11 @@
-import { feeStandard } from 'src/types/enums/fee-standard.enum';
+import { chargeStandard } from 'src/types/enums/charge-standard.enum';
 import { ProductBundleEntity } from '../product-bundle.entity';
 
 export class ProductBundleDto {
   id: number;
   sellerId: number;
   name: string;
-  chargeStandard: keyof typeof feeStandard;
+  chargeStandard: keyof typeof chargeStandard;
 
   constructor(productBundle: ProductBundleEntity) {
     this.id = productBundle.id;

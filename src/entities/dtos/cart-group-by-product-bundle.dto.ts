@@ -1,9 +1,9 @@
-import { feeStandard } from 'src/types/enums/fee-standard.enum';
+import { chargeStandard } from 'src/types/enums/charge-standard.enum';
 import { CartProductDetailDto } from './cart-product-detail.dto';
 
 export class CartGroupByProductBundleDto {
   bundleId?: number | null;
-  chargeStandard?: keyof typeof feeStandard | null;
+  chargeStandard?: keyof typeof chargeStandard | null;
   fixedDeliveryFee!: number;
   cartDetail!: CartProductDetailDto[];
 }

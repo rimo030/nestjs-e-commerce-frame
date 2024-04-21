@@ -12,8 +12,8 @@ import { CartOptionRepository } from 'src/repositories/cart-option.repository';
 import { CartRequiredOptionRepository } from 'src/repositories/cart-required-option.repository';
 import { CartRepository } from 'src/repositories/cart.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
+import { chargeStandard } from 'src/types/enums/charge-standard.enum';
 import { deliveryType } from 'src/types/enums/delivery-type.enum';
-import { feeStandard } from 'src/types/enums/fee-standard.enum';
 
 @Injectable()
 export class CartService {
@@ -226,9 +226,9 @@ export class CartService {
    *
    * @returns 상품 묶음의 최종 배송비
    */
-  private productBundleFixDeliveryFee(chargeStandard: keyof typeof feeStandard, carts: CartEntity[]): number {
+  private productBundleFixDeliveryFee(chargeStandard: keyof typeof chargeStandard, carts: CartEntity[]): number {
     const charges = carts.map((c) => c.product.deliveryCharge);
-    if (chargeStandard === feeStandard.MIN) {
+    if (chargeStandard === chargeStandard.MIN) {
       return Math.min(...charges);
     } else {
       return Math.max(...charges);

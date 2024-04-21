@@ -3,7 +3,7 @@ import { CustomRepository } from 'src/configs/custom-typeorm.decorator';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
 import { ProductDto } from 'src/entities/dtos/product.dto';
 import { ProductEntity } from 'src/entities/product.entity';
-import { feeStandard } from 'src/types/enums/fee-standard.enum';
+import { chargeStandard } from 'src/types/enums/charge-standard.enum';
 
 @CustomRepository(ProductEntity)
 export class ProductRepository extends Repository<ProductEntity> {
@@ -59,7 +59,7 @@ export class ProductRepository extends Repository<ProductEntity> {
 
   async getProductsByBundleGroup(
     ids: number[],
-  ): Promise<{ bundleId: number; chargeStandard: keyof typeof feeStandard; productIds: number[] }[]> {
+  ): Promise<{ bundleId: number; chargeStandard: keyof typeof chargeStandard; productIds: number[] }[]> {
     const results = await this.createQueryBuilder('product')
       .leftJoinAndSelect('product.bundle', 'bundle')
       .select([
