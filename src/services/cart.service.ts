@@ -226,7 +226,7 @@ export class CartService {
    *
    * @returns 상품 묶음의 최종 배송비
    */
-  private productBundleFixDeliveryFee(chargeStandard: string, carts: CartEntity[]): number {
+  private productBundleFixDeliveryFee(chargeStandard: keyof typeof feeStandard, carts: CartEntity[]): number {
     const charges = carts.map((c) => c.product.deliveryCharge);
     if (chargeStandard === feeStandard.MIN) {
       return Math.min(...charges);
