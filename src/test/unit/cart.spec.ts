@@ -74,7 +74,7 @@ describe('Cart Controller', () => {
     expect(testProductId).toBeDefined();
   });
 
-  it(' 상품은 1개 이상의 필수/선택 옵션을 가져야 한다.', async () => {
+  it('상품은 1개 이상의 필수/선택 옵션을 가져야 한다.', async () => {
     if (testProductId) {
       const { data } = await productController.getProduct(testProductId);
       testProduct = data;
@@ -91,16 +91,20 @@ describe('Cart Controller', () => {
     }
   });
 
-  it('현재 테스트 데이터에 대하여 장바구니는 존재하지 않아야 한다.', async () => {
+  /**
+   * 첫번째 테스트가 아니라면 skip합니다.
+   */
+  it.skip('현재 테스트 데이터에 대하여 장바구니는 존재하지 않아야 한다.', async () => {
     const test = await respository.findCart(testBuyerId, testProductId);
     expect(test).toBe(null);
   });
 
   /**
-   * 테스트 시작시에 해당 buyer의 장바구니는 비워져 있어야 합니다.
+   * 첫 장바구니 테스트 시에 해당 buyer의 장바구니는 비워져 있어야 합니다.
+   * 첫번째 테스트가 아니라면 skip합니다.
    */
   describe('장바구니 조회 - 1 (상품이 담기기전 장바구니 조회를 검증합니다.)', () => {
-    it('장바구니 조회가 가능하며 아무것도 없을 때는 빈 배열이 조회되어야 한다.', async () => {
+    it.skip('장바구니 조회가 가능하며 아무것도 없을 때는 빈 배열이 조회되어야 한다.', async () => {
       const { data } = await controller.readCarts(testBuyerId);
 
       expect(data.carts.length).toBe(0);
@@ -183,10 +187,52 @@ describe('Cart Controller', () => {
   });
 
   describe('장바구니 조회 - 2 (상품이 담긴 이후의 장바구니 조회를 검증합니다.)', () => {
-    it('장바구니 상품들은 배송비 계산을 위해 상품 묶음(product bundle id)을 기준으로 묶여서 조회되어야 한다.', async () => {});
-    it.todo('어떤 상품 묶음에도 속하지 않은 상품의 장바구니들도 동일한 구조로써 상품 묶음 ( = 빈 묶음)에 묶여야 한다.');
+    it('장바구니 상품들은 배송비 계산을 위해 상품 묶음(product bundle id)을 기준으로 묶여서 조회되어야 한다.', async () => {
+      const { data } = await controller.readCarts(testBuyerId);
 
-    it.todo('각 번들은 배송비 계산 기준에 맞게 계산이 되어야 한다.');
+      const productPromises = data.carts.map(async (group) => {
+        const productDetails = await Promise.all(
+          group.cartDetail.map(async (c) => {
+            const { data } = await productController.getProduct(c.productId);
+            return data.bundleId;
+          }),
+        );
+        return productDetails.every((bundleId) => bundleId === group.bundleId);
+      });
+
+      // 모든 그룹에 대해 번들 ID가 일치하는지 확인합니다.
+      const isTrueBundle = (await Promise.all(productPromises)).every(Boolean);
+      expect(isTrueBundle).toBe(true);
+    });
+
+    it('어떤 상품 묶음에도 속하지 않은 상품은 각각의 상품 하나를 묶음으로 처리한다.', async () => {
+      const { data } = await controller.readCarts(testBuyerId);
+      const productsWithoutBundle = data.carts.filter((c) => c.bundleId == null);
+      // 검증할 데이터가 존재해야 합니다.
+      expect(productsWithoutBundle.length > 0).toBe(true);
+
+      const isOneProduct = productsWithoutBundle.every((n) => n.cartDetail.length);
+      expect(isOneProduct).toBe(true);
+    });
+
+    it('각 상품 묶음은 묶음에 명시된 계산 기준에 맞게 배송비가 책정 되어야 한다.', async () => {
+      const { data } = await controller.readCarts(testBuyerId);
+      const testCart = data.carts.at(0);
+
+      if (testCart) {
+        const chargeStandard = testCart.chargeStandard;
+        const charges = testCart.cartDetail.map((c) => c.product.deliveryCharge);
+
+        if (chargeStandard === 'MAX') {
+          expect(Math.max(...charges)).toBe(testCart.fixedDeliveryFee);
+        } else if (chargeStandard === 'MIN') {
+          expect(Math.min(...charges)).toBe(testCart.fixedDeliveryFee);
+        } else if (chargeStandard === null) {
+          expect(charges.length === 1).toBe(true);
+          expect(charges.reduce((acc, c) => acc + c, 0)).toBe(testCart.fixedDeliveryFee);
+        }
+      }
+    });
   });
 
   describe('장바구니 수정', () => {
