@@ -170,7 +170,7 @@ export class CartService {
   }> {
     const carts = await this.cartRepository.findCartDetail(buyerId);
     const cartsGroupByProductBundle = await this.groupByProductBundle(carts);
-    const deliveryFee = cartsGroupByProductBundle.map((el) => el.fixedDeliveryFee).reduce((acc, cur) => acc + cur, 0);
+    const deliveryFee = cartsGroupByProductBundle.map((el) => el.bundleDeliveryFee).reduce((acc, cur) => acc + cur, 0);
     return { carts: cartsGroupByProductBundle, deliveryFee };
   }
 
@@ -197,7 +197,7 @@ export class CartService {
         result.push({
           bundleId: bundle.bundleId,
           chargeStandard: bundle.chargeStandard,
-          fixedDeliveryFee: fixedDeliveryFee,
+          bundleDeliveryFee: fixedDeliveryFee,
           cartDetail: cartDetail,
         });
       } else {
@@ -209,7 +209,7 @@ export class CartService {
           result.push({
             bundleId: null,
             chargeStandard: null,
-            fixedDeliveryFee: fixedDeliveryFee,
+            bundleDeliveryFee: fixedDeliveryFee,
             cartDetail: cartDetail,
           });
         }
