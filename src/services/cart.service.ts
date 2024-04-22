@@ -192,24 +192,24 @@ export class CartService {
 
       if (bundle.bundleId !== null) {
         const cartDetail = bundleCarts.map((b) => new CartProductDetailDto(b));
-        const fixedDeliveryFee = this.productBundleFixDeliveryFee(bundle.chargeStandard, bundleCarts);
+        const bundleDeliveryFee = this.calculateBundleDeliveryFee(bundle.chargeStandard, bundleCarts);
 
         result.push({
           bundleId: bundle.bundleId,
           chargeStandard: bundle.chargeStandard,
-          bundleDeliveryFee: fixedDeliveryFee,
+          bundleDeliveryFee: bundleDeliveryFee,
           cartDetail: cartDetail,
         });
       } else {
         for (const productId of bundle.productIds) {
           const productCarts = bundleCarts.filter((c) => c.productId === productId);
           const cartDetail = productCarts.map((b) => new CartProductDetailDto(b));
-          const fixedDeliveryFee = cartDetail.reduce((acc, c) => acc + this.productFixDeliveryFee(c), 0);
+          const bundleDeliveryFee = cartDetail.reduce((acc, c) => acc + this.calculateProductDeliveryFee(c), 0);
 
           result.push({
             bundleId: null,
             chargeStandard: null,
-            bundleDeliveryFee: fixedDeliveryFee,
+            bundleDeliveryFee: bundleDeliveryFee,
             cartDetail: cartDetail,
           });
         }
@@ -221,14 +221,14 @@ export class CartService {
   /**
    * 해당 번들과 내부 장바구니 상품들을 이용해 번들의 최종적인 배송비를 계산한다.
    *
-   * @param chargeStandard 상품 묶음의 배송비 기준
+   * @param standard 상품 묶음의 배송비 기준
    * @param carts 상품 묶음에 해당되는 장바구니 상품 목록
    *
    * @returns 상품 묶음의 최종 배송비
    */
-  private productBundleFixDeliveryFee(chargeStandard: keyof typeof chargeStandard, carts: CartEntity[]): number {
+  private calculateBundleDeliveryFee(standard: keyof typeof chargeStandard, carts: CartEntity[]): number {
     const charges = carts.map((c) => c.product.deliveryCharge);
-    if (chargeStandard === chargeStandard.MIN) {
+    if (standard === chargeStandard.MIN) {
       return Math.min(...charges);
     } else {
       return Math.max(...charges);
@@ -242,7 +242,7 @@ export class CartService {
    * @param cart 장바구니에 담긴 상품의 정보
    * @returns 상품의 배송비
    */
-  private productFixDeliveryFee(cart: CartProductDetailDto): number {
+  private calculateProductDeliveryFee(cart: CartProductDetailDto): number {
     const cartProduct = cart.product;
     const cartDeliveryType = cartProduct.deliveryType;
     const cartDeliveryFreeOver = cartProduct.deliveryFreeOver;
