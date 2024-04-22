@@ -4,6 +4,6 @@ import { CartProductDetailDto } from './cart-product-detail.dto';
 export class CartGroupByProductBundleDto {
   bundleId?: number | null;
   chargeStandard?: keyof typeof chargeStandard | null;
-  fixedDeliveryFee!: number;
+  bundleDeliveryFee!: number;
   cartDetail!: CartProductDetailDto[];
 }

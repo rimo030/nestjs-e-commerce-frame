@@ -224,12 +224,15 @@ describe('Cart Controller', () => {
         const charges = testCart.cartDetail.map((c) => c.product.deliveryCharge);
 
         if (chargeStandard === 'MAX') {
-          expect(Math.max(...charges)).toBe(testCart.fixedDeliveryFee);
+          expect(Math.max(...charges)).toBe(testCart.bundleDeliveryFee);
         } else if (chargeStandard === 'MIN') {
-          expect(Math.min(...charges)).toBe(testCart.fixedDeliveryFee);
+          expect(Math.min(...charges)).toBe(testCart.bundleDeliveryFee);
         } else if (chargeStandard === null) {
           expect(charges.length === 1).toBe(true);
-          expect(charges.reduce((acc, c) => acc + c, 0)).toBe(testCart.fixedDeliveryFee);
+          expect(charges.reduce((acc, c) => acc + c, 0)).toBe(testCart.bundleDeliveryFee);
+        } else {
+          // 발생하지 말아야할 케이스로 에러가 발생합니다.
+          expect(1).toBe(2);
         }
       }
     });
