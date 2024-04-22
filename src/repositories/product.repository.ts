@@ -3,6 +3,7 @@ import { CustomRepository } from 'src/configs/custom-typeorm.decorator';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
 import { ProductDto } from 'src/entities/dtos/product.dto';
 import { ProductEntity } from 'src/entities/product.entity';
+import { chargeStandard } from 'src/types/enums/charge-standard.enum';
 
 @CustomRepository(ProductEntity)
 export class ProductRepository extends Repository<ProductEntity> {
@@ -54,5 +55,26 @@ export class ProductRepository extends Repository<ProductEntity> {
       skip,
       take,
     });
+  }
+
+  async getProductsByBundleGroup(
+    ids: number[],
+  ): Promise<{ bundleId: number; chargeStandard: keyof typeof chargeStandard; productIds: number[] }[]> {
+    const results = await this.createQueryBuilder('product')
+      .leftJoinAndSelect('product.bundle', 'bundle')
+      .select([
+        'product.bundleId AS bundleId',
+        'bundle.chargeStandard As chargeStandard',
+        'GROUP_CONCAT(product.id) AS productIds',
+      ])
+      .whereInIds(ids)
+      .groupBy('product.bundleId')
+      .getRawMany();
+
+    return results.map((result) => ({
+      bundleId: result.bundleId,
+      chargeStandard: result.chargeStandard,
+      productIds: result.productIds.split(',').map((id) => parseInt(id)),
+    }));
   }
 }

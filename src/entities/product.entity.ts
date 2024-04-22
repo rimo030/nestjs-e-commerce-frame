@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { deliveryType } from 'src/types/enums/fee-type.enum';
+import { deliveryType } from 'src/types/enums/delivery-type.enum';
 import { CartEntity } from './cart.entity';
 import { CategoryEntity } from './category.entity';
 import { CommonEntity } from './common/common.entity';

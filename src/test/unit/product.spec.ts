@@ -18,7 +18,7 @@ import { ProductRequiredOptionRepository } from 'src/repositories/product-requir
 import { ProductRepository } from 'src/repositories/product.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
 import { ProductService } from 'src/services/product.service';
-import { deliveryType } from 'src/types/enums/fee-type.enum';
+import { deliveryType } from 'src/types/enums/delivery-type.enum';
 
 describe('ProductController', () => {
   let controller: ProductController;
