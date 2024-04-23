@@ -6,6 +6,7 @@ import { CartDto } from 'src/entities/dtos/cart.dto';
 import { CreateCartOptionDto } from 'src/entities/dtos/create-cart-option.dto';
 import { CreateCartRequiredOptionDto } from 'src/entities/dtos/create-cart-required-option.dto';
 import { CreateCartDto } from 'src/entities/dtos/create-cart.dto';
+import { UpdateCartOptionCountDto } from 'src/entities/dtos/update-cart-option-count.dto';
 import { UpdateCartDto } from 'src/entities/dtos/update-cart.dto';
 import { CartDeliveryTypeNotFoundException, CartIntercnalServerErrorException } from 'src/exceptions/cart.exception';
 import { CartOptionRepository } from 'src/repositories/cart-option.repository';
@@ -271,21 +272,14 @@ export class CartService {
   }
 
   /**
-   * 이미 담긴 장바구니 상품의 수량을 변경한다.
+   * 이미 담긴 장바구니 옵션의 상품의 수량을 변경합니다.
    *
-   * @param userId
-   * @param cartId
-   * @param cartOptionId
-   * @param cartType
-   * @param count
+   * @param buyerId 유저의 아이디
+   * @param updateCartOptionCountDto
+   *
+   * @returns 변경된 결과를 반환합니다.
    */
-  async updateCart(
-    userId: number,
-    cartId: number,
-    cartOptionId: number,
-    cartType: 'option' | 'requiredOption',
-    count: number,
-  ) {}
+  async updateCartsOptionCount(buyerId: number, updateCartOptionCountDto: UpdateCartOptionCountDto): Promise<any> {}
 
   /**
    * 장바구니에서 상품을 지웁니다.
