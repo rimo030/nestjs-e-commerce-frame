@@ -1,19 +1,18 @@
-import { CartOptionEntity } from '../cart-option.entity';
-import { CartRequiredOptionEntity } from '../cart-required-option.entity';
+import { Omit } from 'src/types/omit-type';
 import { CartEntity } from '../cart.entity';
-import { ProductOptionEntity } from '../product-option.entity';
-import { ProductRequiredOptionEntity } from '../product-required-option.entity';
+import { CartOptionDto } from './cart-option.dto';
+import { CartRequiredOptionDto } from './cart-required-option.dto';
+import { ProductOptionDto } from './product-option.dto';
+import { ProductRequiredOptionDto } from './product-required-option.dto';
 import { ProductDto } from './product.dto';
 
 export class CartProductDetailDto {
   id!: number;
   buyerId!: number;
   productId!: number;
-  product: ProductDto;
-  cartRequiredOptions!: (Pick<CartRequiredOptionEntity, 'id' | 'cartId' | 'productRequiredOptionId' | 'count'> &
-    Pick<ProductRequiredOptionEntity, 'productId' | 'price' | 'name' | 'isSale'>)[];
-  cartOptions!: (Pick<CartOptionEntity, 'id' | 'cartId' | 'productOptionId' | 'count'> &
-    Pick<ProductOptionEntity, 'productId' | 'price' | 'name' | 'isSale'>)[];
+  product!: ProductDto;
+  cartRequiredOptions!: (CartRequiredOptionDto & Omit<ProductRequiredOptionDto, 'id'>)[];
+  cartOptions!: (CartOptionDto & Omit<ProductOptionDto, 'id'>)[];
 
   constructor(cart: CartEntity) {
     this.id = cart.id;
