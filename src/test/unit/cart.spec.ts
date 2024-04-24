@@ -8,6 +8,7 @@ import { CreateCartDto } from 'src/entities/dtos/create-cart.dto';
 import { ProductAllOptionsDto } from 'src/entities/dtos/product-all-options.dto';
 import { ProductOptionDto } from 'src/entities/dtos/product-option.dto';
 import { ProductRequiredOptionJoinInputOptionDto } from 'src/entities/dtos/product-rquired-option-join-input-option.dto';
+import { UpdateCartOptionCountDto } from 'src/entities/dtos/update-cart-option-count.dto';
 import { UpdateCartDto } from 'src/entities/dtos/update-cart.dto';
 import { BuyerRepository } from 'src/repositories/buyer.repository';
 import { CartRepository } from 'src/repositories/cart.repository';
@@ -95,7 +96,7 @@ describe('Cart Controller', () => {
    * 첫번째 테스트가 아니라면 skip합니다.
    */
   it.skip('현재 테스트 데이터에 대하여 장바구니는 존재하지 않아야 한다.', async () => {
-    const test = await respository.findCart(testBuyerId, testProductId);
+    const test = await respository.findCartByProductId(testBuyerId, testProductId);
     expect(test).toBe(null);
   });
 
@@ -134,7 +135,7 @@ describe('Cart Controller', () => {
 
       const { data } = await controller.addCart(testBuyerId, testCartDto);
 
-      const savedCart = await respository.findCart(testBuyerId, testProductId);
+      const savedCart = await respository.findCartByProductId(testBuyerId, testProductId);
       expect(savedCart).not.toBe(null);
 
       if (savedCart) {
@@ -159,7 +160,7 @@ describe('Cart Controller', () => {
         cartOptions: [{ productOptionId: testOption.id, count: testCount }],
       };
 
-      const getCart = await respository.findCart(testBuyerId, testProductId);
+      const getCart = await respository.findCartByProductId(testBuyerId, testProductId);
       expect(getCart).not.toBe(null);
 
       /**
@@ -167,7 +168,7 @@ describe('Cart Controller', () => {
        */
       const { data } = await controller.addCart(testBuyerId, testCartDto);
 
-      const savedCart = await respository.findCart(testBuyerId, testProductId);
+      const savedCart = await respository.findCartByProductId(testBuyerId, testProductId);
       expect(savedCart).not.toBe(null);
 
       /**
@@ -239,7 +240,78 @@ describe('Cart Controller', () => {
   });
 
   describe('장바구니 수정', () => {
-    it.todo('장바구니 상품 수량을 수정할 수 있어야 한다.');
+    const setTestCount = () => {
+      testCount = Math.floor(Math.random() * 100);
+    };
+
+    it('장바구니 필수 옵션 수량을 수정할 수 있어야 한다.', async () => {
+      setTestCount();
+
+      const { data } = await controller.readCarts(testBuyerId);
+      const testCartBundle = data.carts.at(0);
+      const testCartDetail = testCartBundle?.cartDetail;
+
+      if (testCartDetail) {
+        const isAllRequiredOptionsUpdate = testCartDetail.every((d) =>
+          d.cartRequiredOptions.map(async (ro) => {
+            const { data } = await controller.updateCartsOptionCount(testBuyerId, {
+              id: ro.id,
+              cartId: ro.cartId,
+              cartOptionType: 'requiredOption',
+              count: testCount,
+            });
+            return data === ro.id;
+          }),
+        );
+        expect(isAllRequiredOptionsUpdate).toBe(true);
+
+        const { data } = await controller.readCarts(testBuyerId);
+        const [updateBundle] = data.carts.filter((c) => c.bundleId === testCartBundle.bundleId);
+        const isUpdateCount = updateBundle.cartDetail.every((d) =>
+          d.cartRequiredOptions.map((ro) => ro.count === testCount),
+        );
+        expect(isUpdateCount).toBe(true);
+      } else {
+        /**
+         * 테스트할 대상이 없기에 의미없는 테스트가 됩니다.
+         * 테스트할 장바구니 데이터를 추가해주세요.
+         */
+        expect(1).toBe(2);
+      }
+    });
+    it('장바구니 옵션 수량을 수정할 수 있어야 한다.', async () => {
+      setTestCount();
+
+      const { data } = await controller.readCarts(testBuyerId);
+      const testCartBundle = data.carts.at(0);
+      const testCartDetail = testCartBundle?.cartDetail;
+
+      if (testCartDetail) {
+        const isAllOptionsUpdate = testCartDetail.every((d) =>
+          d.cartOptions.map(async (o) => {
+            const { data } = await controller.updateCartsOptionCount(testBuyerId, {
+              id: o.id,
+              cartId: o.cartId,
+              cartOptionType: 'option',
+              count: testCount,
+            });
+            return data === o.id;
+          }),
+        );
+        expect(isAllOptionsUpdate).toBe(true);
+
+        const { data } = await controller.readCarts(testBuyerId);
+        const [updateBundle] = data.carts.filter((c) => c.bundleId === testCartBundle.bundleId);
+        const isUpdateCount = updateBundle.cartDetail.every((d) => d.cartOptions.map((o) => o.count === testCount));
+        expect(isUpdateCount).toBe(true);
+      } else {
+        /**
+         * 테스트할 대상이 없기에 의미없는 테스트가 됩니다.
+         * 테스트할 장바구니 데이터를 추가해주세요.
+         */
+        expect(1).toBe(2);
+      }
+    });
   });
 
   describe('장바구니 삭제', () => {
