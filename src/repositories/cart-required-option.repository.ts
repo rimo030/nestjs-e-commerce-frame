@@ -13,6 +13,12 @@ export class CartRequiredOptionRepository extends Repository<CartRequiredOptionE
     return await this.save(entitiesToSave);
   }
 
+  async updateRequiredOptionsCount(id: number, count: number): Promise<number | null> {
+    const updateResult = await this.update(id, { count: count });
+    console.log(updateResult.affected);
+    return updateResult.affected ? id : null;
+  }
+
   async increaseRequiredOptionsCount(options: { id: number; count: number }[]): Promise<number[]> {
     const updatedIds: number[] = [];
 

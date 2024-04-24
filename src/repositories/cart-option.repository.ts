@@ -10,6 +10,11 @@ export class CartOptionRepository extends Repository<CartOptionEntity> {
     return await this.save(entitiesToSave);
   }
 
+  async updateOptionsCount(id: number, count: number): Promise<number | null> {
+    const updateResult = await this.update(id, { count });
+    return updateResult.affected ? id : null;
+  }
+
   async increaseOptionsCount(options: { id: number; count: number }[]): Promise<number[]> {
     const updatedIds: number[] = [];
 
