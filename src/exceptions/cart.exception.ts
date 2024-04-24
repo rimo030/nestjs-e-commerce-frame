@@ -6,6 +6,24 @@ export class CartNotFoundException extends HttpException {
   }
 }
 
+export class CartRequiredOptionNotFoundException extends HttpException {
+  constructor() {
+    super(`Can't find Cart Required Option`, HttpStatus.NOT_FOUND);
+  }
+}
+
+export class CartOptionNotFoundException extends HttpException {
+  constructor() {
+    super(`Can't find Cart Option`, HttpStatus.NOT_FOUND);
+  }
+}
+
+export class CartForbiddenException extends HttpException {
+  constructor() {
+    super(`Cart resource is forbidden.`, HttpStatus.FORBIDDEN);
+  }
+}
+
 export class CartIntercnalServerErrorException extends HttpException {
   constructor() {
     super(`Cart update error`, HttpStatus.INTERNAL_SERVER_ERROR);

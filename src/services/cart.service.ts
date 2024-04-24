@@ -8,7 +8,14 @@ import { CreateCartRequiredOptionDto } from 'src/entities/dtos/create-cart-requi
 import { CreateCartDto } from 'src/entities/dtos/create-cart.dto';
 import { UpdateCartOptionCountDto } from 'src/entities/dtos/update-cart-option-count.dto';
 import { UpdateCartDto } from 'src/entities/dtos/update-cart.dto';
-import { CartDeliveryTypeNotFoundException, CartIntercnalServerErrorException } from 'src/exceptions/cart.exception';
+import {
+  CartForbiddenException,
+  CartDeliveryTypeNotFoundException,
+  CartIntercnalServerErrorException,
+  CartNotFoundException,
+  CartRequiredOptionNotFoundException,
+  CartOptionNotFoundException,
+} from 'src/exceptions/cart.exception';
 import { CartOptionRepository } from 'src/repositories/cart-option.repository';
 import { CartRequiredOptionRepository } from 'src/repositories/cart-required-option.repository';
 import { CartRepository } from 'src/repositories/cart.repository';
@@ -33,7 +40,7 @@ export class CartService {
    * @returns 성공 시 장바구니를 담은 Dto를 리턴한다.
    */
   async addCart(buyerId: number, createCartDto: CreateCartDto): Promise<CartDto | UpdateCartDto> {
-    const cart = await this.cartRepository.findCart(buyerId, createCartDto.productId);
+    const cart = await this.cartRepository.findCartByProductId(buyerId, createCartDto.productId);
     if (!cart) {
       const newCart = await this.createCartWithOptions(buyerId, createCartDto);
       return newCart;
@@ -275,11 +282,49 @@ export class CartService {
    * 이미 담긴 장바구니 옵션의 상품의 수량을 변경합니다.
    *
    * @param buyerId 유저의 아이디
-   * @param updateCartOptionCountDto
+   * @param updateCartOptionCountDto 업데이트 할 장바구니와 옵션에 대한 정보
    *
-   * @returns 변경된 결과를 반환합니다.
+   * @returns 변경된 결과 옵션의 id를 반환합니다.
    */
-  async updateCartsOptionCount(buyerId: number, updateCartOptionCountDto: UpdateCartOptionCountDto): Promise<any> {}
+  async updateCartsOptionCount(buyerId: number, updateCartOptionCountDto: UpdateCartOptionCountDto): Promise<number> {
+    const { id, cartId, cartOptionType, count } = updateCartOptionCountDto;
+    const cart = await this.cartRepository.findCartWithOptions(cartId);
+
+    if (!cart) {
+      throw new CartNotFoundException();
+    }
+
+    if (cart.buyerId !== buyerId) {
+      throw new CartForbiddenException();
+    }
+
+    if (cartOptionType == 'requiredOption') {
+      const isCartRequiredOption = cart.cartRequiredOptions.filter((c) => c.id === id);
+      if (isCartRequiredOption.length === 0) {
+        throw new CartRequiredOptionNotFoundException();
+      }
+      const updateId = await this.cartRequiredOptionRepository.updateRequiredOptionsCount(id, count);
+
+      if (!updateId) {
+        throw new CartRequiredOptionNotFoundException();
+      }
+
+      return updateId;
+    } else if (cartOptionType == 'option') {
+      const isCartOption = cart.cartOptions.filter((c) => c.id === id);
+      if (isCartOption.length === 0) {
+        throw new CartOptionNotFoundException();
+      }
+      const updateId = await this.cartOptionRepository.updateOptionsCount(id, count);
+
+      if (!updateId) {
+        throw new CartOptionNotFoundException();
+      }
+      return updateId;
+    } else {
+      throw new CartForbiddenException();
+    }
+  }
 
   /**
    * 장바구니에서 상품을 지웁니다.
