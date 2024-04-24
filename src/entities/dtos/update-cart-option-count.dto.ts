@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmptyNumber } from 'src/decorators/is-not-empty-number.decorator';
 import { IsNotEmptyString } from 'src/decorators/is-not-empty-string.decorator';
-import { cartOptionType } from 'src/types/cart-option-type';
+import { CartOptionType } from 'src/types/cart-option-type';
 import { CartEntity } from '../cart.entity';
 import { CartOptionDto } from './cart-option.dto';
 
@@ -15,7 +15,7 @@ export class UpdateCartOptionCountDto
     example: 'requiredOption',
   })
   @IsNotEmptyString()
-  cartOptionType!: cartOptionType;
+  cartOptionType!: CartOptionType;
 
   @ApiProperty({ type: Number, description: '상품 옵션의 id', required: true, example: 1 })
   @IsNotEmptyNumber()
@@ -26,6 +26,6 @@ export class UpdateCartOptionCountDto
   cartId!: number;
 
   @ApiProperty({ type: Number, description: '상품 옵션의 수량', required: true, example: 1 })
-  @IsNotEmptyNumber()
+  @IsNotEmptyNumber('int', { min: 1 })
   count!: number;
 }

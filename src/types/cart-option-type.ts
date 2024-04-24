@@ -1,1 +1,1 @@
-export type cartOptionType = 'requiredOption' | 'option';
+export type CartOptionType = 'requiredOption' | 'option';
