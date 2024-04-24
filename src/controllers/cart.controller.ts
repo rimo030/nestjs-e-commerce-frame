@@ -49,7 +49,7 @@ export class CartController {
   async updateCartsOptionCount(
     @UserId() buyerId: number,
     @Body() updateCartOptionCountDto: UpdateCartOptionCountDto,
-  ): Promise<any> {
+  ): Promise<{ data: number }> {
     const result = await this.cartService.updateCartsOptionCount(buyerId, updateCartOptionCountDto);
     return { data: result };
   }
