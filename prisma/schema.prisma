@@ -7,314 +7,270 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model board {
+model Board {
   id          Int       @id @default(autoincrement())
-  created_at  DateTime  @default(now()) @db.DateTime(6)
-  updated_at  DateTime  @default(now()) @db.DateTime(6)
-  deleted_at  DateTime? @db.DateTime(6)
-  buyer_id    Int
+  createdAt   DateTime  @default(now()) @db.DateTime(6)
+  updatedAt   DateTime  @default(now()) @db.DateTime(6)
+  deletedAt   DateTime? @db.DateTime(6)
+  buyerId     Int
   title       String    @db.VarChar(512)
   description String    @db.Text
   status      String    @db.VarChar(128)
-  buyer       buyer     @relation(fields: [buyer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_28d6cbe8d5415d0458c01c9fc36")
-
-  @@index([buyer_id], map: "FK_28d6cbe8d5415d0458c01c9fc36")
+  buyer       Buyer     @relation(fields: [buyerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model buyer {
-  id         Int       @id @default(autoincrement())
-  created_at DateTime  @default(now()) @db.DateTime(6)
-  updated_at DateTime  @default(now()) @db.DateTime(6)
-  deleted_at DateTime? @db.DateTime(6)
-  email      String    @unique(map: "IDX_7911d7b9e729513dec55983fc5") @db.VarChar(128)
-  password   String    @db.VarChar(512)
-  name       String    @db.VarChar(128)
-  gender     Int       @db.TinyInt
-  age        Int
-  phone      String    @db.VarChar(11)
-  board      board[]
-  cart       cart[]
-  order      order[]
+model Buyer {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now()) @db.DateTime(6)
+  updatedAt   DateTime  @default(now()) @db.DateTime(6)
+  deletedAt   DateTime? @db.DateTime(6)
+  email       String    @unique() @db.VarChar(128)
+  password    String    @db.VarChar(512)
+  name        String    @db.VarChar(128)
+  gender      Int       @db.TinyInt
+  age         Int
+  phone       String    @db.VarChar(11)
+  boards      Board[]
+  carts       Cart[]
+  orders      Order[]
 }
 
-model cart {
-  id                   Int                    @id @default(autoincrement())
-  created_at           DateTime               @default(now()) @db.DateTime(6)
-  updated_at           DateTime               @default(now()) @db.DateTime(6)
-  deleted_at           DateTime?              @db.DateTime(6)
-  buyer_id             Int
-  product_id           Int
-  product              product                @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_dccd1ec2d6f5644a69adf163bc1")
-  buyer                buyer                  @relation(fields: [buyer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_e748a9330ce4ffa4c5d4a0e6c75")
-  cart_option          cart_option[]
-  cart_required_option cart_required_option[]
-  order_product        order_product[]
-
-  @@index([product_id], map: "FK_dccd1ec2d6f5644a69adf163bc1")
-  @@index([buyer_id], map: "FK_e748a9330ce4ffa4c5d4a0e6c75")
+model Cart {
+  id                    Int                    @id @default(autoincrement())
+  createdAt             DateTime               @default(now()) @db.DateTime(6)
+  updatedAt             DateTime               @default(now()) @db.DateTime(6)
+  deletedAt             DateTime?              @db.DateTime(6)
+  buyerId               Int
+  productId             Int
+  buyer                 Buyer                  @relation(fields: [buyerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product               Product                @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cartOptions           CartOption[]
+  cartRequiredOptions   CartRequiredOption[]
+  orderProducts         OrderProduct[]
 }
 
-model cart_option {
+model CartOption {
   id                Int            @id @default(autoincrement())
-  created_at        DateTime       @default(now()) @db.DateTime(6)
-  updated_at        DateTime       @default(now()) @db.DateTime(6)
-  deleted_at        DateTime?      @db.DateTime(6)
-  cart_id           Int
-  product_option_id Int
+  createdAt         DateTime       @default(now()) @db.DateTime(6)
+  updatedAt         DateTime       @default(now()) @db.DateTime(6)
+  deletedAt         DateTime?      @db.DateTime(6)
+  cartId            Int
+  productOptionId   Int
   count             Int
-  product_option    product_option @relation(fields: [product_option_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_1a8364b4e9faa0619c35d6c944b")
-  cart              cart           @relation(fields: [cart_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_af7b1bd63988a24c3f35c16e0fa")
-
-  @@index([product_option_id], map: "FK_1a8364b4e9faa0619c35d6c944b")
-  @@index([cart_id], map: "FK_af7b1bd63988a24c3f35c16e0fa")
+  ProductOption     ProductOption  @relation(fields: [productOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  carts             Cart           @relation(fields: [cartId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model cart_product_input_option {
+model CartInputOption {
   id                      Int                   @id @default(autoincrement())
-  created_at              DateTime              @default(now()) @db.DateTime(6)
-  updated_at              DateTime              @default(now()) @db.DateTime(6)
-  deleted_at              DateTime?             @db.DateTime(6)
-  cart_required_id        Int
-  product_input_option_id Int
+  createdAt               DateTime              @default(now()) @db.DateTime(6)
+  updatedAt               DateTime              @default(now()) @db.DateTime(6)
+  deletedAt               DateTime?             @db.DateTime(6)
+  cartRequiredId          Int
+  productInputOptionId    Int
   name                    String                @db.VarChar(128)
   value                   String                @db.VarChar(128)
   count                   Int
-  cart_required_option_id Int?
-  cart_required_option    cart_required_option? @relation(fields: [cart_required_option_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_715094f7bff8ac626c5c2b392f1")
-  product_input_option    product_input_option  @relation(fields: [product_input_option_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_de46b2b09cd416cd8bf7beb02ab")
-
-  @@index([cart_required_option_id], map: "FK_715094f7bff8ac626c5c2b392f1")
-  @@index([product_input_option_id], map: "FK_de46b2b09cd416cd8bf7beb02ab")
+  cartRequiredOptionId    Int?
+  cartRequiredOption      CartRequiredOption? @relation(fields: [cartRequiredOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  productInputOption      ProductInputOption  @relation(fields: [productInputOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model cart_required_option {
-  id                         Int                         @id @default(autoincrement())
-  created_at                 DateTime                    @default(now()) @db.DateTime(6)
-  updated_at                 DateTime                    @default(now()) @db.DateTime(6)
-  deleted_at                 DateTime?                   @db.DateTime(6)
-  cart_id                    Int
-  product_required_option_id Int
-  count                      Int
-  cart_product_input_option  cart_product_input_option[]
-  product_required_option    product_required_option     @relation(fields: [product_required_option_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_04e2299eefb05109e112310898e")
-  cart                       cart                        @relation(fields: [cart_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_46b94cc788f5fa1498627ba3101")
-
-  @@index([product_required_option_id], map: "FK_04e2299eefb05109e112310898e")
-  @@index([cart_id], map: "FK_46b94cc788f5fa1498627ba3101")
+model CartRequiredOption {
+  id                          Int                         @id @default(autoincrement())
+  createdAt                   DateTime                    @default(now()) @db.DateTime(6)
+  updatedAt                   DateTime                    @default(now()) @db.DateTime(6)
+  deletedAt                   DateTime?                   @db.DateTime(6)
+  cartId                      Int
+  productRequiredOptionId     Int
+  count                       Int
+  cartInputOptions            CartInputOption[]
+  productRequiredOption       ProductRequiredOption       @relation(fields: [productRequiredOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cart                        Cart                        @relation(fields: [cartId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model category {
-  id         Int       @id @default(autoincrement())
-  created_at DateTime  @default(now()) @db.DateTime(6)
-  updated_at DateTime  @default(now()) @db.DateTime(6)
-  deleted_at DateTime? @db.DateTime(6)
-  name       String    @unique(map: "IDX_23c05c292c439d77b0de816b50") @db.VarChar(128)
-  product    product[]
+model Category {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now()) @db.DateTime(6)
+  updatedAt   DateTime  @default(now()) @db.DateTime(6)
+  deletedAt   DateTime? @db.DateTime(6)
+  name        String    @unique() @db.VarChar(128)
+  products    Product[]
 }
 
-model company {
-  id         Int       @id @default(autoincrement())
-  created_at DateTime  @default(now()) @db.DateTime(6)
-  updated_at DateTime  @default(now()) @db.DateTime(6)
-  deleted_at DateTime? @db.DateTime(6)
-  name       String    @db.VarChar(128)
-  product    product[]
+model Company {
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now()) @db.DateTime(6)
+  updatedAt   DateTime  @default(now()) @db.DateTime(6)
+  deletedAt   DateTime? @db.DateTime(6)
+  name        String    @db.VarChar(128)
+  products    Product[]
 }
 
-model order {
-  id                                                        Int                    @id @default(autoincrement())
-  created_at                                                DateTime               @default(now()) @db.DateTime(6)
-  updated_at                                                DateTime               @default(now()) @db.DateTime(6)
-  deleted_at                                                DateTime?              @db.DateTime(6)
-  buyer_id                                                  Int
-  buyer                                                     buyer                  @relation(fields: [buyer_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_8724877ec30a3aab629727b36ed")
-  order_product_bundle_order_product_bundle_order_idToorder order_product_bundle[] @relation("order_product_bundle_order_idToorder")
-  order_product_bundle_order_product_bundle_user_idToorder  order_product_bundle[] @relation("order_product_bundle_user_idToorder")
-
-  @@index([buyer_id], map: "FK_8724877ec30a3aab629727b36ed")
+model Order {
+  id                    Int                    @id @default(autoincrement())
+  createdAt             DateTime               @default(now()) @db.DateTime(6)
+  updatedAt             DateTime               @default(now()) @db.DateTime(6)
+  deletedAt             DateTime?              @db.DateTime(6)
+  buyerId               Int
+  buyer                 Buyer                  @relation(fields: [buyerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  orderProductBundles   OrderProductBundle[]
 }
 
-model order_product {
-  id                            Int                             @id @default(autoincrement())
-  created_at                    DateTime                        @default(now()) @db.DateTime(6)
-  updated_at                    DateTime                        @default(now()) @db.DateTime(6)
-  deleted_at                    DateTime?                       @db.DateTime(6)
-  order_product_bundle_id       Int
-  cart_id                       Int
-  product_id                    Int
-  product                       product                         @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_400f1584bf37c21172da3b15e2d")
-  cart                          cart                            @relation(fields: [cart_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_4ae87e364343a191d32540fcaf4")
-  order_product_bundle          order_product_bundle            @relation(fields: [order_product_bundle_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_b7071479467050e51110b9263a8")
-  order_product_option          order_product_option[]
-  order_product_required_option order_product_required_option[]
-
-  @@index([product_id], map: "FK_400f1584bf37c21172da3b15e2d")
-  @@index([cart_id], map: "FK_4ae87e364343a191d32540fcaf4")
-  @@index([order_product_bundle_id], map: "FK_b7071479467050e51110b9263a8")
+model OrderProduct {
+  id                              Int                             @id @default(autoincrement())
+  createdAt                       DateTime                        @default(now()) @db.DateTime(6)
+  updatedAt                       DateTime                        @default(now()) @db.DateTime(6)
+  deletedAt                       DateTime?                       @db.DateTime(6)
+  orderProductBundleId            Int
+  cartId                          Int
+  productId                       Int
+  Product                         Product                         @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  cart                            Cart                            @relation(fields: [cartId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  orderProductBundle              OrderProductBundle              @relation(fields: [orderProductBundleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  orderProductOptions             OrderProductOption[]
+  orderProductRequiredOptions     OrderProductRequiredOption[]
 }
 
-model order_product_bundle {
-  id                                         Int             @id @default(autoincrement())
-  created_at                                 DateTime        @default(now()) @db.DateTime(6)
-  updated_at                                 DateTime        @default(now()) @db.DateTime(6)
-  deleted_at                                 DateTime?       @db.DateTime(6)
-  order_id                                   Int
-  bundle_name                                String          @db.VarChar(128)
-  fee_standard                               String          @db.VarChar(128)
-  user_id                                    Int?
-  order_product                              order_product[]
-  order_order_product_bundle_order_idToorder order           @relation("order_product_bundle_order_idToorder", fields: [order_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_207b1debf02c68ab13d631f2977")
-  order_order_product_bundle_user_idToorder  order?          @relation("order_product_bundle_user_idToorder", fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_561d2fd8b826af4bb454386db80")
-
-  @@index([order_id], map: "FK_207b1debf02c68ab13d631f2977")
-  @@index([user_id], map: "FK_561d2fd8b826af4bb454386db80")
+model OrderProductBundle {
+  id              Int             @id @default(autoincrement())
+  createdAt       DateTime        @default(now()) @db.DateTime(6)
+  updatedAt       DateTime        @default(now()) @db.DateTime(6)
+  deletedAt       DateTime?       @db.DateTime(6)
+  orderId         Int
+  bundleName      String          @db.VarChar(128)
+  feeStandard     String          @db.VarChar(128)
+  orderProducts   OrderProduct[]
+  order           Order           @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model order_product_input_option {
-  id                               Int                           @id @default(autoincrement())
-  created_at                       DateTime                      @default(now()) @db.DateTime(6)
-  updated_at                       DateTime                      @default(now()) @db.DateTime(6)
-  deleted_at                       DateTime?                     @db.DateTime(6)
-  order_product_required_option_id Int
-  name                             String                        @db.VarChar(32)
-  value                            Int
-  count                            Int
-  order_product_required_option    order_product_required_option @relation(fields: [order_product_required_option_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_6d98ad13257c8c45694152e8fc9")
-
-  @@index([order_product_required_option_id], map: "FK_6d98ad13257c8c45694152e8fc9")
+model OrderProductInputOption {
+  id                               Int                          @id @default(autoincrement())
+  createdAt                       DateTime                      @default(now()) @db.DateTime(6)
+  updatedAt                       DateTime                      @default(now()) @db.DateTime(6)
+  deletedAt                       DateTime?                     @db.DateTime(6)
+  orderProductRequiredOptionId    Int
+  name                            String                        @db.VarChar(32)
+  value                           Int
+  count                           Int
+  orderProductRequiredOption      OrderProductRequiredOption    @relation(fields: [orderProductRequiredOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model order_product_option {
-  id               Int           @id @default(autoincrement())
-  created_at       DateTime      @default(now()) @db.DateTime(6)
-  updated_at       DateTime      @default(now()) @db.DateTime(6)
-  deleted_at       DateTime?     @db.DateTime(6)
-  order_product_id Int
-  name             String        @db.VarChar(128)
-  price            Int
-  count            Int
-  order_product    order_product @relation(fields: [order_product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_87445aa4ce94c595bba17f28557")
+model OrderProductOption {
+  id                Int           @id @default(autoincrement())
+  createdAt         DateTime      @default(now()) @db.DateTime(6)
+  updatedAt         DateTime      @default(now()) @db.DateTime(6)
+  deletedAt         DateTime?     @db.DateTime(6)
+  orderProductId    Int
+  name              String        @db.VarChar(128)
+  price             Int
+  count             Int
+  orderProduct      OrderProduct  @relation(fields: [orderProductId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@index([order_product_id], map: "FK_87445aa4ce94c595bba17f28557")
 }
 
-model order_product_required_option {
-  id                         Int                          @id @default(autoincrement())
-  created_at                 DateTime                     @default(now()) @db.DateTime(6)
-  updated_at                 DateTime                     @default(now()) @db.DateTime(6)
-  deleted_at                 DateTime?                    @db.DateTime(6)
-  order_product_id           Int
-  name                       String                       @db.VarChar(128)
-  price                      Int
-  count                      Int
-  order_product_input_option order_product_input_option[]
-  order_product              order_product                @relation(fields: [order_product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_ec76a131a22ef2df2f5e578cc98")
-
-  @@index([order_product_id], map: "FK_ec76a131a22ef2df2f5e578cc98")
+model OrderProductRequiredOption {
+  id                            Int                          @id @default(autoincrement())
+  createdAt                     DateTime                     @default(now()) @db.DateTime(6)
+  updatedAt                     DateTime                     @default(now()) @db.DateTime(6)
+  deletedAt                     DateTime?                    @db.DateTime(6)
+  orderProductId                Int
+  name                          String                       @db.VarChar(128)
+  price                         Int
+  count                         Int
+  orderProductInputOptions      OrderProductInputOption[]
+  orderProduct                  OrderProduct                @relation(fields: [orderProductId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model product {
-  id                      Int                       @id @default(autoincrement())
-  created_at              DateTime                  @default(now()) @db.DateTime(6)
-  updated_at              DateTime                  @default(now()) @db.DateTime(6)
-  deleted_at              DateTime?                 @db.DateTime(6)
-  seller_id               Int
-  bundle_id               Int?
-  category_id             Int
-  company_id              Int
-  is_sale                 Int                       @db.TinyInt
-  name                    String                    @db.VarChar(128)
-  description             String?                   @db.VarChar(255)
-  delivery_type           String                    @db.VarChar(128)
-  delivery_free_over      Int?
-  delivery_charge         Int
-  img                     String                    @db.VarChar(255)
-  cart                    cart[]
-  order_product           order_product[]
-  category                category                  @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_0dce9bc93c2d2c399982d04bef1")
-  seller                  seller                    @relation(fields: [seller_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_79a3ae0442388a2418ec67a3120")
-  company                 company                   @relation(fields: [company_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_a0503db1630a5b8a4d7deabd556")
-  product_bundle          product_bundle?           @relation(fields: [bundle_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_f35662270f8bcb3f26dfd6e9fda")
-  product_option          product_option[]
-  product_required_option product_required_option[]
-
-  @@index([category_id], map: "FK_0dce9bc93c2d2c399982d04bef1")
-  @@index([seller_id], map: "FK_79a3ae0442388a2418ec67a3120")
-  @@index([company_id], map: "FK_a0503db1630a5b8a4d7deabd556")
-  @@index([bundle_id], map: "FK_f35662270f8bcb3f26dfd6e9fda")
+model Product {
+  id                        Int                       @id @default(autoincrement())
+  createdAt                 DateTime                  @default(now()) @db.DateTime(6)
+  updatedAt                 DateTime                  @default(now()) @db.DateTime(6)
+  deletedAt                 DateTime?                 @db.DateTime(6)
+  sellerId                  Int
+  bundleId                  Int?
+  categoryId                Int
+  companyId                 Int
+  isSale                    Int                       @db.TinyInt
+  name                      String                    @db.VarChar(128)
+  description               String?                   @db.VarChar(255)
+  deliveryType              String                    @db.VarChar(128)
+  deliveryFreeOver          Int?
+  deliveryCharge            Int
+  img                       String                    @db.VarChar(255)
+  carts                     Cart[]
+  orderProducts             OrderProduct[]
+  category                  Category                  @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  seller                    Seller                    @relation(fields: [sellerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  company                   Company                   @relation(fields: [companyId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  productBundle             ProductBundle?            @relation(fields: [bundleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  productOptions            ProductOption[]
+  productRequiredOptions    ProductRequiredOption[]
 }
 
-model product_bundle {
-  id              Int       @id @default(autoincrement())
-  created_at      DateTime  @default(now()) @db.DateTime(6)
-  updated_at      DateTime  @default(now()) @db.DateTime(6)
-  deleted_at      DateTime? @db.DateTime(6)
-  seller_id       Int
-  name            String    @db.VarChar(128)
-  charge_standard String    @db.VarChar(128)
-  product         product[]
-  seller          seller    @relation(fields: [seller_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_5f7d9d71c8ae2f2141c1d2a18fb")
-
-  @@index([seller_id], map: "FK_5f7d9d71c8ae2f2141c1d2a18fb")
+model ProductBundle {
+  id                Int       @id @default(autoincrement())
+  createdAt         DateTime  @default(now()) @db.DateTime(6)
+  updatedAt         DateTime  @default(now()) @db.DateTime(6)
+  deletedAt         DateTime? @db.DateTime(6)
+  sellerId          Int
+  name              String    @db.VarChar(128)
+  chargeStandard    String    @db.VarChar(128)
+  products          Product[]
+  seller            Seller    @relation(fields: [sellerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model product_input_option {
-  id                         Int                         @id @default(autoincrement())
-  created_at                 DateTime                    @default(now()) @db.DateTime(6)
-  updated_at                 DateTime                    @default(now()) @db.DateTime(6)
-  deleted_at                 DateTime?                   @db.DateTime(6)
-  product_required_option_id Int
-  name                       String                      @db.VarChar(128)
-  value                      String                      @db.VarChar(128)
-  description                String                      @db.VarChar(255)
-  is_required                Int                         @db.TinyInt
-  cart_product_input_option  cart_product_input_option[]
-  product_required_option    product_required_option     @relation(fields: [product_required_option_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_2ecb5a06d4d1e771e297403aca5")
-
-  @@index([product_required_option_id], map: "FK_2ecb5a06d4d1e771e297403aca5")
+model ProductInputOption {
+  id                        Int                         @id @default(autoincrement())
+  createdAt                 DateTime                    @default(now()) @db.DateTime(6)
+  updatedAt                 DateTime                    @default(now()) @db.DateTime(6)
+  deletedAt                 DateTime?                   @db.DateTime(6)
+  productRequiredOptionId   Int
+  name                      String                      @db.VarChar(128)
+  value                     String                      @db.VarChar(128)
+  description               String                      @db.VarChar(255)
+  isRequired                Int                         @db.TinyInt
+  cartInputOptions          CartInputOption[]
+  productRequiredOption     ProductRequiredOption       @relation(fields: [productRequiredOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model product_option {
-  id          Int           @id @default(autoincrement())
-  created_at  DateTime      @default(now()) @db.DateTime(6)
-  updated_at  DateTime      @default(now()) @db.DateTime(6)
-  deleted_at  DateTime?     @db.DateTime(6)
-  product_id  Int
-  name        String        @db.VarChar(128)
-  price       Int
-  is_sale     Int           @db.TinyInt
-  cart_option cart_option[]
-  product     product       @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_e634fca34f6b594b87fdbee95f6")
-
-  @@index([product_id], map: "FK_e634fca34f6b594b87fdbee95f6")
+model ProductOption {
+  id              Int           @id @default(autoincrement())
+  createdAt       DateTime      @default(now()) @db.DateTime(6)
+  updatedAt       DateTime      @default(now()) @db.DateTime(6)
+  deletedAt       DateTime?     @db.DateTime(6)
+  productId       Int
+  name            String        @db.VarChar(128)
+  price           Int
+  isSale          Int           @db.TinyInt
+  cartOptions     CartOption[]
+  product         Product       @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model product_required_option {
-  id                   Int                    @id @default(autoincrement())
-  created_at           DateTime               @default(now()) @db.DateTime(6)
-  updated_at           DateTime               @default(now()) @db.DateTime(6)
-  deleted_at           DateTime?              @db.DateTime(6)
-  product_id           Int
-  name                 String                 @db.VarChar(128)
-  price                Int
-  is_sale              Int                    @db.TinyInt
-  cart_required_option cart_required_option[]
-  product_input_option product_input_option[]
-  product              product                @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "FK_fcd139390614f140c0a834257ab")
-
-  @@index([product_id], map: "FK_fcd139390614f140c0a834257ab")
+model ProductRequiredOption {
+  id                      Int                    @id @default(autoincrement())
+  createdAt               DateTime               @default(now()) @db.DateTime(6)
+  updatedAt               DateTime               @default(now()) @db.DateTime(6)
+  deletedAt               DateTime?              @db.DateTime(6)
+  productId               Int
+  name                    String                 @db.VarChar(128)
+  price                   Int
+  isSale                  Int                    @db.TinyInt
+  cartRequiredOptions     CartRequiredOption[]
+  productInputOptions     ProductInputOption[]
+  product                 Product                @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
 
-model seller {
-  id              Int              @id @default(autoincrement())
-  created_at      DateTime         @default(now()) @db.DateTime(6)
-  updated_at      DateTime         @default(now()) @db.DateTime(6)
-  deleted_at      DateTime?        @db.DateTime(6)
-  email           String           @unique(map: "IDX_1f677314b76e057b56c48042ac") @db.VarChar(128)
-  password        String           @db.VarChar(512)
-  name            String           @db.VarChar(32)
-  phone           String           @db.VarChar(11)
-  business_number String           @db.VarChar(128)
-  product         product[]
-  product_bundle  product_bundle[]
-}
+model Seller {
+  id                Int              @id @default(autoincrement())
+  createdAt         DateTime         @default(now()) @db.DateTime(6)
+  updatedAt         DateTime         @default(now()) @db.DateTime(6)
+  deletedAt         DateTime?        @db.DateTime(6)
+  email             String           @unique() @db.VarChar(128)
+  password          String           @db.VarChar(512)
+  name              String           @db.VarChar(32)
+  phone             String           @db.VarChar(11)
+  businessNumber    String           @db.VarChar(128)
+  products          Product[]
+  productBundles    ProductBundle[]
+} 
