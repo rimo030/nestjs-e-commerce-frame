@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { InjectRepository } from '@nestjs/typeorm';
+import { PrismaService } from 'src/services/prisma.service';
 import { AuthCredentialsDto } from '../entities/dtos/auth-credentials.dto';
 import { CreateBuyerDto } from '../entities/dtos/create-buyer.dto';
 import { CreateSellerDto } from '../entities/dtos/create-seller.dto';
@@ -12,25 +12,19 @@ import {
   SellerNotfoundException,
   SellerUnauthrizedException,
 } from '../exceptions/auth.exception';
-import { BuyerRepository } from '../repositories/buyer.repository';
-import { SellerRepository } from '../repositories/seller.repository';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(BuyerRepository)
-    private readonly buyersRespository: BuyerRepository,
-
-    @InjectRepository(SellerRepository)
-    private readonly sellersRespository: SellerRepository,
-
+    private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
-    readonly configService: ConfigService,
+    private readonly configService: ConfigService,
   ) {}
 
   async buyerSignUp(createBuyerDto: CreateBuyerDto): Promise<void> {
-    const user = await this.buyersRespository.findByEmail(createBuyerDto.email);
-    if (user) {
+    const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email: createBuyerDto.email } });
+
+    if (buyer) {
       throw new BuyerUnauthrizedException();
     }
 
@@ -38,12 +32,16 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(createBuyerDto.password, salt);
     createBuyerDto.password = hashedPassword;
 
-    await this.buyersRespository.saveBuyer(createBuyerDto);
+    await this.prisma.buyer.create({ data: { ...createBuyerDto } });
   }
 
   async sellerSignUp(createSellerDto: CreateSellerDto): Promise<void> {
-    const user = await this.sellersRespository.findByEmail(createSellerDto.email);
-    if (user) {
+    const seller = await this.prisma.seller.findUnique({
+      select: { id: true },
+      where: { email: createSellerDto.email },
+    });
+
+    if (seller) {
       throw new SellerUnauthrizedException();
     }
 
@@ -51,15 +49,19 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(createSellerDto.password, salt);
     createSellerDto.password = hashedPassword;
 
-    await this.sellersRespository.saveSeller(createSellerDto);
+    await this.prisma.seller.create({ data: { ...createSellerDto } });
   }
 
   async validateBuyer(authCredentialsDto: AuthCredentialsDto): Promise<{ id: number }> {
-    const user = await this.buyersRespository.findByEmail(authCredentialsDto.email);
-    if (user) {
-      const isRightPassword = await bcrypt.compare(authCredentialsDto.password, user.password);
+    const buyer = await this.prisma.buyer.findUnique({
+      select: { id: true, password: true },
+      where: { email: authCredentialsDto.email },
+    });
+
+    if (buyer) {
+      const isRightPassword = await bcrypt.compare(authCredentialsDto.password, buyer.password);
       if (isRightPassword) {
-        return { id: user.id };
+        return { id: buyer.id };
       }
       throw new BuyerNotfoundException();
     }
@@ -67,11 +69,15 @@ export class AuthService {
   }
 
   async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<{ id: number }> {
-    const user = await this.sellersRespository.findByEmail(authCredentialsDto.email);
-    if (user) {
-      const isRightPassword = await bcrypt.compare(authCredentialsDto.password, user.password);
+    const seller = await this.prisma.seller.findUnique({
+      select: { id: true, password: true },
+      where: { email: authCredentialsDto.email },
+    });
+
+    if (seller) {
+      const isRightPassword = await bcrypt.compare(authCredentialsDto.password, seller.password);
       if (isRightPassword) {
-        return { id: user.id };
+        return { id: seller.id };
       }
       throw new SellerNotfoundException();
     }
