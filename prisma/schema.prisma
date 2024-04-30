@@ -9,23 +9,24 @@ datasource db {
 
 model Board {
   id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now()) @db.DateTime(6)
-  updatedAt   DateTime  @default(now()) @db.DateTime(6)
-  deletedAt   DateTime? @db.DateTime(6)
-  buyerId     Int
+  createdAt   DateTime  @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt   DateTime  @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt   DateTime? @db.DateTime(6) @map("deleted_at")
+  buyerId     Int       @map("buyer_id")
   title       String    @db.VarChar(512)
   description String    @db.Text
   status      String    @db.VarChar(128)
   buyer       Buyer     @relation(fields: [buyerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([buyerId])
+  @@map("board")
 }
 
 model Buyer {
   id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now()) @db.DateTime(6)
-  updatedAt   DateTime  @default(now()) @db.DateTime(6)
-  deletedAt   DateTime? @db.DateTime(6)
+  createdAt   DateTime  @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt   DateTime  @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt   DateTime? @db.DateTime(6) @map("deleted_at")
   email       String    @unique() @db.VarChar(128)
   password    String    @db.VarChar(512)
   name        String    @db.VarChar(128)
@@ -36,16 +37,16 @@ model Buyer {
   carts       Cart[]
   orders      Order[]
 
-  
+  @@map("buyer")
 }
 
 model Cart {
   id                    Int                    @id @default(autoincrement())
-  createdAt             DateTime               @default(now()) @db.DateTime(6)
-  updatedAt             DateTime               @default(now()) @db.DateTime(6)
-  deletedAt             DateTime?              @db.DateTime(6)
-  buyerId               Int
-  productId             Int
+  createdAt             DateTime               @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt             DateTime               @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt             DateTime?              @db.DateTime(6) @map("deleted_at")
+  buyerId               Int                    @map("buyer_id")
+  productId             Int                    @map("product_id")
   buyer                 Buyer                  @relation(fields: [buyerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   product               Product                @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   cartOptions           CartOption[]
@@ -54,48 +55,50 @@ model Cart {
 
   @@index([buyerId])
   @@index([productId])
+  @@map("cart")
 }
 
 model CartOption {
   id                Int            @id @default(autoincrement())
-  createdAt         DateTime       @default(now()) @db.DateTime(6)
-  updatedAt         DateTime       @default(now()) @db.DateTime(6)
-  deletedAt         DateTime?      @db.DateTime(6)
-  cartId            Int
-  productOptionId   Int
+  createdAt         DateTime       @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt         DateTime       @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt         DateTime?      @db.DateTime(6) @map("deleted_at")
+  cartId            Int            @map("cart_id")
+  productOptionId   Int            @map("product_option_id")
   count             Int
   ProductOption     ProductOption  @relation(fields: [productOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   carts             Cart           @relation(fields: [cartId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([productOptionId])
   @@index([cartId])
+  @@map("cart_option")
 }
 
 model CartInputOption {
   id                      Int                   @id @default(autoincrement())
-  createdAt               DateTime              @default(now()) @db.DateTime(6)
-  updatedAt               DateTime              @default(now()) @db.DateTime(6)
-  deletedAt               DateTime?             @db.DateTime(6)
-  cartRequiredId          Int
-  productInputOptionId    Int
+  createdAt               DateTime              @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt               DateTime              @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt               DateTime?             @db.DateTime(6) @map("deleted_at")
+  cartRequiredOptionId    Int                   @map("cart_required_option_id")
+  productInputOptionId    Int                   @map("product_input_option_id")
   name                    String                @db.VarChar(128)
   value                   String                @db.VarChar(128)
   count                   Int
-  cartRequiredOptionId    Int?
   cartRequiredOption      CartRequiredOption? @relation(fields: [cartRequiredOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   productInputOption      ProductInputOption  @relation(fields: [productInputOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([cartRequiredOptionId])
   @@index([productInputOptionId])
+  @@map("cart_input_option")
 }
 
 model CartRequiredOption {
   id                          Int                         @id @default(autoincrement())
-  createdAt                   DateTime                    @default(now()) @db.DateTime(6)
-  updatedAt                   DateTime                    @default(now()) @db.DateTime(6)
-  deletedAt                   DateTime?                   @db.DateTime(6)
-  cartId                      Int
-  productRequiredOptionId     Int
+  createdAt                   DateTime                    @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt                   DateTime                    @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt                   DateTime?                   @db.DateTime(6) @map("deleted_at")
+  cartId                      Int                         @map("cart_id")
+  productRequiredOptionId     Int                         @map("product_required_option_id")
   count                       Int
   cartInputOptions            CartInputOption[]
   productRequiredOption       ProductRequiredOption       @relation(fields: [productRequiredOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -103,46 +106,52 @@ model CartRequiredOption {
 
   @@index([productRequiredOptionId])
   @@index([cartId])
+  @@map("cart_required_option")
 }
 
 model Category {
   id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now()) @db.DateTime(6)
-  updatedAt   DateTime  @default(now()) @db.DateTime(6)
-  deletedAt   DateTime? @db.DateTime(6)
+  createdAt   DateTime  @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt   DateTime  @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt   DateTime? @db.DateTime(6) @map("deleted_at")
   name        String    @unique() @db.VarChar(128)
   products    Product[]
+
+  @@map("category")
 }
 
 model Company {
   id          Int       @id @default(autoincrement())
-  createdAt   DateTime  @default(now()) @db.DateTime(6)
-  updatedAt   DateTime  @default(now()) @db.DateTime(6)
-  deletedAt   DateTime? @db.DateTime(6)
+  createdAt   DateTime  @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt   DateTime  @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt   DateTime? @db.DateTime(6) @map("deleted_at")
   name        String    @db.VarChar(128)
   products    Product[]
+
+  @@map("company")
 }
 
 model Order {
   id                    Int                    @id @default(autoincrement())
-  createdAt             DateTime               @default(now()) @db.DateTime(6)
-  updatedAt             DateTime               @default(now()) @db.DateTime(6)
-  deletedAt             DateTime?              @db.DateTime(6)
-  buyerId               Int
+  createdAt             DateTime               @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt             DateTime               @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt             DateTime?              @db.DateTime(6) @map("deleted_at")
+  buyerId               Int                    @map("buyer_id")
   buyer                 Buyer                  @relation(fields: [buyerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   orderProductBundles   OrderProductBundle[]
 
-   @@index([buyerId])
+  @@index([buyerId])
+  @@map("order")
 }
 
 model OrderProduct {
   id                              Int                             @id @default(autoincrement())
-  createdAt                       DateTime                        @default(now()) @db.DateTime(6)
-  updatedAt                       DateTime                        @default(now()) @db.DateTime(6)
-  deletedAt                       DateTime?                       @db.DateTime(6)
-  orderProductBundleId            Int
-  cartId                          Int
-  productId                       Int
+  createdAt                       DateTime                        @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt                       DateTime                        @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt                       DateTime?                       @db.DateTime(6) @map("deleted_at")
+  orderProductBundleId            Int                             @map("order_product_id")
+  cartId                          Int                             @map("cart_id")
+  productId                       Int                             @map("product_id")
   Product                         Product                         @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   cart                            Cart                            @relation(fields: [cartId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   orderProductBundle              OrderProductBundle              @relation(fields: [orderProductBundleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -152,80 +161,85 @@ model OrderProduct {
   @@index([productId])
   @@index([cartId])
   @@index([orderProductBundleId])
+  @@map("order_product")
 }
 
 model OrderProductBundle {
   id              Int             @id @default(autoincrement())
-  createdAt       DateTime        @default(now()) @db.DateTime(6)
-  updatedAt       DateTime        @default(now()) @db.DateTime(6)
-  deletedAt       DateTime?       @db.DateTime(6)
-  orderId         Int
-  bundleName      String          @db.VarChar(128)
-  feeStandard     String          @db.VarChar(128)
+  createdAt       DateTime        @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt       DateTime        @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt       DateTime?       @db.DateTime(6) @map("deleted_at")
+  orderId         Int             @map("order_id")
+  bundleName      String          @db.VarChar(128) @map("bundle_name")
+  feeStandard     String          @db.VarChar(128) @map("fee_standard")
   orderProducts   OrderProduct[]
   order           Order           @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([orderId])
+  @@map("order_product_bundle")
 }
 
 model OrderProductInputOption {
   id                               Int                          @id @default(autoincrement())
-  createdAt                       DateTime                      @default(now()) @db.DateTime(6)
-  updatedAt                       DateTime                      @default(now()) @db.DateTime(6)
-  deletedAt                       DateTime?                     @db.DateTime(6)
-  orderProductRequiredOptionId    Int
+  createdAt                       DateTime                      @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt                       DateTime                      @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt                       DateTime?                     @db.DateTime(6) @map("deleted_at")
+  orderProductRequiredOptionId    Int                           @map("order_product_required_option_id")
   name                            String                        @db.VarChar(32)
   value                           Int
   count                           Int
   orderProductRequiredOption      OrderProductRequiredOption    @relation(fields: [orderProductRequiredOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([orderProductRequiredOptionId])
+  @@map("order_product_input_option")
 }
 
 model OrderProductOption {
   id                Int           @id @default(autoincrement())
-  createdAt         DateTime      @default(now()) @db.DateTime(6)
-  updatedAt         DateTime      @default(now()) @db.DateTime(6)
-  deletedAt         DateTime?     @db.DateTime(6)
-  orderProductId    Int
+  createdAt         DateTime      @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt         DateTime      @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt         DateTime?     @db.DateTime(6) @map("deleted_at")
+  orderProductId    Int           @map("order_product_id")
   name              String        @db.VarChar(128)
   price             Int
   count             Int
   orderProduct      OrderProduct  @relation(fields: [orderProductId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([orderProductId])
+  @@map("order_product_option")
 }
 
 model OrderProductRequiredOption {
   id                            Int                          @id @default(autoincrement())
-  createdAt                     DateTime                     @default(now()) @db.DateTime(6)
-  updatedAt                     DateTime                     @default(now()) @db.DateTime(6)
-  deletedAt                     DateTime?                    @db.DateTime(6)
-  orderProductId                Int
+  createdAt                     DateTime                     @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt                     DateTime                     @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt                     DateTime?                    @db.DateTime(6) @map("deleted_at")
+  orderProductId                Int                           @map("order_product_id")
   name                          String                       @db.VarChar(128)
   price                         Int
   count                         Int
   orderProductInputOptions      OrderProductInputOption[]
   orderProduct                  OrderProduct                @relation(fields: [orderProductId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-   @@index([orderProductId])
+  @@index([orderProductId])
+  @@map("order_product_required_option")
 }
 
 model Product {
   id                        Int                       @id @default(autoincrement())
-  createdAt                 DateTime                  @default(now()) @db.DateTime(6)
-  updatedAt                 DateTime                  @default(now()) @db.DateTime(6)
-  deletedAt                 DateTime?                 @db.DateTime(6)
-  sellerId                  Int
-  bundleId                  Int?
-  categoryId                Int
-  companyId                 Int
-  isSale                    Int                       @db.TinyInt
+  createdAt                 DateTime                  @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt                 DateTime                  @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt                 DateTime?                 @db.DateTime(6) @map("deleted_at")
+  sellerId                  Int                       @map("seller_id")
+  bundleId                  Int?                      @map("bundle_id")
+  categoryId                Int                       @map("category_id")
+  companyId                 Int                       @map("company_id")
+  isSale                    Int                       @db.TinyInt @map("is_sale")
   name                      String                    @db.VarChar(128)
   description               String?                   @db.VarChar(255)
-  deliveryType              String                    @db.VarChar(128)
-  deliveryFreeOver          Int?
-  deliveryCharge            Int
+  deliveryType              String                    @db.VarChar(128) @map("delivery_type")
+  deliveryFreeOver          Int?                      @map("delivery_free_over")
+  deliveryCharge            Int                       @map("delivery_charge")
   img                       String                    @db.VarChar(255)
   carts                     Cart[]
   orderProducts             OrderProduct[]
@@ -240,81 +254,88 @@ model Product {
   @@index([sellerId])
   @@index([companyId])
   @@index([bundleId])
+  @@map("product")
 }
 
 model ProductBundle {
   id                Int       @id @default(autoincrement())
-  createdAt         DateTime  @default(now()) @db.DateTime(6)
-  updatedAt         DateTime  @default(now()) @db.DateTime(6)
-  deletedAt         DateTime? @db.DateTime(6)
-  sellerId          Int
+  createdAt         DateTime  @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt         DateTime  @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt         DateTime? @db.DateTime(6) @map("deleted_at")
+  sellerId          Int       @map("seller_id")
   name              String    @db.VarChar(128)
-  chargeStandard    String    @db.VarChar(128)
+  chargeStandard    String    @db.VarChar(128) @map("charge_standard")
   products          Product[]
   seller            Seller    @relation(fields: [sellerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([sellerId])
+  @@map("product_bundle")
 }
 
 model ProductInputOption {
   id                        Int                         @id @default(autoincrement())
-  createdAt                 DateTime                    @default(now()) @db.DateTime(6)
-  updatedAt                 DateTime                    @default(now()) @db.DateTime(6)
-  deletedAt                 DateTime?                   @db.DateTime(6)
-  productRequiredOptionId   Int
+  createdAt                 DateTime                    @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt                 DateTime                    @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt                 DateTime?                   @db.DateTime(6) @map("deleted_at")
+  productRequiredOptionId   Int                         @map("product_required_option_id")
   name                      String                      @db.VarChar(128)
   value                     String                      @db.VarChar(128)
   description               String                      @db.VarChar(255)
-  isRequired                Int                         @db.TinyInt
+  isRequired                Int                         @db.TinyInt  @map("is_required")
   cartInputOptions          CartInputOption[]
   productRequiredOption     ProductRequiredOption       @relation(fields: [productRequiredOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([productRequiredOptionId])
+  @@map("product_input_option")
 }
 
 model ProductOption {
   id              Int           @id @default(autoincrement())
-  createdAt       DateTime      @default(now()) @db.DateTime(6)
-  updatedAt       DateTime      @default(now()) @db.DateTime(6)
-  deletedAt       DateTime?     @db.DateTime(6)
-  productId       Int
+  createdAt       DateTime      @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt       DateTime      @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt       DateTime?     @db.DateTime(6) @map("deleted_at")
+  productId       Int           @map("product_id")
   name            String        @db.VarChar(128)
   price           Int
-  isSale          Int           @db.TinyInt
+  isSale          Int           @db.TinyInt @map("is_sale")
   cartOptions     CartOption[]
   product         Product       @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([productId])
+  @@map("product_option")
 }
 
 
 model ProductRequiredOption {
   id                      Int                    @id @default(autoincrement())
-  createdAt               DateTime               @default(now()) @db.DateTime(6)
-  updatedAt               DateTime               @default(now()) @db.DateTime(6)
-  deletedAt               DateTime?              @db.DateTime(6)
-  productId               Int
+  createdAt               DateTime               @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt               DateTime               @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt               DateTime?              @db.DateTime(6) @map("deleted_at")
+  productId               Int                    @map("product_id")
   name                    String                 @db.VarChar(128)
   price                   Int
-  isSale                  Int                    @db.TinyInt
+  isSale                  Int                    @db.TinyInt @map("is_sale")
   cartRequiredOptions     CartRequiredOption[]
   productInputOptions     ProductInputOption[]
   product                 Product                @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([productId])
+  @@map("product_required_option")
 
 }
 
 model Seller {
   id                Int              @id @default(autoincrement())
-  createdAt         DateTime         @default(now()) @db.DateTime(6)
-  updatedAt         DateTime         @default(now()) @db.DateTime(6)
-  deletedAt         DateTime?        @db.DateTime(6)
+  createdAt         DateTime         @default(now()) @db.DateTime(6) @map("created_at")
+  updatedAt         DateTime         @default(now()) @db.DateTime(6) @map("updated_at")
+  deletedAt         DateTime?        @db.DateTime(6) @map("deleted_at")
   email             String           @unique() @db.VarChar(128)
   password          String           @db.VarChar(512)
   name              String           @db.VarChar(32)
   phone             String           @db.VarChar(11)
-  businessNumber    String           @db.VarChar(128)
+  businessNumber    String           @db.VarChar(128) @map("business_number")
   products          Product[]
   productBundles    ProductBundle[]
+  
+  @@map("seller")
 } 
