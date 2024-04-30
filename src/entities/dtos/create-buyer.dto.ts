@@ -1,14 +1,11 @@
+import { Buyer } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmptyNumber } from '../../decorators/is-not-empty-number.decorator';
 import { IsNotEmptyString } from '../../decorators/is-not-empty-string.decorator';
-import { BuyerEntity } from '../buyer.entity';
 import { AuthCredentialsDto } from './auth-credentials.dto';
 
-export class CreateBuyerDto
-  extends AuthCredentialsDto
-  implements Pick<BuyerEntity, 'name' | 'gender' | 'age' | 'phone'>
-{
+export class CreateBuyerDto extends AuthCredentialsDto implements Pick<Buyer, 'name' | 'gender' | 'age' | 'phone'> {
   @ApiProperty({ type: String, description: '이름', required: true, example: 'myname' })
   @IsNotEmptyString(1, 128)
   name!: string;
