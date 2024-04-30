@@ -22,23 +22,24 @@ export class AuthService {
   ) {}
 
   async buyerSignUp(createBuyerDto: CreateBuyerDto): Promise<void> {
-    const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email: createBuyerDto.email } });
+    const { email, password, name, gender, age, phone } = createBuyerDto;
+    const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email } });
 
     if (buyer) {
       throw new BuyerUnauthrizedException();
     }
 
     const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(createBuyerDto.password, salt);
-    createBuyerDto.password = hashedPassword;
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    await this.prisma.buyer.create({ data: { ...createBuyerDto } });
+    await this.prisma.buyer.create({ data: { email, password: hashedPassword, name, gender, age, phone } });
   }
 
   async sellerSignUp(createSellerDto: CreateSellerDto): Promise<void> {
+    const { email, password, name, phone, businessNumber } = createSellerDto;
     const seller = await this.prisma.seller.findUnique({
       select: { id: true },
-      where: { email: createSellerDto.email },
+      where: { email },
     });
 
     if (seller) {
@@ -46,10 +47,9 @@ export class AuthService {
     }
 
     const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(createSellerDto.password, salt);
-    createSellerDto.password = hashedPassword;
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    await this.prisma.seller.create({ data: { ...createSellerDto } });
+    await this.prisma.seller.create({ data: { email, password: hashedPassword, name, phone, businessNumber } });
   }
 
   async validateBuyer(authCredentialsDto: AuthCredentialsDto): Promise<{ id: number }> {
