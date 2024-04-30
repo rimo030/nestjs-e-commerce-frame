@@ -17,6 +17,8 @@ model Board {
   description String    @db.Text
   status      String    @db.VarChar(128)
   buyer       Buyer     @relation(fields: [buyerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([buyerId])
 }
 
 model Buyer {
@@ -33,6 +35,8 @@ model Buyer {
   boards      Board[]
   carts       Cart[]
   orders      Order[]
+
+  
 }
 
 model Cart {
@@ -47,6 +51,9 @@ model Cart {
   cartOptions           CartOption[]
   cartRequiredOptions   CartRequiredOption[]
   orderProducts         OrderProduct[]
+
+  @@index([buyerId])
+  @@index([productId])
 }
 
 model CartOption {
@@ -59,6 +66,9 @@ model CartOption {
   count             Int
   ProductOption     ProductOption  @relation(fields: [productOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   carts             Cart           @relation(fields: [cartId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([productOptionId])
+  @@index([cartId])
 }
 
 model CartInputOption {
@@ -74,6 +84,9 @@ model CartInputOption {
   cartRequiredOptionId    Int?
   cartRequiredOption      CartRequiredOption? @relation(fields: [cartRequiredOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   productInputOption      ProductInputOption  @relation(fields: [productInputOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([cartRequiredOptionId])
+  @@index([productInputOptionId])
 }
 
 model CartRequiredOption {
@@ -87,6 +100,9 @@ model CartRequiredOption {
   cartInputOptions            CartInputOption[]
   productRequiredOption       ProductRequiredOption       @relation(fields: [productRequiredOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   cart                        Cart                        @relation(fields: [cartId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([productRequiredOptionId])
+  @@index([cartId])
 }
 
 model Category {
@@ -115,6 +131,8 @@ model Order {
   buyerId               Int
   buyer                 Buyer                  @relation(fields: [buyerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   orderProductBundles   OrderProductBundle[]
+
+   @@index([buyerId])
 }
 
 model OrderProduct {
@@ -130,6 +148,10 @@ model OrderProduct {
   orderProductBundle              OrderProductBundle              @relation(fields: [orderProductBundleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   orderProductOptions             OrderProductOption[]
   orderProductRequiredOptions     OrderProductRequiredOption[]
+
+  @@index([productId])
+  @@index([cartId])
+  @@index([orderProductBundleId])
 }
 
 model OrderProductBundle {
@@ -142,6 +164,8 @@ model OrderProductBundle {
   feeStandard     String          @db.VarChar(128)
   orderProducts   OrderProduct[]
   order           Order           @relation(fields: [orderId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([orderId])
 }
 
 model OrderProductInputOption {
@@ -154,6 +178,8 @@ model OrderProductInputOption {
   value                           Int
   count                           Int
   orderProductRequiredOption      OrderProductRequiredOption    @relation(fields: [orderProductRequiredOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([orderProductRequiredOptionId])
 }
 
 model OrderProductOption {
@@ -167,6 +193,7 @@ model OrderProductOption {
   count             Int
   orderProduct      OrderProduct  @relation(fields: [orderProductId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
+  @@index([orderProductId])
 }
 
 model OrderProductRequiredOption {
@@ -180,6 +207,8 @@ model OrderProductRequiredOption {
   count                         Int
   orderProductInputOptions      OrderProductInputOption[]
   orderProduct                  OrderProduct                @relation(fields: [orderProductId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+   @@index([orderProductId])
 }
 
 model Product {
@@ -206,6 +235,11 @@ model Product {
   productBundle             ProductBundle?            @relation(fields: [bundleId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   productOptions            ProductOption[]
   productRequiredOptions    ProductRequiredOption[]
+
+  @@index([categoryId])
+  @@index([sellerId])
+  @@index([companyId])
+  @@index([bundleId])
 }
 
 model ProductBundle {
@@ -218,6 +252,8 @@ model ProductBundle {
   chargeStandard    String    @db.VarChar(128)
   products          Product[]
   seller            Seller    @relation(fields: [sellerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([sellerId])
 }
 
 model ProductInputOption {
@@ -232,6 +268,8 @@ model ProductInputOption {
   isRequired                Int                         @db.TinyInt
   cartInputOptions          CartInputOption[]
   productRequiredOption     ProductRequiredOption       @relation(fields: [productRequiredOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([productRequiredOptionId])
 }
 
 model ProductOption {
@@ -245,7 +283,10 @@ model ProductOption {
   isSale          Int           @db.TinyInt
   cartOptions     CartOption[]
   product         Product       @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([productId])
 }
+
 
 model ProductRequiredOption {
   id                      Int                    @id @default(autoincrement())
@@ -259,6 +300,9 @@ model ProductRequiredOption {
   cartRequiredOptions     CartRequiredOption[]
   productInputOptions     ProductInputOption[]
   product                 Product                @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([productId])
+
 }
 
 model Seller {
