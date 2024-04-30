@@ -1,21 +1,15 @@
-import { GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
-import { GetProductListResponse } from 'src/interfaces/get-product-list-response.interface';
+import { PaginationResponseDto } from 'src/entities/dtos/pagination-response.dto';
 import { GetResponse } from 'src/interfaces/get-response.interface';
-import { ProductListElement } from 'src/interfaces/product-list-element.interface';
 import { getTotalPage } from './get-total-page.function';
 
-export function createProductPaginationForm(
-  getResponse: GetResponse<ProductListElement>,
-  getProductPagintionDto: GetProductListPaginationDto,
-): GetProductListResponse {
-  const { list, count, take } = getResponse;
-  const totalPage = getTotalPage(count, take);
-
-  const lastProductId = list.at(list.length - 1)?.id;
-  const result: GetProductListResponse = {
-    data: { list, totalPage, lastProductId: lastProductId ?? null },
-    meta: getProductPagintionDto,
+export function createProductPaginationForm<T>(response: GetResponse<T>): PaginationResponseDto<T> {
+  return {
+    data: response.data,
+    meta: {
+      page: response.skip / response.take + 1,
+      take: response.take,
+      totalCount: response.take,
+      totalPage: getTotalPage(response.count, response.take),
+    },
   };
-
-  return result;
 }
