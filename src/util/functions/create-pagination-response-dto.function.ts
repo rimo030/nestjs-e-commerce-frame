@@ -8,7 +8,7 @@ export function createPaginationResponseDto<T>(response: GetResponse<T>): Pagina
     meta: {
       page: response.skip / response.take + 1,
       take: response.take,
-      totalCount: response.take,
+      totalCount: response.count,
       totalPage: getTotalPage(response.count, response.take),
     },
   };
