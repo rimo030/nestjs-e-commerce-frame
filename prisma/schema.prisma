@@ -225,6 +225,13 @@ model OrderProductRequiredOption {
   @@map("order_product_required_option")
 }
 
+enum DeliveryType {
+  FREE
+  NOT_FREE
+  COUNT_FREE
+  PRICE_FREE
+}
+
 model Product {
   id                        Int                       @id @default(autoincrement())
   createdAt                 DateTime                  @default(now()) @db.DateTime(6) @map("created_at")
@@ -237,7 +244,7 @@ model Product {
   isSale                    Boolean                   @default(true) @map("is_sale")
   name                      String                    @db.VarChar(128)
   description               String?                   @db.VarChar(255)
-  deliveryType              String                    @db.VarChar(128) @map("delivery_type")
+  deliveryType              DeliveryType              @map("delivery_type")
   deliveryFreeOver          Int?                      @map("delivery_free_over")
   deliveryCharge            Int                       @map("delivery_charge")
   img                       String                    @db.VarChar(255)

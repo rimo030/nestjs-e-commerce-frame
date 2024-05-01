@@ -1,3 +1,4 @@
+import { DeliveryType } from '@prisma/client';
 import { ProductDto } from './product.dto';
 
 export class ProductListDto {
@@ -6,9 +7,8 @@ export class ProductListDto {
   categoryId: number;
   companyId: number;
   name: string;
-  deliveryType: string;
+  deliveryType: DeliveryType;
   img: string;
-
   salePrice!: number;
 
   /**
@@ -23,7 +23,6 @@ export class ProductListDto {
    * 상품에 대한 리뷰 작성수를 의미한다.
    * reviewCount : number;
    */
-
   constructor(product: ProductDto, salePrice: number) {
     this.id = product.id;
     this.sellerId = product.sellerId;
