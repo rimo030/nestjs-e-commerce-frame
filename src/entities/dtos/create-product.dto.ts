@@ -5,7 +5,7 @@ import { IsNotEmptyNumber } from 'src/decorators/is-not-empty-number.decorator';
 import { IsNotEmptyString } from 'src/decorators/is-not-empty-string.decorator';
 import { IsOptionalNumber } from 'src/decorators/is-optional-number.decorator';
 import { IsOptionalString } from 'src/decorators/is-optional-string.decorator';
-import { deliveryType } from 'src/types/enums/delivery-type.enum';
+import { _deliveryType } from 'src/types/enums/delivery-type.enum';
 import { ProductEntity } from '../product.entity';
 
 export class CreateProductDto
@@ -55,12 +55,12 @@ export class CreateProductDto
 
   @ApiProperty({
     type: 'enum',
-    enum: deliveryType,
+    enum: _deliveryType,
     description: '배송비 종류 ("FREE", "NOT_FREE", "COUNT_FREE", "PRICE_FREE" 을 허용합니다.)',
     required: true,
   })
-  @IsEnum(deliveryType)
-  deliveryType!: keyof typeof deliveryType;
+  @IsEnum(_deliveryType)
+  deliveryType!: keyof typeof _deliveryType;
 
   @ApiProperty({
     type: Number,

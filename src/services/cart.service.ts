@@ -21,7 +21,7 @@ import { CartRequiredOptionRepository } from 'src/repositories/cart-required-opt
 import { CartRepository } from 'src/repositories/cart.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
 import { chargeStandard } from 'src/types/enums/charge-standard.enum';
-import { deliveryType } from 'src/types/enums/delivery-type.enum';
+import { _deliveryType } from 'src/types/enums/delivery-type.enum';
 
 @Injectable()
 export class CartService {
@@ -255,19 +255,19 @@ export class CartService {
     const cartDeliveryType = cartProduct.deliveryType;
     const cartDeliveryFreeOver = cartProduct.deliveryFreeOver;
 
-    if (cartDeliveryType === deliveryType.FREE) {
+    if (cartDeliveryType === _deliveryType.FREE) {
       return 0;
-    } else if (cartDeliveryType === deliveryType.NOT_FREE) {
+    } else if (cartDeliveryType === _deliveryType.NOT_FREE) {
       return cartProduct.deliveryCharge;
     } else if (
-      cartDeliveryType === deliveryType.COUNT_FREE &&
+      cartDeliveryType === _deliveryType.COUNT_FREE &&
       cartDeliveryFreeOver !== null &&
       cartDeliveryFreeOver !== undefined
     ) {
       const count = cart.cartRequiredOptions.reduce((acc, requiredOption) => acc + requiredOption.count, 0);
       return count >= cartDeliveryFreeOver ? 0 : cartProduct.deliveryCharge;
     } else if (
-      cartDeliveryType === deliveryType.PRICE_FREE &&
+      cartDeliveryType === _deliveryType.PRICE_FREE &&
       cartDeliveryFreeOver !== null &&
       cartDeliveryFreeOver !== undefined
     ) {
