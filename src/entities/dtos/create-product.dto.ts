@@ -1,3 +1,4 @@
+import { Product } from '@prisma/client';
 import { IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmptyBoolean } from 'src/decorators/is-not-empty-boolean.decorator';
@@ -5,27 +6,26 @@ import { IsNotEmptyNumber } from 'src/decorators/is-not-empty-number.decorator';
 import { IsNotEmptyString } from 'src/decorators/is-not-empty-string.decorator';
 import { IsOptionalNumber } from 'src/decorators/is-optional-number.decorator';
 import { IsOptionalString } from 'src/decorators/is-optional-string.decorator';
-import { _deliveryType } from 'src/types/enums/delivery-type.enum';
-import { ProductEntity } from '../product.entity';
+import { DeliveryType } from 'src/types/delivery-type.type';
 
 export class CreateProductDto
   implements
     Pick<
-      ProductEntity,
+      Product,
       | 'bundleId'
       | 'categoryId'
       | 'companyId'
       | 'isSale'
       | 'name'
       | 'description'
-      | 'deliveryType'
       | 'deliveryCharge'
+      | 'deliveryFreeOver'
       | 'img'
     >
 {
   @ApiProperty({ type: Number, description: '묶음 배송 그룹 id', required: false, nullable: true, example: 1 })
   @IsOptionalNumber()
-  bundleId?: number | null;
+  bundleId!: number | null;
 
   @ApiProperty({ type: Number, description: '상품 카테고리 id', required: true, example: 1 })
   @IsNotEmptyNumber()
@@ -51,16 +51,16 @@ export class CreateProductDto
     example: '테스트 상품 입니다!',
   })
   @IsOptionalString(1, 128)
-  description?: string | null;
+  description!: string | null;
 
   @ApiProperty({
     type: 'enum',
-    enum: _deliveryType,
+    enum: ['FREE', 'NOT_FREE', 'COUNT_FREE', 'PRICE_FREE'],
     description: '배송비 종류 ("FREE", "NOT_FREE", "COUNT_FREE", "PRICE_FREE" 을 허용합니다.)',
     required: true,
   })
-  @IsEnum(_deliveryType)
-  deliveryType!: keyof typeof _deliveryType;
+  @IsEnum(['FREE', 'NOT_FREE', 'COUNT_FREE', 'PRICE_FREE'])
+  deliveryType!: DeliveryType;
 
   @ApiProperty({
     type: Number,
@@ -70,7 +70,7 @@ export class CreateProductDto
     example: null,
   })
   @IsOptionalNumber()
-  deliveryFreeOver?: number | null;
+  deliveryFreeOver!: number | null;
 
   @ApiProperty({
     type: Number,
