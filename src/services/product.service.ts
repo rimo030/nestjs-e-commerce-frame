@@ -13,6 +13,7 @@ import {
   ProductsNotFoundException,
   ProductRequiredOptionsNotFoundException,
 } from 'src/exceptions/product.exception';
+import { Omit } from 'src/types/omit-type';
 import { createPaginationResponseDto } from 'src/util/functions/create-pagination-response-dto.function';
 import { getOffset } from 'src/util/functions/get-offset.function';
 import { PrismaService } from './prisma.service';
@@ -21,6 +22,11 @@ import { PrismaService } from './prisma.service';
 export class ProductService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /**
+   * 상품의 정보를 조회합니다.
+   * @param id  조회할 상품의 아이디
+   *
+   */
   async getProductById(id: number): Promise<ProductDto> {
     const product = await this.prisma.product.findUnique({
       select: {
@@ -43,7 +49,6 @@ export class ProductService {
     if (!product) {
       throw new ProductNotFoundException();
     }
-
     return product;
   }
 
@@ -63,7 +68,6 @@ export class ProductService {
     }
     return { product, productRequiredOptions: paginationRequirdOptions, productOptions: paginationOptions };
   }
-
   /**
    * 상품의 목록과 최소 가격을 페이지네이션으로 조회합니다.
    * 상품명, 카테고리명, 판매자ID 검색 쿼리를 설정할 수 있습니다.
@@ -73,22 +77,17 @@ export class ProductService {
   async getProductListWithMiniumPrice(
     getProductListPaginationDto: GetProductListPaginationDto,
   ): Promise<PaginationResponseDto<ProductListDto>> {
-    const { skip, take } = getOffset({
-      page: getProductListPaginationDto.page,
-      limit: getProductListPaginationDto.limit,
-    });
-    const products = await this.getProductList(getProductListPaginationDto);
+    const { data, meta } = await this.getProductList(getProductListPaginationDto);
 
-    const productIds = products.map((p) => p.id);
+    const productIds = data.map((d) => d.id);
     const miniumPriceRows = await this.getMinimumPriceRows(productIds);
 
-    const data = products.map((p) => {
-      const salePrice = miniumPriceRows.find((r) => r.productId === p.id)?.minimumPrice ?? 0;
-      return { ...p, salePrice };
+    const productList = data.map((d) => {
+      const salePrice = miniumPriceRows.find((r) => r.productId === d.id)?.minimumPrice ?? 0;
+      return { ...d, salePrice };
     });
 
-    const count = await this.prisma.product.count();
-    return createPaginationResponseDto({ data, skip, count, take });
+    return { data: productList, meta };
   }
 
   /**
@@ -121,37 +120,42 @@ export class ProductService {
    * @param getProductListPaginationDto 요청 쿼리 객체 입니다.
    *
    */
-  async getProductList(getProductListPaginationDto: GetProductListPaginationDto) {
+  async getProductList(
+    getProductListPaginationDto: GetProductListPaginationDto,
+  ): Promise<PaginationResponseDto<Omit<ProductListDto, 'salePrice'>>> {
     const { page, limit, search, categoryId, sellerId } = getProductListPaginationDto;
     const { skip, take } = getOffset({ page, limit });
 
-    const products = await this.prisma.product.findMany({
-      select: {
-        id: true,
-        sellerId: true,
-        categoryId: true,
-        companyId: true,
-        name: true,
-        deliveryType: true,
-        img: true,
-      },
-      orderBy: {
-        id: 'desc',
-      },
-      where: {
-        isSale: true,
-        ...{ categoryId: categoryId ?? undefined },
-        ...{ sellerId: sellerId ?? undefined },
-        ...{ name: search ? { contains: search } : undefined },
-      },
-      skip,
-      take,
-    });
+    const [data, count] = await Promise.all([
+      this.prisma.product.findMany({
+        select: {
+          id: true,
+          sellerId: true,
+          categoryId: true,
+          companyId: true,
+          name: true,
+          deliveryType: true,
+          img: true,
+        },
+        orderBy: {
+          id: 'desc',
+        },
+        where: {
+          isSale: true,
+          ...(categoryId && { categoryId }),
+          ...(sellerId && { sellerId }),
+          ...(search && { name: { contains: search } }),
+        },
+        skip,
+        take,
+      }),
+      this.prisma.product.count({ where: { isSale: true } }),
+    ]);
 
-    if (!products.length) {
+    if (!data.length) {
       throw new ProductsNotFoundException();
     }
-    return products;
+    return createPaginationResponseDto({ data, skip, count, take });
   }
 
   /**
@@ -183,37 +187,41 @@ export class ProductService {
    * @param paginationDto 페이지네이션 요청 객체
    *
    */
-  async getRequiredOptionJoinInputOptions(productId: number, paginationDto: PaginationDto) {
+  async getRequiredOptionJoinInputOptions(
+    productId: number,
+    paginationDto: PaginationDto,
+  ): Promise<PaginationResponseDto<ProductRequiredOptionJoinInputOptionDto>> {
     const { skip, take } = getOffset(paginationDto);
-
-    const data = await this.prisma.productRequiredOption.findMany({
-      select: {
-        id: true,
-        productId: true,
-        name: true,
-        price: true,
-        isSale: true,
-        productInputOptions: {
-          select: {
-            id: true,
-            productRequiredOptionId: true,
-            name: true,
-            value: true,
-            description: true,
-            isRequired: true,
+    const [data, count] = await Promise.all([
+      this.prisma.productRequiredOption.findMany({
+        select: {
+          id: true,
+          productId: true,
+          name: true,
+          price: true,
+          isSale: true,
+          productInputOptions: {
+            select: {
+              id: true,
+              productRequiredOptionId: true,
+              name: true,
+              value: true,
+              description: true,
+              isRequired: true,
+            },
           },
         },
-      },
-      where: { productId, isSale: true },
-      orderBy: { id: 'asc' },
-      skip,
-      take,
-    });
+        where: { productId, isSale: true },
+        orderBy: { id: 'asc' },
+        skip,
+        take,
+      }),
+      this.prisma.productRequiredOption.count({ where: { isSale: true } }),
+    ]);
 
     if (!data.length) {
       throw new ProductRequiredOptionsNotFoundException();
     }
-    const count = await this.prisma.productRequiredOption.count({ where: { isSale: true } });
     return createPaginationResponseDto({ data, skip, take, count });
   }
 
@@ -223,7 +231,10 @@ export class ProductService {
    * @param paginationDto 페이지네이션 요청 객체
    *
    */
-  async getProductOptions(productId: number, paginationDto: PaginationDto) {
+  async getProductOptions(
+    productId: number,
+    paginationDto: PaginationDto,
+  ): Promise<PaginationResponseDto<ProductOptionDto>> {
     const { skip, take } = getOffset(paginationDto);
 
     const data = await this.prisma.productOption.findMany({
