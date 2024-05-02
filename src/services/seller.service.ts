@@ -8,16 +8,20 @@ import { ProductBundleDto } from 'src/entities/dtos/product-bundle.dto';
 import { ProductOptionDto } from 'src/entities/dtos/product-option.dto';
 import { ProductRequiredOptionDto } from 'src/entities/dtos/product-required-option.dto';
 import { ProductDto } from 'src/entities/dtos/product.dto';
+import { SellerNotfoundException } from 'src/exceptions/auth.exception';
 import { ProductNotFoundException } from 'src/exceptions/product.exception';
 import { ProductUnauthrizedException } from 'src/exceptions/seller.exception';
 import { ProductBundleRepository } from 'src/repositories/product-bundle.repository';
 import { ProductOptionRepository } from 'src/repositories/product-option-repository';
 import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
+import { PrismaService } from './prisma.service';
 
 @Injectable()
 export class SellerService {
   constructor(
+    private readonly prisma: PrismaService,
+
     @InjectRepository(ProductBundleRepository)
     private readonly productBundleRepository: ProductBundleRepository,
 
@@ -31,12 +35,26 @@ export class SellerService {
     private readonly productOptionRepository: ProductOptionRepository,
   ) {}
 
+  /**
+   * 상품 묶음을 저장합니다.
+   *
+   * @param sellerId 판매자 계정의 아이디가 있어야 상품 묶음을 저장할 수 있습니다.
+   * @param createProductBundleDto 저장할 내용을 담은 객체입니다.
+   */
   async createProductBundle(
     sellerId: number,
     createProductBundleDto: CreateProductBundleDto,
   ): Promise<ProductBundleDto> {
-    const productBundle = await this.productBundleRepository.saveProductBundle(sellerId, createProductBundleDto);
-    return new ProductBundleDto(productBundle);
+    const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
+    if (!seller) {
+      throw new SellerNotfoundException();
+    }
+
+    const productBundle = await this.prisma.productBundle.create({
+      select: { id: true, name: true, sellerId: true, chargeStandard: true },
+      data: { sellerId, name: createProductBundleDto.name, chargeStandard: createProductBundleDto.chargeStandard },
+    });
+    return productBundle;
   }
 
   async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductDto> {
