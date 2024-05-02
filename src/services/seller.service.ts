@@ -62,7 +62,7 @@ export class SellerService {
    *
    * @param sellerId 판매자 계정의 아이디가 있어야 상품 묶음을 저장할 수 있습니다.
    * @param createProductDto 저장할 상품의 데이터 입니다.
-   * @returns
+   *
    */
   async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductDto> {
     const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
@@ -102,13 +102,21 @@ export class SellerService {
     return product;
   }
 
+  /**
+   * 상품 필수/선택 옵션을 생성합니다.
+   *
+   * @param sellerId 상품의 판매자 계정이 맞아야 상품 묶음을 저장할 수 있습니다.
+   * @param productId 옵션을 생성할 상품의 아이디 입니다.
+   * @param isRequireOptionDto 필수 옵션 / 선택 옵션의 여부를 나타냅니다.
+   * @param createProductOptionsDto 저장할 옵션의 데이터 입니다.
+   */
   async createProductOptions(
     sellerId: number,
     productId: number,
     isRequireOptionDto: IsRequireOptionDto,
     createProductOptionsDto: CreateProductOptionsDto,
   ): Promise<ProductRequiredOptionDto | ProductOptionDto> {
-    const savedProduct = await this.productRepository.getProductSellerId(productId);
+    const savedProduct = await this.prisma.product.findUnique({ select: { sellerId: true }, where: { id: productId } });
 
     if (!savedProduct) {
       throw new ProductNotFoundException();
@@ -119,14 +127,27 @@ export class SellerService {
     }
 
     if (isRequireOptionDto.isRequire) {
-      const requiredOption = await this.productRequiredRepository.saveRequiredOption(
-        productId,
-        createProductOptionsDto,
-      );
-      return new ProductRequiredOptionDto(requiredOption);
+      const requiredOption = await this.prisma.productRequiredOption.create({
+        select: { id: true, productId: true, name: true, price: true, isSale: true },
+        data: {
+          productId,
+          name: createProductOptionsDto.name,
+          price: createProductOptionsDto.price,
+          isSale: createProductOptionsDto.isSale,
+        },
+      });
+      return requiredOption;
     } else {
-      const option = await this.productOptionRepository.saveOption(productId, createProductOptionsDto);
-      return new ProductOptionDto(option);
+      const option = await this.prisma.productOption.create({
+        select: { id: true, productId: true, name: true, price: true, isSale: true },
+        data: {
+          productId,
+          name: createProductOptionsDto.name,
+          price: createProductOptionsDto.price,
+          isSale: createProductOptionsDto.isSale,
+        },
+      });
+      return option;
     }
   }
 }
