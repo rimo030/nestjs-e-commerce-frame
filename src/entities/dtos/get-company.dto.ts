@@ -1,4 +1,3 @@
-import { PickType } from '@nestjs/swagger';
-import { CompanyEntity } from '../company.entity';
+import { Company } from '@prisma/client';
 
-export class GetCompanyDto extends PickType(CompanyEntity, ['id', 'name']) {}
+export interface GetCompanyDto extends Pick<Company, 'id' | 'name'> {}

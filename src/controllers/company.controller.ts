@@ -1,13 +1,12 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SellerJwtAuthGuard } from 'src/auth/guards/seller-jwt.guard';
 import { UserId } from 'src/decorators/user-id.decorator';
-import { CompanyEntity } from 'src/entities/company.entity';
 import { GetCompanyDto } from 'src/entities/dtos/get-company.dto';
+import { PaginationResponseDto } from 'src/entities/dtos/pagination-response.dto';
 import { PaginationDto } from 'src/entities/dtos/pagination.dto';
-import { PaginationResponseForm } from 'src/interfaces/pagination-response-form.interface';
 import { CompanyService } from 'src/services/company.service';
-import { createResponseForm } from 'src/util/functions/create-response-form.function';
+import { createPaginationResponseDto } from 'src/util/functions/create-pagination-response-dto.function';
 
 @Controller('company')
 @ApiTags('Company API')
@@ -16,15 +15,12 @@ export class CompanyController {
   constructor(private readonly companyService: CompanyService) {}
 
   @Get()
+  @ApiOperation({ summary: '회사 조회 API', description: '등록된 회사를 페이지 네이션으로 확인할 수 있다.' })
   async getCompany(
-    /**
-     * @todo
-     * sellerId 추후 사용 예정
-     */
-    // @UserId() sellerId: number,
+    @UserId() sellerId: number,
     @Query() paginationDto: PaginationDto,
-  ): Promise<PaginationResponseForm<GetCompanyDto>> {
-    const response = await this.companyService.getCompany(paginationDto);
-    return createResponseForm(response, paginationDto);
+  ): Promise<PaginationResponseDto<GetCompanyDto>> {
+    const response = await this.companyService.getCompany(sellerId, paginationDto);
+    return createPaginationResponseDto(response);
   }
 }

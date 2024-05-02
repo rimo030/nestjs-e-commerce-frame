@@ -2,7 +2,7 @@ import { PaginationResponseDto } from 'src/entities/dtos/pagination-response.dto
 import { GetResponse } from 'src/interfaces/get-response.interface';
 import { getTotalPage } from './get-total-page.function';
 
-export function createProductPaginationForm<T>(response: GetResponse<T>): PaginationResponseDto<T> {
+export function createPaginationResponseDto<T>(response: GetResponse<T>): PaginationResponseDto<T> {
   return {
     data: response.data,
     meta: {
