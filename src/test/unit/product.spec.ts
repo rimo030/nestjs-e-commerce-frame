@@ -3,13 +3,7 @@ import { AppModule } from 'src/app.module';
 import { ProductController } from 'src/controllers/product.controller';
 import { CategoryEntity } from 'src/entities/category.entity';
 import { CompanyEntity } from 'src/entities/company.entity';
-import { ProductInputOptionEntity } from 'src/entities/product-input-option.entity';
-import { ProductOptionEntity } from 'src/entities/product-option.entity';
-import { ProductRequiredOptionEntity } from 'src/entities/product-required-option.entity';
-import { ProductEntity } from 'src/entities/product.entity';
 import { SellerEntity } from 'src/entities/seller.entity';
-import { GetProductListResponse } from 'src/interfaces/get-product-list-response.interface';
-import { GetProductResponse } from 'src/interfaces/get-product-response.interface';
 import { CategoryRepository } from 'src/repositories/category.repository';
 import { CompanyRepository } from 'src/repositories/company.repository';
 import { ProductInputOptionRepository } from 'src/repositories/product-input-option.repository';
@@ -18,7 +12,7 @@ import { ProductRequiredOptionRepository } from 'src/repositories/product-requir
 import { ProductRepository } from 'src/repositories/product.repository';
 import { SellerRepository } from 'src/repositories/seller.repository';
 import { ProductService } from 'src/services/product.service';
-import { deliveryType } from 'src/types/enums/delivery-type.enum';
+import { _deliveryType } from 'src/types/enums/delivery-type.enum';
 
 describe('ProductController', () => {
   let controller: ProductController;
@@ -129,7 +123,7 @@ describe('ProductController', () => {
               companyId: companyId,
               isSale: true,
               name: `${String.fromCharCode(i + 65)}_${sellerId}_${categoryId}_${companyId}`,
-              deliveryType: deliveryType.FREE,
+              deliveryType: _deliveryType.FREE,
               deliveryCharge: 3000,
               img: 'test.img',
             });
@@ -261,7 +255,7 @@ describe('ProductController', () => {
         categoryId: testCategoryId,
       });
 
-      expect(resByService.data.every((el) => el.categoryId === testCategoryId)).toBe(true);
+      expect(resByService.every((el) => el.categoryId === testCategoryId)).toBe(true);
     });
 
     /**
@@ -392,7 +386,7 @@ describe('ProductController', () => {
        * 조회된 상품 id와 필수옵션, 선택옵션의 productId 값이 testId와 같아야 한다.
        */
 
-      expect(res.data.id === testId).toBe(true);
+      expect(res.data.product.id === testId).toBe(true);
       expect(res.data.productRequiredOptions.data.every((el) => el.productId === testId)).toBe(true);
       expect(res.data.productOptions.data.every((el) => el.productId === testId)).toBe(true);
     });
@@ -408,13 +402,13 @@ describe('ProductController', () => {
       const productIds = products.map((el) => el.id);
       const testProductId = productIds[0];
 
-      const resByServiceIsRequired = await service.getProductOptions(
+      const resByServiceIsRequired = await service.getProductOption(
         testProductId,
         { isRequire: true },
         { page: 0, limit: testMinCount },
       );
 
-      const resByServiceIsNotRequired = await service.getProductOptions(
+      const resByServiceIsNotRequired = await service.getProductOption(
         testProductId,
         { isRequire: false },
         { page: 0, limit: testMinCount },

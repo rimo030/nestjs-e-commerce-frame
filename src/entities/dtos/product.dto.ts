@@ -1,4 +1,4 @@
-import { deliveryType } from 'src/types/enums/delivery-type.enum';
+import { DeliveryType } from '@prisma/client';
 import { ProductEntity } from '../product.entity';
 
 export class ProductDto {
@@ -10,7 +10,7 @@ export class ProductDto {
   isSale!: boolean;
   name!: string;
   description?: string | null;
-  deliveryType!: keyof typeof deliveryType;
+  deliveryType!: DeliveryType;
   deliveryFreeOver?: number | null;
   deliveryCharge!: number;
   img!: string;

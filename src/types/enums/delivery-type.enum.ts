@@ -6,7 +6,9 @@
  *  - PRICE_FREE : 가격 이상 무료 (deliveryFreeOver에 기준 가격 입력)
  */
 
-export enum deliveryType {
+export type DeliveryType = 'FREE' | 'NOT_FREE' | 'COUNT_FREE' | 'PRICE_FREE';
+
+export enum _deliveryType {
   FREE = 'FREE',
   NOT_FREE = 'NOT_FREE',
   COUNT_FREE = 'COUNT_FREE',

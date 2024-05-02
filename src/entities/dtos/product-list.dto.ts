@@ -1,15 +1,15 @@
-import { ProductDto } from './product.dto';
+import { DeliveryType, Product } from '@prisma/client';
 
-export class ProductListDto {
+export interface ProductListDto
+  extends Pick<Product, 'id' | 'sellerId' | 'categoryId' | 'companyId' | 'name' | 'deliveryType' | 'img'> {
   id: number;
   sellerId: number;
   categoryId: number;
   companyId: number;
   name: string;
-  deliveryType: string;
+  deliveryType: DeliveryType;
   img: string;
-
-  salePrice!: number;
+  salePrice: number;
 
   /**
    * 상품에 대한 썸네일을 의미한다.
@@ -23,15 +23,4 @@ export class ProductListDto {
    * 상품에 대한 리뷰 작성수를 의미한다.
    * reviewCount : number;
    */
-
-  constructor(product: ProductDto, salePrice: number) {
-    this.id = product.id;
-    this.sellerId = product.sellerId;
-    this.categoryId = product.categoryId;
-    this.companyId = product.companyId;
-    this.name = product.name;
-    this.deliveryType = product.deliveryType;
-    this.img = product.img;
-    this.salePrice = salePrice;
-  }
 }
