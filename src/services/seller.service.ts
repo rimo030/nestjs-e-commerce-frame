@@ -57,9 +57,49 @@ export class SellerService {
     return productBundle;
   }
 
+  /**
+   * 상품을 생성합니다.
+   *
+   * @param sellerId 판매자 계정의 아이디가 있어야 상품 묶음을 저장할 수 있습니다.
+   * @param createProductDto 저장할 상품의 데이터 입니다.
+   * @returns
+   */
   async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductDto> {
-    const product = await this.productRepository.saveProduct(sellerId, createProductDto);
-    return new ProductDto(product);
+    const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
+    if (!seller) {
+      throw new SellerNotfoundException();
+    }
+
+    const product = await this.prisma.product.create({
+      select: {
+        id: true,
+        sellerId: true,
+        bundleId: true,
+        categoryId: true,
+        companyId: true,
+        name: true,
+        isSale: true,
+        description: true,
+        deliveryType: true,
+        deliveryCharge: true,
+        deliveryFreeOver: true,
+        img: true,
+      },
+      data: {
+        sellerId,
+        bundleId: createProductDto.bundleId,
+        categoryId: createProductDto.categoryId,
+        companyId: createProductDto.companyId,
+        name: createProductDto.name,
+        isSale: createProductDto.isSale,
+        description: createProductDto.description,
+        deliveryType: createProductDto.deliveryType,
+        deliveryCharge: createProductDto.deliveryCharge,
+        deliveryFreeOver: createProductDto.deliveryFreeOver,
+        img: createProductDto.img,
+      },
+    });
+    return product;
   }
 
   async createProductOptions(
