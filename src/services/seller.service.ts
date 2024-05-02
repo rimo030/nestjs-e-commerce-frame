@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
@@ -9,31 +8,13 @@ import { ProductOptionDto } from 'src/entities/dtos/product-option.dto';
 import { ProductRequiredOptionDto } from 'src/entities/dtos/product-required-option.dto';
 import { ProductDto } from 'src/entities/dtos/product.dto';
 import { SellerNotfoundException } from 'src/exceptions/auth.exception';
-import { ProductNotFoundException } from 'src/exceptions/product.exception';
+import { ProductBundleNotFoundException, ProductNotFoundException } from 'src/exceptions/product.exception';
 import { ProductUnauthrizedException } from 'src/exceptions/seller.exception';
-import { ProductBundleRepository } from 'src/repositories/product-bundle.repository';
-import { ProductOptionRepository } from 'src/repositories/product-option-repository';
-import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
-import { ProductRepository } from 'src/repositories/product.repository';
 import { PrismaService } from './prisma.service';
 
 @Injectable()
 export class SellerService {
-  constructor(
-    private readonly prisma: PrismaService,
-
-    @InjectRepository(ProductBundleRepository)
-    private readonly productBundleRepository: ProductBundleRepository,
-
-    @InjectRepository(ProductRepository)
-    private readonly productRepository: ProductRepository,
-
-    @InjectRepository(ProductRequiredOptionRepository)
-    private readonly productRequiredRepository: ProductRequiredOptionRepository,
-
-    @InjectRepository(ProductOptionRepository)
-    private readonly productOptionRepository: ProductOptionRepository,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * 상품 묶음을 저장합니다.
@@ -149,5 +130,21 @@ export class SellerService {
       });
       return option;
     }
+  }
+
+  /**
+   * 상품 묶음을 조회합니다.
+   * @param bundleId 조회할 상품 묶음의 아이디 입니다.
+   */
+  async getProductBundle(bundleId: number): Promise<ProductBundleDto> {
+    const productBundle = await this.prisma.productBundle.findUnique({
+      select: { id: true, sellerId: true, name: true, chargeStandard: true },
+      where: { id: bundleId },
+    });
+
+    if (!productBundle) {
+      throw new ProductBundleNotFoundException();
+    }
+    return productBundle;
   }
 }
