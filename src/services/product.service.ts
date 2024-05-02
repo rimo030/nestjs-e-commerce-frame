@@ -149,7 +149,14 @@ export class ProductService {
         skip,
         take,
       }),
-      this.prisma.product.count({ where: { isSale: true } }),
+      this.prisma.product.count({
+        where: {
+          isSale: true,
+          ...(categoryId && { categoryId }),
+          ...(sellerId && { sellerId }),
+          ...(search && { name: { contains: search } }),
+        },
+      }),
     ]);
 
     if (!data.length) {
@@ -216,7 +223,7 @@ export class ProductService {
         skip,
         take,
       }),
-      this.prisma.productRequiredOption.count({ where: { isSale: true } }),
+      this.prisma.productRequiredOption.count({ where: { productId, isSale: true } }),
     ]);
 
     if (!data.length) {
@@ -251,7 +258,7 @@ export class ProductService {
       take,
     });
 
-    const count = await this.prisma.productRequiredOption.count({ where: { isSale: true } });
+    const count = await this.prisma.productRequiredOption.count({ where: { productId, isSale: true } });
     return createPaginationResponseDto({ data, skip, take, count });
   }
 }
