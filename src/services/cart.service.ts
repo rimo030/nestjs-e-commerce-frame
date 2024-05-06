@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CartEntity } from 'src/entities/cart.entity';
 import { CartGroupByProductBundleDto } from 'src/entities/dtos/cart-group-by-product-bundle.dto';
 import { CartOptionDto } from 'src/entities/dtos/cart-option.dto';
 import { CartProductDetailDto } from 'src/entities/dtos/cart-product-detail.dto';
@@ -21,7 +20,7 @@ import { CartOptionRepository } from 'src/repositories/cart-option.repository';
 import { CartRequiredOptionRepository } from 'src/repositories/cart-required-option.repository';
 import { CartRepository } from 'src/repositories/cart.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
-import { chargeStandard } from 'src/types/enums/charge-standard.enum';
+import { chargeStandard } from 'src/types/charge-standard.type';
 import { _deliveryType } from 'src/types/enums/delivery-type.enum';
 import { PrismaService } from './prisma.service';
 
@@ -39,6 +38,8 @@ export class CartService {
   /**
    * 장바구니에 상품과 상품 옵션들을 저장합니다.
    * 이미 담겨있는 상품이라면 개수를 더해 반환합니다.
+   *
+   * @todo 상품 입력 옵션 추가
    *
    * @param buyerId 구매자의 아이디 입니다.
    * @param createCartDto 저장하려는 장바구니의 정보 입니다.
@@ -280,58 +281,125 @@ export class CartService {
 
   /**
    * 유저의 장바구니를 읽습니다.
+   * 장바구니에 담긴 상품 묶음, 상품, 상품 필수 옵션, 선택 옵션의 데이터가 함께 조회되어야 합니다.
+   * 상품 묶음을 고려해 배송비가 계산 되어야 합니다.
+   *
+   * @todo 상품 입력 옵션 추가
    *
    * @param buyerId 구매자의 아이디
-   * @returns 장바구니 정보와 총 배송비
-   *
    */
   async readCarts(buyerId: number): Promise<{
     carts: CartGroupByProductBundleDto[];
     deliveryFee: number;
   }> {
-    const carts = await this.cartRepository.findCartDetail(buyerId);
-    const cartsGroupByProductBundle = await this.groupByProductBundle(carts);
+    const cartDetails = await this.getCartDetail(buyerId);
+    const cartsGroupByProductBundle = await this.groupByProductBundle(cartDetails);
     const deliveryFee = cartsGroupByProductBundle.map((el) => el.bundleDeliveryFee).reduce((acc, cur) => acc + cur, 0);
     return { carts: cartsGroupByProductBundle, deliveryFee };
   }
 
   /**
-   * 장바구니, 상품, 상품옵션 정보를 묶음(bundle) 별로 배송비와 함께 그룹화 합니다.
+   * 장바구니의 정보와 담긴 상품과 필수/선택옵션의 데이터도 함께 조회되어야 합니다.
    *
+   * @param buyerId 조회할 buyer의 id입니다.
+   */
+  async getCartDetail(buyerId: number): Promise<CartProductDetailDto[]> {
+    const cartDetails = await this.prisma.cart.findMany({
+      select: {
+        id: true,
+        productId: true,
+        buyerId: true,
+        product: {
+          select: {
+            id: true,
+            sellerId: true,
+            bundleId: true,
+            categoryId: true,
+            companyId: true,
+            isSale: true,
+            name: true,
+            description: true,
+            deliveryType: true,
+            deliveryFreeOver: true,
+            deliveryCharge: true,
+            img: true,
+          },
+        },
+        cartRequiredOptions: {
+          select: {
+            id: true,
+            cartId: true,
+            productRequiredOptionId: true,
+            count: true,
+            productRequiredOption: {
+              select: {
+                id: true,
+                productId: true,
+                name: true,
+                price: true,
+                isSale: true,
+              },
+            },
+          },
+        },
+        cartOptions: {
+          select: {
+            id: true,
+            cartId: true,
+            productOptionId: true,
+            count: true,
+            productOption: {
+              select: {
+                id: true,
+                productId: true,
+                name: true,
+                price: true,
+                isSale: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: { id: 'asc' },
+      where: { buyerId },
+    });
+
+    return cartDetails;
+  }
+
+  /**
+   * 장바구니, 상품, 상품옵션 정보를 묶음(bundle) 별로 배송비와 함께 그룹화 합니다.
    * 묶음이 있는 경우라면 묶음별로, 묶음이 없다면 각 상품을 하나의 묶음으로 취급합니다.
    *
-   * @param carts 장바구니 및 상품에 대한 모든 정보
+   * @param cartDetails 장바구니 및 상품, 옵션들에 대한 모든 정보
    */
-
-  async groupByProductBundle(carts: CartEntity[]): Promise<CartGroupByProductBundleDto[]> {
-    const productIds = carts.map((c) => c.productId);
+  async groupByProductBundle(cartDetails: CartProductDetailDto[]): Promise<CartGroupByProductBundleDto[]> {
+    const productIds = cartDetails.map((c) => c.productId);
     const bundleGroup = await this.productRepository.getProductsByBundleGroup(productIds);
     const result: CartGroupByProductBundleDto[] = [];
 
     for (const bundle of bundleGroup) {
-      const bundleCarts = carts.filter((c) => bundle.productIds.includes(c.productId));
+      const bundleCarts = cartDetails.filter((c) => bundle.productIds.includes(c.productId));
 
       if (bundle.bundleId !== null) {
-        const cartDetail = bundleCarts.map((b) => new CartProductDetailDto(b));
         const bundleDeliveryFee = this.calculateBundleDeliveryFee(bundle.chargeStandard, bundleCarts);
 
         result.push({
           bundleId: bundle.bundleId,
           chargeStandard: bundle.chargeStandard,
           bundleDeliveryFee: bundleDeliveryFee,
-          cartDetail: cartDetail,
+          cartDetails: cartDetails,
         });
       } else {
         for (const productId of bundle.productIds) {
           const productCarts = bundleCarts.filter((c) => c.productId === productId);
-          const cartDetail = productCarts.map((b) => new CartProductDetailDto(b));
-          const bundleDeliveryFee = cartDetail.reduce((acc, c) => acc + this.calculateProductDeliveryFee(c), 0);
+          const bundleDeliveryFee = productCarts.reduce((acc, c) => acc + this.calculateProductDeliveryFee(c), 0);
 
           result.push({
             bundleId: null,
             chargeStandard: null,
             bundleDeliveryFee: bundleDeliveryFee,
-            cartDetail: cartDetail,
+            cartDetails: productCarts,
           });
         }
       }
@@ -347,9 +415,9 @@ export class CartService {
    *
    * @returns 상품 묶음의 최종 배송비
    */
-  private calculateBundleDeliveryFee(standard: keyof typeof chargeStandard, carts: CartEntity[]): number {
+  private calculateBundleDeliveryFee(standard: chargeStandard, carts: CartProductDetailDto[]): number {
     const charges = carts.map((c) => c.product.deliveryCharge);
-    if (standard === chargeStandard.MIN) {
+    if (standard === 'MIN') {
       return Math.min(...charges);
     } else {
       return Math.max(...charges);
@@ -384,7 +452,7 @@ export class CartService {
       cartDeliveryFreeOver !== null &&
       cartDeliveryFreeOver !== undefined
     ) {
-      const price = cart.cartRequiredOptions.reduce((acc, ro) => acc + ro.count * ro.price, 0);
+      const price = cart.cartRequiredOptions.reduce((acc, ro) => acc + ro.count * ro.productRequiredOption.price, 0);
       return price >= cartDeliveryFreeOver ? 0 : cartProduct.deliveryCharge;
     }
 
