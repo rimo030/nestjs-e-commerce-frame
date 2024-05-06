@@ -236,17 +236,17 @@ export class CartService {
    * 해당 id를 가진 필수 옵션의 count칼럼을 증가시킵니다.
    * 기존 수량에 count만큼 더합니다.
    *
-   * @param data 필수 옵션의 아이디와 수량을 담은 객체로 이루어진 배열입니다.
+   * @param idWithCount 필수 옵션의 아이디와 수량을 담은 객체로 이루어진 배열입니다.
    */
-  async increaseRequiredOptionsCount(data: { id: number; count: number }[]): Promise<CartRequiredOptionDto[]> {
+  async increaseRequiredOptionsCount(idWithCount: { id: number; count: number }[]): Promise<CartRequiredOptionDto[]> {
     const updateCartRequiredOptions = await this.prisma.$transaction(
-      data.map((d) =>
+      idWithCount.map((i) =>
         this.prisma.cartRequiredOption.update({
           select: { id: true, cartId: true, productRequiredOptionId: true, count: true },
-          where: { id: d.id },
+          where: { id: i.id },
           data: {
             count: {
-              increment: d.count,
+              increment: i.count,
             },
           },
         }),
@@ -259,17 +259,17 @@ export class CartService {
    * 해당 id를 가진 선택 옵션의 count칼럼을 증가시킵니다.
    * 기존 수량에 count만큼 더합니다.
    *
-   * @param data 선택 옵션의 아이디와 수량을 담은 객체로 이루어진 배열입니다.
+   * @param idWithCount 선택 옵션의 아이디와 수량을 담은 객체로 이루어진 배열입니다.
    */
-  async increaseOptionsCount(data: { id: number; count: number }[]): Promise<CartOptionDto[]> {
+  async increaseOptionsCount(idWithCount: { id: number; count: number }[]): Promise<CartOptionDto[]> {
     const updateCartOptions = await this.prisma.$transaction(
-      data.map((d) =>
+      idWithCount.map((i) =>
         this.prisma.cartOption.update({
           select: { id: true, cartId: true, productOptionId: true, count: true },
-          where: { id: d.id },
+          where: { id: i.id },
           data: {
             count: {
-              increment: d.count,
+              increment: i.count,
             },
           },
         }),
