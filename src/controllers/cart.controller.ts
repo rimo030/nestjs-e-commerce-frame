@@ -32,13 +32,10 @@ export class CartController {
   @Get()
   @ApiOperation({ summary: '장바구니 조회 API', description: '모든 사용자는 담은 상품을 장바구니에서 조회할 수 있다.' })
   async readCarts(@UserId() buyerId: number): Promise<{
-    data: {
-      carts: CartGroupByProductBundleDto[];
-      deliveryFee: number;
-    };
+    data: CartGroupByProductBundleDto[];
   }> {
-    const carts = await this.cartService.readCarts(buyerId);
-    return { data: carts };
+    const cartDetils = await this.cartService.readCarts(buyerId);
+    return { data: cartDetils };
   }
 
   @Patch()

@@ -7,6 +7,7 @@ import { CartDto } from 'src/entities/dtos/cart.dto';
 import { CreateCartOptionDto } from 'src/entities/dtos/create-cart-option.dto';
 import { CreateCartRequiredOptionDto } from 'src/entities/dtos/create-cart-required-option.dto';
 import { CreateCartDto } from 'src/entities/dtos/create-cart.dto';
+import { ProductBundleDto } from 'src/entities/dtos/product-bundle.dto';
 import { UpdateCartOptionCountDto } from 'src/entities/dtos/update-cart-option-count.dto';
 import { UpdateCartDto } from 'src/entities/dtos/update-cart.dto';
 import {
@@ -15,13 +16,13 @@ import {
   CartNotFoundException,
   CartRequiredOptionNotFoundException,
   CartOptionNotFoundException,
+  CartDeliveryFreeOverNotFoundException,
 } from 'src/exceptions/cart.exception';
 import { CartOptionRepository } from 'src/repositories/cart-option.repository';
 import { CartRequiredOptionRepository } from 'src/repositories/cart-required-option.repository';
 import { CartRepository } from 'src/repositories/cart.repository';
 import { ProductRepository } from 'src/repositories/product.repository';
 import { chargeStandard } from 'src/types/charge-standard.type';
-import { _deliveryType } from 'src/types/enums/delivery-type.enum';
 import { PrismaService } from './prisma.service';
 
 @Injectable()
@@ -282,20 +283,17 @@ export class CartService {
   /**
    * 유저의 장바구니를 읽습니다.
    * 장바구니에 담긴 상품 묶음, 상품, 상품 필수 옵션, 선택 옵션의 데이터가 함께 조회되어야 합니다.
-   * 상품 묶음을 고려해 배송비가 계산 되어야 합니다.
+   * 상품 묶음을 고려해 각 묶음별 배송비가 계산 되어야 합니다.
    *
    * @todo 상품 입력 옵션 추가
    *
    * @param buyerId 구매자의 아이디
    */
-  async readCarts(buyerId: number): Promise<{
-    carts: CartGroupByProductBundleDto[];
-    deliveryFee: number;
-  }> {
+  async readCarts(buyerId: number): Promise<CartGroupByProductBundleDto[]> {
     const cartDetails = await this.getCartDetail(buyerId);
     const cartsGroupByProductBundle = await this.groupByProductBundle(cartDetails);
-    const deliveryFee = cartsGroupByProductBundle.map((el) => el.bundleDeliveryFee).reduce((acc, cur) => acc + cur, 0);
-    return { carts: cartsGroupByProductBundle, deliveryFee };
+
+    return cartsGroupByProductBundle;
   }
 
   /**
@@ -368,43 +366,71 @@ export class CartService {
   }
 
   /**
-   * 장바구니, 상품, 상품옵션 정보를 묶음(bundle) 별로 배송비와 함께 그룹화 합니다.
-   * 묶음이 있는 경우라면 묶음별로, 묶음이 없다면 각 상품을 하나의 묶음으로 취급합니다.
+   * 장바구니, 상품, 상품옵션 정보를 상품 묶음(product bundle)별로 그룹화 합니다.
+   * 그룹화 후 묶음의 배송비 기준(chargeStandard)에 따라 묶음별 배송비가 책정 되어야 합니다.
+   *
+   * 묶음이 있는 경우라면 묶음별로,
+   * 묶음이 없다면 하나의 상품을 하나의 묶음으로 취급합니다.
    *
    * @param cartDetails 장바구니 및 상품, 옵션들에 대한 모든 정보
    */
   async groupByProductBundle(cartDetails: CartProductDetailDto[]): Promise<CartGroupByProductBundleDto[]> {
-    const productIds = cartDetails.map((c) => c.productId);
-    const bundleGroup = await this.productRepository.getProductsByBundleGroup(productIds);
+    const cartDetialByBundleGroups = await this.cartDetialByBundleGroups(cartDetails);
     const result: CartGroupByProductBundleDto[] = [];
 
-    for (const bundle of bundleGroup) {
-      const bundleCarts = cartDetails.filter((c) => bundle.productIds.includes(c.productId));
-
-      if (bundle.bundleId !== null) {
-        const bundleDeliveryFee = this.calculateBundleDeliveryFee(bundle.chargeStandard, bundleCarts);
-
+    for (const cartDetail of cartDetialByBundleGroups) {
+      const { bundle, cartDetails } = cartDetail;
+      if (bundle) {
+        const bundleDeliveryFee = this.calculateBundleDeliveryFee(bundle.chargeStandard, cartDetails);
         result.push({
-          bundleId: bundle.bundleId,
-          chargeStandard: bundle.chargeStandard,
+          bundle,
           bundleDeliveryFee: bundleDeliveryFee,
-          cartDetails: cartDetails,
+          cartDetails,
         });
       } else {
-        for (const productId of bundle.productIds) {
-          const productCarts = bundleCarts.filter((c) => c.productId === productId);
-          const bundleDeliveryFee = productCarts.reduce((acc, c) => acc + this.calculateProductDeliveryFee(c), 0);
-
+        for (const cart of cartDetails) {
+          const bundleDeliveryFee = this.calculateProductDeliveryFee(cart);
           result.push({
-            bundleId: null,
-            chargeStandard: null,
+            bundle: null,
             bundleDeliveryFee: bundleDeliveryFee,
-            cartDetails: productCarts,
+            cartDetails: [cart],
           });
         }
       }
     }
     return result;
+  }
+
+  /**
+   * 상품 묶음 별로 장바구니 조회 정보를 그룹화 합니다.
+   *
+   * @param cartDetails 그룹화할 장바구니 조회 정보 입니다.
+   */
+  async cartDetialByBundleGroups(
+    cartDetails: CartProductDetailDto[],
+  ): Promise<{ bundle: ProductBundleDto | null; cartDetails: CartProductDetailDto[] }[]> {
+    const bundleIds = cartDetails.map((c) => c.product.bundleId);
+    const bundleIdSetArray = [...new Set(bundleIds)];
+
+    const bundleNotNullIds = bundleIdSetArray.filter((b) => b !== null);
+    const bundleDtos = await this.getProductBundles(bundleNotNullIds as number[]);
+
+    return bundleIdSetArray.map((key) => ({
+      bundle: bundleDtos.find((b) => b.id === key) ?? null,
+      cartDetails: cartDetails.filter((c) => c.product.bundleId === key),
+    }));
+  }
+
+  /**
+   * 상품 묶음을 조회합니다.
+   * @param bundleId 조회할 상품 묶음의 아이디 입니다.
+   */
+  async getProductBundles(bundleIds: number[]): Promise<ProductBundleDto[]> {
+    const productBundles = await this.prisma.productBundle.findMany({
+      select: { id: true, sellerId: true, name: true, chargeStandard: true },
+      where: { id: { in: bundleIds } },
+    });
+    return productBundles;
   }
 
   /**
@@ -432,31 +458,50 @@ export class CartService {
    * @returns 상품의 배송비
    */
   private calculateProductDeliveryFee(cart: CartProductDetailDto): number {
-    const cartProduct = cart.product;
-    const cartDeliveryType = cartProduct.deliveryType;
-    const cartDeliveryFreeOver = cartProduct.deliveryFreeOver;
+    const product = cart.product;
+    const deliveryType = product.deliveryType;
+    const deliveryFreeOver = product.deliveryFreeOver;
 
-    if (cartDeliveryType === _deliveryType.FREE) {
-      return 0;
-    } else if (cartDeliveryType === _deliveryType.NOT_FREE) {
-      return cartProduct.deliveryCharge;
-    } else if (
-      cartDeliveryType === _deliveryType.COUNT_FREE &&
-      cartDeliveryFreeOver !== null &&
-      cartDeliveryFreeOver !== undefined
-    ) {
-      const count = cart.cartRequiredOptions.reduce((acc, requiredOption) => acc + requiredOption.count, 0);
-      return count >= cartDeliveryFreeOver ? 0 : cartProduct.deliveryCharge;
-    } else if (
-      cartDeliveryType === _deliveryType.PRICE_FREE &&
-      cartDeliveryFreeOver !== null &&
-      cartDeliveryFreeOver !== undefined
-    ) {
-      const price = cart.cartRequiredOptions.reduce((acc, ro) => acc + ro.count * ro.productRequiredOption.price, 0);
-      return price >= cartDeliveryFreeOver ? 0 : cartProduct.deliveryCharge;
+    switch (deliveryType) {
+      case 'FREE':
+        return 0;
+      case 'NOT_FREE':
+        return product.deliveryCharge;
+      case 'COUNT_FREE':
+        return this.calculateCountFreeDeliveryFee(cart, deliveryFreeOver);
+      case 'PRICE_FREE':
+        return this.calculatePriceFreeDeliveryFee(cart, deliveryFreeOver);
+      default:
+        throw new CartDeliveryTypeNotFoundException();
     }
+  }
 
-    throw new CartDeliveryTypeNotFoundException();
+  /**
+   * 수량 이상 무료 배송비를 계산합니다.
+   *
+   * @param cart 장바구니에 담긴 상품의 정보
+   * @param deliveryFreeOver 무료 기준 수량
+   */
+  private calculateCountFreeDeliveryFee(cart: CartProductDetailDto, deliveryFreeOver: number | null): number {
+    if (!deliveryFreeOver) {
+      throw new CartDeliveryFreeOverNotFoundException();
+    }
+    const count = cart.cartRequiredOptions.reduce((acc, requiredOption) => acc + requiredOption.count, 0);
+    return count >= deliveryFreeOver ? 0 : cart.product.deliveryCharge;
+  }
+
+  /**
+   * 가격 이상 무료 배송비를 계산합니다.
+   *
+   * @param cart 장바구니에 담긴 상품의 정보
+   * @param deliveryFreeOver 무료 기준 가격
+   */
+  private calculatePriceFreeDeliveryFee(cart: CartProductDetailDto, deliveryFreeOver: number | null): number {
+    if (!deliveryFreeOver) {
+      throw new CartDeliveryFreeOverNotFoundException();
+    }
+    const price = cart.cartRequiredOptions.reduce((acc, ro) => acc + ro.count * ro.productRequiredOption.price, 0);
+    return price >= deliveryFreeOver ? 0 : cart.product.deliveryCharge;
   }
 
   /**
