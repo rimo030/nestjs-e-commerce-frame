@@ -1,10 +1,13 @@
-import { Body, Controller, Get, HttpCode, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { BuyerJwtAuthGuard } from 'src/auth/guards/buyer-jwt.guard';
 import { UserId } from 'src/decorators/user-id.decorator';
 import { CartGroupByProductBundleDto } from 'src/entities/dtos/cart-group-by-product-bundle.dto';
+import { CartOptionDto } from 'src/entities/dtos/cart-option.dto';
+import { CartRequiredOptionDto } from 'src/entities/dtos/cart-required-option.dto';
 import { CartDto } from 'src/entities/dtos/cart.dto';
 import { CreateCartDto } from 'src/entities/dtos/create-cart.dto';
+import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { UpdateCartOptionCountDto } from 'src/entities/dtos/update-cart-option-count.dto';
 import { UpdateCartDto } from 'src/entities/dtos/update-cart.dto';
 import { CartService } from 'src/services/cart.service';
@@ -45,9 +48,16 @@ export class CartController {
   })
   async updateCartsOptionCount(
     @UserId() buyerId: number,
+    @Query() isRequireOptionDto: IsRequireOptionDto,
     @Body() updateCartOptionCountDto: UpdateCartOptionCountDto,
-  ): Promise<{ data: number }> {
-    const result = await this.cartService.updateCartsOptionCount(buyerId, updateCartOptionCountDto);
-    return { data: result };
+  ): Promise<{
+    data: CartRequiredOptionDto | CartOptionDto;
+  }> {
+    const updateOption = await this.cartService.updateCartsOptionCount(
+      buyerId,
+      isRequireOptionDto,
+      updateCartOptionCountDto,
+    );
+    return { data: updateOption };
   }
 }
