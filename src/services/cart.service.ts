@@ -7,6 +7,7 @@ import { CartDto } from 'src/entities/dtos/cart.dto';
 import { CreateCartOptionDto } from 'src/entities/dtos/create-cart-option.dto';
 import { CreateCartRequiredOptionDto } from 'src/entities/dtos/create-cart-required-option.dto';
 import { CreateCartDto } from 'src/entities/dtos/create-cart.dto';
+import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
 import { ProductBundleDto } from 'src/entities/dtos/product-bundle.dto';
 import { UpdateCartOptionCountDto } from 'src/entities/dtos/update-cart-option-count.dto';
 import { UpdateCartDto } from 'src/entities/dtos/update-cart.dto';
@@ -18,23 +19,12 @@ import {
   CartOptionNotFoundException,
   CartDeliveryFreeOverNotFoundException,
 } from 'src/exceptions/cart.exception';
-import { CartOptionRepository } from 'src/repositories/cart-option.repository';
-import { CartRequiredOptionRepository } from 'src/repositories/cart-required-option.repository';
-import { CartRepository } from 'src/repositories/cart.repository';
-import { ProductRepository } from 'src/repositories/product.repository';
 import { chargeStandard } from 'src/types/charge-standard.type';
 import { PrismaService } from './prisma.service';
 
 @Injectable()
 export class CartService {
-  constructor(
-    private readonly prisma: PrismaService,
-
-    private readonly cartRepository: CartRepository,
-    private readonly cartRequiredOptionRepository: CartRequiredOptionRepository,
-    private readonly cartOptionRepository: CartOptionRepository,
-    private readonly productRepository: ProductRepository,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   /**
    * 장바구니에 상품과 상품 옵션들을 저장합니다.
@@ -86,7 +76,7 @@ export class CartService {
    * @param createCartDto 생성하려는 장바구니의 정보입니다. 선택 옵션은 존재하지 않을수 있습니다.
    *
    */
-  private async createCartWithOptions(buyerId: number, createCartDto: CreateCartDto): Promise<CartDto> {
+  async createCartWithOptions(buyerId: number, createCartDto: CreateCartDto): Promise<CartDto> {
     const { productId, createCartRequiredOptionDtos, createCartOptionDtos } = createCartDto;
 
     const { id } = await this.prisma.cart.create({
@@ -155,7 +145,7 @@ export class CartService {
    * @param cart 조회된 장바구니의 데이터 입니다.
    * @param createCartDto 추가하려는 장바구니의 데이터입니다.
    */
-  private async updateCartWithOptions(cart: CartDto, createCartDto: CreateCartDto): Promise<UpdateCartDto> {
+  async updateCartWithOptions(cart: CartDto, createCartDto: CreateCartDto): Promise<UpdateCartDto> {
     const { id, buyerId, productId, cartRequiredOptions, cartOptions } = cart;
 
     const { existingRequiredOption, notExistingRequiredOption } = this.findExistingCartRequiredOptions(
@@ -290,18 +280,19 @@ export class CartService {
    * @param buyerId 구매자의 아이디
    */
   async readCarts(buyerId: number): Promise<CartGroupByProductBundleDto[]> {
-    const cartDetails = await this.getCartDetail(buyerId);
+    const cartDetails = await this.getCartDetails(buyerId);
     const cartsGroupByProductBundle = await this.groupByProductBundle(cartDetails);
 
     return cartsGroupByProductBundle;
   }
 
   /**
+   * buyer의 장바구니에 담긴 모든 데이터를 조회합니다.
    * 장바구니의 정보와 담긴 상품과 필수/선택옵션의 데이터도 함께 조회되어야 합니다.
    *
    * @param buyerId 조회할 buyer의 id입니다.
    */
-  async getCartDetail(buyerId: number): Promise<CartProductDetailDto[]> {
+  async getCartDetails(buyerId: number): Promise<CartProductDetailDto[]> {
     const cartDetails = await this.prisma.cart.findMany({
       select: {
         id: true,
@@ -505,16 +496,18 @@ export class CartService {
   }
 
   /**
-   * 이미 담긴 장바구니 옵션의 상품의 수량을 변경합니다.
+   * 장바구니에 이미 담긴 상품 옵션의 수량을 변경합니다.
    *
-   * @param buyerId 유저의 아이디
-   * @param updateCartOptionCountDto 업데이트 할 장바구니와 옵션에 대한 정보
-   *
-   * @returns 변경된 결과 옵션의 id를 반환합니다.
+   * @param buyerId 유저의 아이디 입니다.
+   * @param updateCartOptionCountDto 업데이트 할 장바구니와 옵션에 대한 정보입니다.
    */
-  async updateCartsOptionCount(buyerId: number, updateCartOptionCountDto: UpdateCartOptionCountDto): Promise<number> {
-    const { id, cartId, cartOptionType, count } = updateCartOptionCountDto;
-    const cart = await this.cartRepository.findCartWithOptions(cartId);
+  async updateCartsOptionCount(
+    buyerId: number,
+    isRequireOptionDto: IsRequireOptionDto,
+    updateCartOptionCountDto: UpdateCartOptionCountDto,
+  ): Promise<CartRequiredOptionDto | CartOptionDto> {
+    const { id, cartId, count } = updateCartOptionCountDto;
+    const cart = await this.getCartDetail(cartId);
 
     if (!cart) {
       throw new CartNotFoundException();
@@ -524,32 +517,164 @@ export class CartService {
       throw new CartForbiddenException();
     }
 
-    if (cartOptionType == 'requiredOption') {
+    if (isRequireOptionDto.isRequire) {
       const isCartRequiredOption = cart.cartRequiredOptions.filter((c) => c.id === id);
-      if (isCartRequiredOption.length === 0) {
+      if (!isCartRequiredOption.length) {
         throw new CartRequiredOptionNotFoundException();
       }
-      const updateId = await this.cartRequiredOptionRepository.updateRequiredOptionsCount(id, count);
+      const updateCartRequiredOption = await this.updateRequiredOptionCount(id, count);
 
-      if (!updateId) {
+      if (!updateCartRequiredOption) {
         throw new CartRequiredOptionNotFoundException();
       }
-
-      return updateId;
-    } else if (cartOptionType == 'option') {
-      const isCartOption = cart.cartOptions.filter((c) => c.id === id);
-      if (isCartOption.length === 0) {
-        throw new CartOptionNotFoundException();
-      }
-      const updateId = await this.cartOptionRepository.updateOptionsCount(id, count);
-
-      if (!updateId) {
-        throw new CartOptionNotFoundException();
-      }
-      return updateId;
+      return updateCartRequiredOption;
     } else {
-      throw new CartForbiddenException();
+      const isCartOption = cart.cartOptions.filter((c) => c.id === id);
+      if (!isCartOption.length) {
+        throw new CartOptionNotFoundException();
+      }
+      const updateCartOption = await this.updateOptionCount(id, count);
+
+      if (!updateCartOption) {
+        throw new CartOptionNotFoundException();
+      }
+      return updateCartOption;
     }
+  }
+
+  /**
+   * 장바구니를 조회합니다.
+   * 장바구니의 정보와 담긴 상품과 필수/선택옵션의 데이터도 함께 조회되어야 합니다.
+   *
+   * @param cartId 조회할 장바구니의 아이디 입니다.
+   */
+  async getCartDetail(cartId: number): Promise<CartProductDetailDto | null> {
+    const cartDetail = await this.prisma.cart.findUnique({
+      select: {
+        id: true,
+        productId: true,
+        buyerId: true,
+        product: {
+          select: {
+            id: true,
+            sellerId: true,
+            bundleId: true,
+            categoryId: true,
+            companyId: true,
+            isSale: true,
+            name: true,
+            description: true,
+            deliveryType: true,
+            deliveryFreeOver: true,
+            deliveryCharge: true,
+            img: true,
+          },
+        },
+        cartRequiredOptions: {
+          select: {
+            id: true,
+            cartId: true,
+            productRequiredOptionId: true,
+            count: true,
+            productRequiredOption: {
+              select: {
+                id: true,
+                productId: true,
+                name: true,
+                price: true,
+                isSale: true,
+              },
+            },
+          },
+        },
+        cartOptions: {
+          select: {
+            id: true,
+            cartId: true,
+            productOptionId: true,
+            count: true,
+            productOption: {
+              select: {
+                id: true,
+                productId: true,
+                name: true,
+                price: true,
+                isSale: true,
+              },
+            },
+          },
+        },
+      },
+      where: { id: cartId },
+    });
+
+    return cartDetail;
+  }
+
+  /**
+   * 장바구니에 담긴 필수 옵션의 수량을 변경합니다.
+   *
+   * @param id 변경할 상품 필수 옵션의 아이디 입니다.
+   * @param count 변경할 수량입니다.
+   */
+  async updateRequiredOptionCount(id: number, count: number): Promise<CartRequiredOptionDto> {
+    const updateCartRequiredOption = await this.prisma.cartRequiredOption.update({
+      select: { id: true, cartId: true, productRequiredOptionId: true, count: true },
+      where: { id },
+      data: { count },
+    });
+    return updateCartRequiredOption;
+  }
+
+  /**
+   * 장바구니에 담긴 선택 옵션의 수량을 변경합니다.
+   *
+   * @param id 변경할 상품 선택 옵션의 아이디 입니다.
+   * @param count 변경할 수량입니다.
+   */
+  async updateOptionCount(id: number, count: number): Promise<CartOptionDto> {
+    const updateCartOption = await this.prisma.cartOption.update({
+      select: { id: true, cartId: true, productOptionId: true, count: true },
+      where: { id },
+      data: { count },
+    });
+    return updateCartOption;
+  }
+
+  /**
+   * 장바구니에 담긴 필수 옵션들의 수량을 변경합니다.
+   *
+   * @param idWithCount 필수 옵션의 아이디와 수량을 담은 객체로 이루어진 배열입니다.
+   */
+  async updateRequiredOptionsCount(idWithCount: { id: number; count: number }[]): Promise<CartRequiredOptionDto[]> {
+    const updateCartRequiredOptions = await this.prisma.$transaction(
+      idWithCount.map((i) =>
+        this.prisma.cartRequiredOption.update({
+          select: { id: true, cartId: true, productRequiredOptionId: true, count: true },
+          where: { id: i.id },
+          data: { count: i.count },
+        }),
+      ),
+    );
+    return updateCartRequiredOptions;
+  }
+
+  /**
+   * 장바구니에 담긴 선택 옵션들의 수량을 변경합니다.
+   *
+   * @param idWithCount 선택 옵션의 아이디와 수량을 담은 객체로 이루어진 배열입니다.
+   */
+  async updateOptionsCount(idWithCount: { id: number; count: number }[]): Promise<CartOptionDto[]> {
+    const updateCartOptions = await this.prisma.$transaction(
+      idWithCount.map((i) =>
+        this.prisma.cartOption.update({
+          select: { id: true, cartId: true, productOptionId: true, count: true },
+          where: { id: i.id },
+          data: { count: i.count },
+        }),
+      ),
+    );
+    return updateCartOptions;
   }
 
   /**
