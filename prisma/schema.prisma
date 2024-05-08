@@ -66,7 +66,7 @@ model CartOption {
   cartId            Int            @map("cart_id")
   productOptionId   Int            @map("product_option_id")
   count             Int
-  ProductOption     ProductOption  @relation(fields: [productOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  productOption     ProductOption  @relation(fields: [productOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   carts             Cart           @relation(fields: [cartId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([productOptionId])
