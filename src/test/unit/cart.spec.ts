@@ -35,7 +35,7 @@ describe('Cart Controller', () => {
   let testProducts: ProductDto[];
   let testBuyerId: number;
   let testCount = 0;
-  ///////////
+
   let testProductId: number;
   let testRequiredOption: ProductRequiredOptionDto;
   let testOption: ProductOptionDto;
@@ -479,23 +479,19 @@ describe('Cart Controller', () => {
       if (testCartDetail) {
         const isAllRequiredOptionsUpdate = testCartDetail.every((d) =>
           d.cartRequiredOptions.map(async (ro) => {
-            const { data } = await controller.updateCartsOptionCount(testBuyerId, {
-              id: ro.id,
-              cartId: ro.cartId,
-              cartOptionType: 'requiredOption',
-              count: testCount,
-            });
-            return data === ro.id;
+            const { data } = await controller.updateCartsOptionCount(
+              testBuyerId,
+              { isRequire: true },
+              {
+                id: ro.id,
+                cartId: ro.cartId,
+                count: testCount,
+              },
+            );
+            return data.id === ro.id && data.count === testCount && data.cartId === ro.id;
           }),
         );
         expect(isAllRequiredOptionsUpdate).toBe(true);
-
-        const { data } = await controller.readCarts(testBuyerId);
-        const [updateBundle] = data.filter((c) => c.bundle?.id === testCartBundle.bundle?.id);
-        const isUpdateCount = updateBundle.cartDetails.every((d) =>
-          d.cartRequiredOptions.map((ro) => ro.count === testCount),
-        );
-        expect(isUpdateCount).toBe(true);
       } else {
         /**
          * 테스트할 대상이 없기에 의미없는 테스트가 됩니다.
@@ -514,21 +510,19 @@ describe('Cart Controller', () => {
       if (testCartDetail) {
         const isAllOptionsUpdate = testCartDetail.every((d) =>
           d.cartOptions.map(async (o) => {
-            const { data } = await controller.updateCartsOptionCount(testBuyerId, {
-              id: o.id,
-              cartId: o.cartId,
-              cartOptionType: 'option',
-              count: testCount,
-            });
-            return data === o.id;
+            const { data } = await controller.updateCartsOptionCount(
+              testBuyerId,
+              { isRequire: false },
+              {
+                id: o.id,
+                cartId: o.cartId,
+                count: testCount,
+              },
+            );
+            return data.id === o.id && data.count === testCount && data.cartId === o.id;
           }),
         );
         expect(isAllOptionsUpdate).toBe(true);
-
-        const { data } = await controller.readCarts(testBuyerId);
-        const [updateBundle] = data.filter((c) => c.bundle?.id === testCartBundle.bundle?.id);
-        const isUpdateCount = updateBundle.cartDetails.every((d) => d.cartOptions.map((o) => o.count === testCount));
-        expect(isUpdateCount).toBe(true);
       } else {
         /**
          * 테스트할 대상이 없기에 의미없는 테스트가 됩니다.
