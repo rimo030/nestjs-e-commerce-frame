@@ -1,4 +1,4 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { v4 } from 'uuid';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { AuthController } from 'src/auth/auth.controller';
@@ -6,25 +6,28 @@ import { SellerController } from 'src/controllers/seller.controller';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
 import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
-import { ProductBundleRepository } from 'src/repositories/product-bundle.repository';
-import { ProductOptionRepository } from 'src/repositories/product-option-repository';
-import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
-import { ProductRepository } from 'src/repositories/product.repository';
-import { SellerRepository } from 'src/repositories/seller.repository';
+import { ProductUnauthrizedException } from 'src/exceptions/seller.exception';
+import { CategoryService } from 'src/services/category.service';
+import { CompanyService } from 'src/services/company.service';
+import { ProductService } from 'src/services/product.service';
 import { SellerService } from 'src/services/seller.service';
+import { isEqual } from 'src/util/functions/is-equal.function';
 
 describe('Seller Controller', () => {
   let controller: SellerController;
   let service: SellerService;
-  let repository: SellerRepository;
+
+  let productService: ProductService;
+  let companyService: CompanyService;
+  let categoryService: CategoryService;
 
   let authController: AuthController;
-  let testId: number | null = null;
+  let testId: number;
+  let testBundleId: number;
+  let testCategoryId: number;
+  let testCompanyId: number;
 
-  let productBundleRepository: ProductBundleRepository;
-  let productRepository: ProductRepository;
-  let productRequiredRepository: ProductRequiredOptionRepository;
-  let productOptionRepository: ProductOptionRepository;
+  let testProduct: CreateProductDto;
 
   /**
    * 구매자 사이드
@@ -37,45 +40,81 @@ describe('Seller Controller', () => {
 
     controller = module.get<SellerController>(SellerController);
     service = module.get<SellerService>(SellerService);
-    repository = module.get<SellerRepository>(SellerRepository);
+
+    productService = module.get<ProductService>(ProductService);
+    companyService = module.get<CompanyService>(CompanyService);
+    categoryService = module.get<CategoryService>(CategoryService);
 
     authController = module.get<AuthController>(AuthController);
 
-    productBundleRepository = module.get<ProductBundleRepository>(ProductBundleRepository);
-    productRepository = module.get<ProductRepository>(ProductRepository);
-    productRequiredRepository = module.get<ProductRequiredOptionRepository>(ProductRequiredOptionRepository);
-    productOptionRepository = module.get<ProductOptionRepository>(ProductOptionRepository);
-
     /**
      * seller 회원이어야 사용 가능하다.
-     * 테스트 seller를 생성한 후 id를 추출해 사용한다.
+     * 임의의 회원을 생성하여 사용한다.
      */
     const testSeller: CreateSellerDto = {
-      email: 'myemail@gmail.com',
+      email: `${v4()}`.slice(0, 100) + '@gmail.com',
       password: 'mypassword1!',
       name: 'myname',
       phone: '01012341234',
       businessNumber: '12341234',
     };
 
-    await authController.sellerSignUp(testSeller);
-    const { id, ...rest } = await repository.findByEmail(testSeller.email);
-    testId = id;
+    const seller = await authController.sellerSignUp(testSeller);
+    testId = seller.id;
+
+    /**
+     * 상품 묶음을 생성합니다.
+     */
+    const bundle = await service.createProductBundle(testId, { name: v4(), chargeStandard: 'MIN' });
+    testBundleId = bundle.id;
+
+    /**
+     * 카테고리와 회사를 생성한다.
+     */
+    const company = await companyService.createCompany({ sellerId: testId, name: v4() });
+    testCompanyId = company.id;
+
+    const category = await categoryService.createCategory({ name: v4() });
+    testCategoryId = category.id;
+
+    testProduct = {
+      bundleId: testBundleId,
+      categoryId: testCategoryId,
+      companyId: testCompanyId,
+      isSale: true,
+      name: 'test product',
+      description: '테스트 상품 입니다!',
+      deliveryType: 'FREE',
+      deliveryFreeOver: null,
+      deliveryCharge: 0,
+      img: 'test.img',
+    };
   });
 
   it('should be defined.', async () => {
     expect(controller).toBeDefined();
     expect(service).toBeDefined();
-    expect(repository).toBeDefined();
     expect(authController).toBeDefined();
+    expect(productService).toBeDefined();
+    expect(companyService).toBeDefined();
+    expect(categoryService).toBeDefined();
   });
 
-  it('seller 회원이어야 사용가능 하다.', () => {
+  it('테스트 계정은 판매자로 등록되어 있어야 한다.', () => {
     expect(testId).toBeDefined();
-    expect(testId !== null).toBe(true);
+    expect(testId).not.toBe(null);
   });
 
-  describe('POST', () => {
+  it('테스트 상품 묶음, 카테고리, 회사가 정의되어야 한다.', () => {
+    expect(testBundleId).toBeDefined();
+    expect(testBundleId).not.toBe(null);
+    expect(testCompanyId).toBeDefined();
+    expect(testCompanyId).not.toBe(null);
+    expect(testCategoryId).toBeDefined();
+    expect(testCategoryId).not.toBe(null);
+  });
+
+  describe('seller는 상품묶음(bundle)을 생성할 수 있다.', () => {
     /**
      * 1. 상품 생성 허가 기능이 추가될 경우
      *
@@ -95,45 +134,33 @@ describe('Seller Controller', () => {
      */
     it.todo('허가 받은지 1년이 지난 경우라면 어떻게 해야 하는가?');
 
-    describe('seller는 상품묶음(bundle)을 생성할 수 있다.', () => {
-      const testProductBundle: CreateProductBundleDto = {
-        name: 'Test Bundle name',
-        chargeStandard: 'MIN',
-      };
+    const testProductBundle: CreateProductBundleDto = {
+      name: 'Test Bundle name',
+      chargeStandard: 'MIN',
+    };
 
-      it('상품 묶음이 생성 되었다면 DB에서 조회할 수 있어야 한다.', async () => {
-        const { data } = await controller.createProductBundle(testId as number, testProductBundle);
-        const savedProductBundle = await productBundleRepository.getProductBundle(data.id);
-        expect(savedProductBundle).not.toBe(null);
-      });
+    it('상품 묶음이 생성 되었다면 DB에서 조회할 수 있어야 한다.', async () => {
+      const { data } = await controller.createProductBundle(testId as number, testProductBundle);
+      const savedProductBundle = await service.getProductBundle(data.id);
+
+      expect(savedProductBundle).toBeDefined();
+      expect(savedProductBundle.id).toBeDefined();
+      expect(savedProductBundle.id).not.toBe(null);
+
+      expect(savedProductBundle.sellerId).toBe(testId);
+      expect(savedProductBundle.name).toBe(testProductBundle.name);
+      expect(savedProductBundle.chargeStandard).toBe(testProductBundle.chargeStandard);
     });
+  });
 
-    describe('seller는 상품을 생성할 수 있다.', () => {
-      const testProduct: CreateProductDto = {
-        bundleId: 1,
-        categoryId: 1,
-        companyId: 1,
-        isSale: true,
-        name: 'test product',
-        description: '테스트 상품 입니다!',
-        deliveryType: 'FREE',
-        deliveryFreeOver: null,
-        deliveryCharge: 0,
-        img: 'test.img',
-      };
+  describe('seller는 상품을 생성할 수 있다.', () => {
+    it('상품이 생성 되었다면 DB에서 조회할 수 있어야 한다.', async () => {
+      const { data } = await controller.createProduct(testId as number, testProduct);
+      const { id: savedId, sellerId: savedSellerId, ...savedProduct } = await productService.getProductById(data.id);
 
-      it('상품이 생성 되었다면 DB에서 조회할 수 있어야 한다.', async () => {
-        const { data } = await controller.createProduct(testId as number, testProduct);
-        const savedProduct = await productRepository.getProduct(data.id);
-
-        expect(savedProduct).not.toBe(null);
-      });
-
-      /**
-       * 로그인과 무관하게 동작해야 한다.
-       * 이 부분은 추후 구매자 플로우에서 다시 증명 한다.
-       */
-      it.skip('생성된 상품을 buyer 조회할 수 있어야 한다.', () => {});
+      expect(savedId).toBe(data.id);
+      expect(savedSellerId).toBe(testId);
+      expect(isEqual(testProduct, savedProduct)).toBe(true);
     });
   });
 
@@ -153,84 +180,67 @@ describe('Seller Controller', () => {
      * 판매자는 id가 발급된 필수 옵션에 대하여 입력 옵션을 추가/조회/삭제 할 수 있다.
      *
      */
-    const testProduct: CreateProductDto = {
-      bundleId: 1,
-      categoryId: 1,
-      companyId: 1,
-      isSale: true,
-      name: 'test product',
-      description: '테스트 상품 입니다!',
-      deliveryType: 'FREE',
-      deliveryFreeOver: null,
-      deliveryCharge: 0,
-      img: 'test.img',
-    };
 
-    it('필수 옵션이 추가되면 그 id를 DB에서 조회할 수 있어야 한다.', async () => {
-      const { data } = await controller.createProduct(testId as number, testProduct);
-      const savedProduct = await productRepository.getProduct(data.id);
+    it('필수 옵션이 추가되면 DB에서 조회할 수 있어야 한다.', async () => {
+      const { data: savedProduct } = await controller.createProduct(testId as number, testProduct);
+
       expect(savedProduct).not.toBe(null);
-      expect(savedProduct?.sellerId).toBe(testId);
+      expect(savedProduct.sellerId).toBe(testId);
 
-      if (savedProduct) {
-        const { data } = await controller.createProductOptions(
-          testId as number,
-          savedProduct.id,
-          { isRequire: true },
-          {
-            name: 'test options name',
-            price: 10000,
-            isSale: true,
-          },
-        );
-        const requirdOption = await productRequiredRepository.getRequiredOption(data.id);
-        expect(requirdOption).not.toBe(null);
-      }
+      const { data: testRequiredOption } = await controller.createProductOptions(
+        testId as number,
+        savedProduct.id,
+        { isRequire: true },
+        {
+          name: 'test options name',
+          price: 10000,
+          isSale: true,
+        },
+      );
+      const savedRequiredOption = await productService.getProductRequiredOptionById(testRequiredOption.id);
+
+      expect(isEqual(testRequiredOption, savedRequiredOption)).toBe(true);
     });
 
-    it('선택 옵션이 추가되면 그 id를 DB에서 조회할 수 있어야 한다.', async () => {
-      const { data } = await controller.createProduct(testId as number, testProduct);
-      const savedProduct = await productRepository.getProduct(data.id);
+    it('선택 옵션이 추가되면 DB에서 조회할 수 있어야 한다.', async () => {
+      const { data: savedProduct } = await controller.createProduct(testId as number, testProduct);
       expect(savedProduct).not.toBe(null);
       expect(savedProduct?.sellerId).toBe(testId);
 
-      if (savedProduct) {
-        const { data } = await controller.createProductOptions(
-          testId as number,
-          savedProduct.id,
-          { isRequire: false },
-          {
-            name: 'test options name',
-            price: 10000,
-            isSale: true,
-          },
-        );
-        const option = await productOptionRepository.getOption(data.id);
-        expect(option).not.toBe(null);
-      }
+      const { data: testOption } = await controller.createProductOptions(
+        testId as number,
+        savedProduct.id,
+        { isRequire: false },
+        {
+          name: 'test options name',
+          price: 10000,
+          isSale: true,
+        },
+      );
+      const savedOption = await productService.getProductOptionById(testOption.id);
+
+      expect(isEqual(testOption, savedOption)).toBe(true);
     });
 
     it('해당 상품을 생성한 판매자가 아닐 경우 권한 에러를 던져야 한다.', async () => {
       const { data } = await controller.createProduct(testId as number, testProduct);
-      const savedProduct = await productRepository.getProduct(data.id);
+      const savedProduct = await productService.getProductById(data.id);
       expect(savedProduct).not.toBe(null);
 
-      if (savedProduct) {
-        try {
-          await controller.createProductOptions(
-            (testId as number) + 1,
-            savedProduct.id,
-            { isRequire: true },
-            {
-              name: 'test required options name',
-              price: 10000,
-              isSale: true,
-            },
-          );
-          expect(1).toBe('판매자가 다른 데도 불구하고 에러가 나지 않은 케이스');
-        } catch (err) {
-          expect(err).toBeInstanceOf(UnauthorizedException);
-        }
+      try {
+        await controller.createProductOptions(
+          (testId as number) + 1, // 잘못된 id 삽입
+          savedProduct.id,
+          { isRequire: true },
+          {
+            name: 'test required options name',
+            price: 10000,
+            isSale: true,
+          },
+        );
+        expect(1).toBe('판매자가 다른 데도 불구하고 에러가 나지 않은 케이스');
+      } catch (err) {
+        expect(err).toBeInstanceOf(ProductUnauthrizedException);
       }
     });
   });

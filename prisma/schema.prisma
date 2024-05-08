@@ -264,6 +264,11 @@ model Product {
   @@map("product")
 }
 
+enum ChargeStandard {
+  MIN
+  MAX
+}
+
 model ProductBundle {
   id                Int       @id @default(autoincrement())
   createdAt         DateTime  @default(now()) @db.DateTime(6) @map("created_at")
@@ -271,7 +276,7 @@ model ProductBundle {
   deletedAt         DateTime? @db.DateTime(6) @map("deleted_at")
   sellerId          Int       @map("seller_id")
   name              String    @db.VarChar(128)
-  chargeStandard    String    @db.VarChar(128) @map("charge_standard")
+  chargeStandard    ChargeStandard  @map("charge_standard")
   products          Product[]
   seller            Seller    @relation(fields: [sellerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
