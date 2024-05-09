@@ -2,15 +2,12 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
-import { InjectRepository } from '@nestjs/typeorm';
-import { SellerNotfoundException } from '../../exceptions/auth.exception';
-import { SellerRepository } from '../../repositories/seller.repository';
+import { AuthService } from '../auth.service';
 
 @Injectable()
 export class SellerJwtStrategy extends PassportStrategy(Strategy, 'seller-jwt') {
   constructor(
-    @InjectRepository(SellerRepository)
-    private readonly sellerRepository: SellerRepository,
+    readonly authService: AuthService,
     readonly configService: ConfigService,
   ) {
     super({
@@ -20,10 +17,7 @@ export class SellerJwtStrategy extends PassportStrategy(Strategy, 'seller-jwt') 
   }
 
   async validate(payload: { id: number }): Promise<{ id: number }> {
-    const user = await this.sellerRepository.findById(payload.id);
-    if (user) {
-      return { id: payload.id };
-    }
-    throw new SellerNotfoundException();
+    await this.authService.findSeller(payload.id);
+    return { id: payload.id };
   }
 }
