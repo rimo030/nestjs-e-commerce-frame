@@ -1,12 +1,12 @@
+import { Cart } from '@prisma/client';
 import { Type } from 'class-transformer';
 import { ArrayNotEmpty, IsArray, ValidateNested } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmptyNumber } from 'src/decorators/is-not-empty-number.decorator';
-import { CartEntity } from '../cart.entity';
 import { CreateCartOptionDto } from './create-cart-option.dto';
 import { CreateCartRequiredOptionDto } from './create-cart-required-option.dto';
 
-export class CreateCartDto implements Pick<CartEntity, 'productId'> {
+export class CreateCartDto implements Pick<Cart, 'productId'> {
   @ApiProperty({ type: Number, description: '상품의 id', required: true, example: 1 })
   @IsNotEmptyNumber()
   productId!: number;
@@ -24,7 +24,7 @@ export class CreateCartDto implements Pick<CartEntity, 'productId'> {
   @ArrayNotEmpty()
   @ValidateNested({ each: true })
   @Type(() => CreateCartRequiredOptionDto)
-  cartRequiredOptions!: CreateCartRequiredOptionDto[];
+  createCartRequiredOptionDtos!: CreateCartRequiredOptionDto[];
 
   @ApiProperty({
     type: CreateCartOptionDto,
@@ -38,5 +38,5 @@ export class CreateCartDto implements Pick<CartEntity, 'productId'> {
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateCartOptionDto)
-  cartOptions!: CreateCartOptionDto[];
+  createCartOptionDtos!: CreateCartOptionDto[];
 }

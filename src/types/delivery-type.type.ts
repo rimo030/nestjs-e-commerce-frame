@@ -6,4 +6,4 @@
  *  - PRICE_FREE : 가격 이상 무료 (deliveryFreeOver에 기준 가격 입력)
  */
 
-export type DeliveryType = 'FREE' | 'NOT_FREE' | 'COUNT_FREE' | 'PRICE_FREE';
+export type deliveryType = 'FREE' | 'NOT_FREE' | 'COUNT_FREE' | 'PRICE_FREE';

@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptionalNumber } from 'src/decorators/is-optional-number.decorator';
 import { IsOptionalString } from 'src/decorators/is-optional-string.decorator';
-import { PaginationDto } from './pagination.dto';
+import { GetPaginationDto } from './get-pagination.dto';
 
-export class GetProductListPaginationDto extends PaginationDto {
+export class GetProductListPaginationDto extends GetPaginationDto {
   /**
    * @todo
    * 검색어 길이 제한 결정
