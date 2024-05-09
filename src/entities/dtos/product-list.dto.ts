@@ -1,14 +1,12 @@
-import { DeliveryType, Product } from '@prisma/client';
+import { deliveryType } from 'src/types/delivery-type.type';
 
-export interface ProductListDto
-  extends Pick<Product, 'id' | 'sellerId' | 'categoryId' | 'companyId' | 'name' | 'deliveryType' | 'img'> {
+export interface ProductListDto {
   id: number;
   sellerId: number;
   categoryId: number;
   companyId: number;
   name: string;
-  deliveryType: DeliveryType;
-  img: string;
+  deliveryType: deliveryType;
   salePrice: number;
 
   /**

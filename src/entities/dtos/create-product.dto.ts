@@ -6,7 +6,7 @@ import { IsNotEmptyNumber } from 'src/decorators/is-not-empty-number.decorator';
 import { IsNotEmptyString } from 'src/decorators/is-not-empty-string.decorator';
 import { IsOptionalNumber } from 'src/decorators/is-optional-number.decorator';
 import { IsOptionalString } from 'src/decorators/is-optional-string.decorator';
-import { DeliveryType } from 'src/types/delivery-type.type';
+import { deliveryType } from 'src/types/delivery-type.type';
 
 export class CreateProductDto
   implements
@@ -60,7 +60,7 @@ export class CreateProductDto
     required: true,
   })
   @IsEnum(['FREE', 'NOT_FREE', 'COUNT_FREE', 'PRICE_FREE'])
-  deliveryType!: DeliveryType;
+  deliveryType!: deliveryType;
 
   @ApiProperty({
     type: Number,
