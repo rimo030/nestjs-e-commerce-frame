@@ -2,16 +2,12 @@ import { v4 } from 'uuid';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { CategoryController } from 'src/controllers/category.controller';
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
-import { CategoryRepository } from 'src/repositories/category.repository';
+import { GetPaginationDto } from 'src/entities/dtos/get-pagination.dto';
 import { CategoryService } from 'src/services/category.service';
-import { PrismaService } from 'src/services/prisma.service';
 
 describe('CategoryController', () => {
   let controller: CategoryController;
   let service: CategoryService;
-  let repository: CategoryRepository;
-  let prisma: PrismaService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
@@ -20,15 +16,11 @@ describe('CategoryController', () => {
 
     service = module.get<CategoryService>(CategoryService);
     controller = module.get<CategoryController>(CategoryController);
-    repository = module.get<CategoryRepository>(CategoryRepository);
-    prisma = module.get<PrismaService>(PrismaService);
   });
 
   it('should be defined.', async () => {
     expect(controller).toBeDefined();
     expect(service).toBeDefined();
-    expect(repository).toBeDefined();
-    expect(prisma).toBeDefined();
   });
 
   describe('서버 실행 시 카테고리 데이터를 추가하는 스크립트', () => {
@@ -52,12 +44,12 @@ describe('CategoryController', () => {
         return { name: v4() };
       });
 
-      await prisma.category.createMany({ data: categorys });
+      await service.createCategories(categorys);
 
       /**
        * 테스트 페이지 설정
        */
-      const testPaginationDto: PaginationDto = { page: 1, limit: testCount };
+      const testPaginationDto: GetPaginationDto = { page: 1, limit: testCount };
 
       const category = await controller.getCategory(testPaginationDto);
 
@@ -77,9 +69,9 @@ describe('CategoryController', () => {
         return { name: v4() };
       });
 
-      await prisma.category.createMany({ data: categorys });
+      await service.createCategories(categorys);
 
-      const testPaginationDto: PaginationDto = { page: 1, limit: 20 };
+      const testPaginationDto: GetPaginationDto = { page: 1, limit: 20 };
       const firstPageData = await controller.getCategory(testPaginationDto);
       expect(firstPageData.meta.page).toBe(testPaginationDto.page);
       expect(firstPageData.data.length).toBe(testPaginationDto.limit);
