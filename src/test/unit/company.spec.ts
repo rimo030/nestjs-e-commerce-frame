@@ -1,17 +1,15 @@
 import { v4 } from 'uuid';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
+import { AuthService } from 'src/auth/auth.service';
 import { CompanyController } from 'src/controllers/company.controller';
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
-import { CompanyRepository } from 'src/repositories/company.repository';
+import { GetPaginationDto } from 'src/entities/dtos/get-pagination.dto';
 import { CompanyService } from 'src/services/company.service';
-import { PrismaService } from 'src/services/prisma.service';
 
 describe('Controller', () => {
   let controller: CompanyController;
   let service: CompanyService;
-  let repository: CompanyRepository;
-  let prisma: PrismaService;
+  let authService: AuthService;
 
   let testSellerId: number;
 
@@ -22,23 +20,25 @@ describe('Controller', () => {
 
     service = module.get<CompanyService>(CompanyService);
     controller = module.get<CompanyController>(CompanyController);
-    repository = module.get<CompanyRepository>(CompanyRepository);
-    prisma = module.get<PrismaService>(PrismaService);
+    authService = module.get<AuthService>(AuthService);
 
     /**
-     * 테스트시 사용할 판매자 계정의 아이디를 가져옵니다.
+     * 테스트시 사용할 판매자 계정아이디를 생성합니다.
      */
-    const testId = await prisma.seller.findFirst({ select: { id: true } });
-    if (testId) {
-      testSellerId = testId.id;
-    }
+    const { id } = await authService.sellerSignUp({
+      email: `${v4().slice(0, 120)}@gmail.com`,
+      name: v4().slice(0, 10),
+      password: v4().slice(0, 20),
+      phone: '01012341234',
+      businessNumber: v4().slice(0, 120),
+    });
+    testSellerId = id;
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
     expect(controller).toBeDefined();
-    expect(repository).toBeDefined();
-    expect(prisma).toBeDefined();
+    expect(authService).toBeDefined();
     expect(testSellerId).toBeDefined();
   });
 
@@ -77,20 +77,15 @@ describe('Controller', () => {
   describe('GET company', () => {
     it('company를 페이지네이션으로 조회할 수 있어야 한다.', async () => {
       /**
-       * 테스트할 company를 미리 추가 합니다.
-       * testCount 만큼 company를 생성
+       * 테스트할 company를 추가 합니다.
        */
       const testCount = 10;
-      const testName = v4();
       const companys = new Array(testCount).fill(0).map(() => {
-        return { name: testName };
+        return { name: v4() };
       });
-      await prisma.company.createMany({ data: companys });
+      await service.createCompanies(testSellerId, companys);
 
-      /**
-       * 테스트 페이지 설정
-       */
-      const testPaginationDto: PaginationDto = { page: 1, limit: testCount };
+      const testPaginationDto: GetPaginationDto = { page: 1, limit: testCount };
 
       const company = await controller.getCompany(testSellerId, testPaginationDto);
 
@@ -99,27 +94,19 @@ describe('Controller', () => {
       expect(company.meta.take).toBe(testPaginationDto.limit);
       expect(company.meta.totalCount).toBeDefined();
       expect(company.meta.totalPage).toBeDefined();
-
-      /**
-       * 테스트 데이터 삭제
-       */
-      await prisma.company.deleteMany({ where: { name: testName } });
     });
 
-    it('페이지 네이션으로 다음 페이지를 조회할 수 있다.', async () => {
+    it('페이지네이션으로 다음 페이지를 조회할 수 있다.', async () => {
       /**
-       * 테스트할 company를 미리 추가 합니다.
-       * testCount 만큼 company를 생성
+       * 테스트할 company를 추가 합니다.
        */
       const testCount = 100;
-      const testName = v4();
       const companys = new Array(testCount).fill(0).map(() => {
-        return { name: testName };
+        return { name: v4() };
       });
+      await service.createCompanies(testSellerId, companys);
 
-      await prisma.company.createMany({ data: companys });
-
-      const testPaginationDto: PaginationDto = { page: 1, limit: 20 };
+      const testPaginationDto: GetPaginationDto = { page: 1, limit: 20 };
       const firstPageData = await controller.getCompany(testSellerId, testPaginationDto);
       expect(firstPageData.meta.page).toBe(testPaginationDto.page);
       expect(firstPageData.data.length).toBe(testPaginationDto.limit);
@@ -134,15 +121,30 @@ describe('Controller', () => {
 
       expect(firstPageData.meta.totalCount).toBe(secondPageData.meta.totalCount);
       expect(firstPageData.meta.totalPage).toBe(secondPageData.meta.totalPage);
-
-      /**
-       * 테스트 데이터 삭제
-       */
-      await prisma.company.deleteMany({ where: { name: testName } });
     });
 
+    it('회사 이름으로 검색이 가능해야 한다.', async () => {
+      /**
+       * 테스트할 company를 추가 합니다.
+       */
+      const testCount = 100;
+      const companys = new Array(testCount).fill(0).map(() => {
+        return { name: v4() };
+      });
+      await service.createCompanies(testSellerId, companys);
+
+      const testName = companys.at(0)?.name.substring(0, 1);
+      const { data } = await controller.getCompany(testSellerId, { search: testName });
+      const isSearchSubString = data.every((d) => {
+        const name = testName as string;
+        if (d.name.includes(name.toUpperCase()) || d.name.includes(name.toLocaleLowerCase())) {
+          return true;
+        }
+        return false;
+      });
+      expect(isSearchSubString).toBe(true);
+    });
     it.todo('사업자 번호를 통한 검색이 가능해야 한다.');
-    it.todo('회사 이름으로 검색이 가능해야 한다.');
     it.todo('회사의 업종, 업태, 종목 등 상세한 정보가 조회되어야 한다.');
   });
 });
