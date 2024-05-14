@@ -1,6 +1,6 @@
 import { GetPaginationDto } from 'src/entities/dtos/get-pagination.dto';
 import { PaginationDto } from 'src/entities/dtos/pagination.dto';
-import { GetResponse } from 'src/interfaces/get-response.interface';
+import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
 
 /**
  * 페이지네이션에서 전체페이지 계산을 위한 함수 입니다.
@@ -35,7 +35,7 @@ export const getOffset = (paginationDto: GetPaginationDto): { skip: number; take
 /**
  * 페이지네이션 응답 형태를 만들기 위한 유틸 함수 입니다.
  */
-export function createPaginationResponseDto<T>(response: GetResponse<T>): PaginationDto<T> {
+export function createPaginationResponseDto<T>(response: PaginationResponse<T>): PaginationDto<T> {
   return {
     data: response.data,
     meta: {
