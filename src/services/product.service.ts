@@ -1,21 +1,21 @@
 import { Injectable } from '@nestjs/common';
+import { GetPaginationDto } from 'src/entities/dtos/get-pagination.dto';
 import { GetProductListPaginationDto } from 'src/entities/dtos/get-product-list-pagination.dto';
 import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
-import { PaginationResponseDto } from 'src/entities/dtos/pagination-response.dto';
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
-import { ProductAllOptionsDto } from 'src/entities/dtos/product-all-options.dto';
 import { ProductListDto } from 'src/entities/dtos/product-list.dto';
 import { ProductOptionDto } from 'src/entities/dtos/product-option.dto';
+import { ProductRequiredOptionDto } from 'src/entities/dtos/product-required-option.dto';
 import { ProductRequiredOptionJoinInputOptionDto } from 'src/entities/dtos/product-rquired-option-join-input-option.dto';
 import { ProductDto } from 'src/entities/dtos/product.dto';
 import {
   ProductNotFoundException,
+  ProductRequiredOptionNotFoundException,
+  ProductOptionNotFoundException,
   ProductsNotFoundException,
   ProductRequiredOptionsNotFoundException,
 } from 'src/exceptions/product.exception';
-import { Omit } from 'src/types/omit-type';
-import { createPaginationResponseDto } from 'src/util/functions/create-pagination-response-dto.function';
-import { getOffset } from 'src/util/functions/get-offset.function';
+import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
+import { getOffset } from 'src/util/functions/pagination-util.function';
 import { PrismaService } from './prisma.service';
 
 @Injectable()
@@ -53,20 +53,48 @@ export class ProductService {
   }
 
   /**
-   * 상품과 상품 옵션의 정보들을 조회합니다.
-   * 상품 옵션은 페이지네이션으로 1페이지 (10개)가 조회됩니다.
-   *
+   * 상품 필수 옵션을 조회합니다.
+   * @param requiredOptionId 조회할 상품 필수 옵션의 아이디 입니다.
+   */
+  async getProductRequiredOptionById(requiredOptionId: number): Promise<ProductRequiredOptionDto> {
+    const requiredOption = await this.prisma.productRequiredOption.findUnique({
+      select: { id: true, productId: true, name: true, price: true, isSale: true },
+      where: { id: requiredOptionId },
+    });
+
+    if (!requiredOption) {
+      throw new ProductRequiredOptionNotFoundException();
+    }
+    return requiredOption;
+  }
+
+  /**
+   * 상품 선택 옵션을 조회합니다.
+   * @param optionId 조회할 상품 선택 옵션의 아이디 입니다.
+   */
+  async getProductOptionById(optionId: number): Promise<ProductOptionDto> {
+    const option = await this.prisma.productOption.findUnique({
+      select: { id: true, productId: true, name: true, price: true, isSale: true },
+      where: { id: optionId },
+    });
+
+    if (!option) {
+      throw new ProductOptionNotFoundException();
+    }
+    return option;
+  }
+
+  /**
+   * 상품의 정보를 조회합니다.
    * @param id 조회할 상품의 아이디 입니다.
    */
-  async getProduct(id: number): Promise<ProductAllOptionsDto> {
+  async getProduct(id: number): Promise<ProductDto> {
     const product = await this.getProductById(id);
-    const paginationRequirdOptions = await this.getRequiredOptionJoinInputOptions(id, {});
-    const paginationOptions = await this.getProductOptions(id, {});
 
     if (!product) {
       throw new ProductNotFoundException();
     }
-    return { product, productRequiredOptions: paginationRequirdOptions, productOptions: paginationOptions };
+    return product;
   }
   /**
    * 상품의 목록과 최소 가격을 페이지네이션으로 조회합니다.
@@ -76,8 +104,8 @@ export class ProductService {
    */
   async getProductListWithMiniumPrice(
     getProductListPaginationDto: GetProductListPaginationDto,
-  ): Promise<PaginationResponseDto<ProductListDto>> {
-    const { data, meta } = await this.getProductList(getProductListPaginationDto);
+  ): Promise<PaginationResponse<ProductListDto>> {
+    const { data, skip, take, count } = await this.getProductList(getProductListPaginationDto);
 
     const productIds = data.map((d) => d.id);
     const miniumPriceRows = await this.getMinimumPriceRows(productIds);
@@ -87,7 +115,7 @@ export class ProductService {
       return { ...d, salePrice };
     });
 
-    return { data: productList, meta };
+    return { data: productList, skip, take, count };
   }
 
   /**
@@ -122,7 +150,7 @@ export class ProductService {
    */
   async getProductList(
     getProductListPaginationDto: GetProductListPaginationDto,
-  ): Promise<PaginationResponseDto<Omit<ProductListDto, 'salePrice'>>> {
+  ): Promise<PaginationResponse<Omit<ProductListDto, 'salePrice'>>> {
     const { page, limit, search, categoryId, sellerId } = getProductListPaginationDto;
     const { skip, take } = getOffset({ page, limit });
 
@@ -162,7 +190,7 @@ export class ProductService {
     if (!data.length) {
       throw new ProductsNotFoundException();
     }
-    return createPaginationResponseDto({ data, skip, count, take });
+    return { data, skip, count, take };
   }
 
   /**
@@ -176,8 +204,8 @@ export class ProductService {
   async getProductOption(
     productId: number,
     isRequireOptionDto: IsRequireOptionDto,
-    paginationDto: PaginationDto,
-  ): Promise<PaginationResponseDto<ProductOptionDto | ProductRequiredOptionJoinInputOptionDto>> {
+    paginationDto: GetPaginationDto,
+  ): Promise<PaginationResponse<ProductOptionDto | ProductRequiredOptionJoinInputOptionDto>> {
     if (isRequireOptionDto.isRequire) {
       const paginationRequirdOptions = await this.getRequiredOptionJoinInputOptions(productId, paginationDto);
       return paginationRequirdOptions;
@@ -196,8 +224,8 @@ export class ProductService {
    */
   async getRequiredOptionJoinInputOptions(
     productId: number,
-    paginationDto: PaginationDto,
-  ): Promise<PaginationResponseDto<ProductRequiredOptionJoinInputOptionDto>> {
+    paginationDto: GetPaginationDto,
+  ): Promise<PaginationResponse<ProductRequiredOptionJoinInputOptionDto>> {
     const { skip, take } = getOffset(paginationDto);
     const [data, count] = await Promise.all([
       this.prisma.productRequiredOption.findMany({
@@ -229,7 +257,7 @@ export class ProductService {
     if (!data.length) {
       throw new ProductRequiredOptionsNotFoundException();
     }
-    return createPaginationResponseDto({ data, skip, take, count });
+    return { data, skip, take, count };
   }
 
   /**
@@ -240,25 +268,26 @@ export class ProductService {
    */
   async getProductOptions(
     productId: number,
-    paginationDto: PaginationDto,
-  ): Promise<PaginationResponseDto<ProductOptionDto>> {
+    paginationDto: GetPaginationDto,
+  ): Promise<PaginationResponse<ProductOptionDto>> {
     const { skip, take } = getOffset(paginationDto);
 
-    const data = await this.prisma.productOption.findMany({
-      select: {
-        id: true,
-        productId: true,
-        name: true,
-        price: true,
-        isSale: true,
-      },
-      where: { productId, isSale: true },
-      orderBy: { id: 'asc' },
-      skip,
-      take,
-    });
-
-    const count = await this.prisma.productRequiredOption.count({ where: { productId, isSale: true } });
-    return createPaginationResponseDto({ data, skip, take, count });
+    const [data, count] = await Promise.all([
+      this.prisma.productOption.findMany({
+        select: {
+          id: true,
+          productId: true,
+          name: true,
+          price: true,
+          isSale: true,
+        },
+        where: { productId, isSale: true },
+        orderBy: { id: 'asc' },
+        skip,
+        take,
+      }),
+      this.prisma.productRequiredOption.count({ where: { productId, isSale: true } }),
+    ]);
+    return { data, skip, take, count };
   }
 }

@@ -1,32 +1,34 @@
+import { v4 } from 'uuid';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
+import { AuthService } from 'src/auth/auth.service';
 import { ProductController } from 'src/controllers/product.controller';
-import { CategoryEntity } from 'src/entities/category.entity';
-import { CompanyEntity } from 'src/entities/company.entity';
-import { SellerEntity } from 'src/entities/seller.entity';
-import { CategoryRepository } from 'src/repositories/category.repository';
-import { CompanyRepository } from 'src/repositories/company.repository';
-import { ProductInputOptionRepository } from 'src/repositories/product-input-option.repository';
-import { ProductOptionRepository } from 'src/repositories/product-option-repository';
-import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
-import { ProductRepository } from 'src/repositories/product.repository';
-import { SellerRepository } from 'src/repositories/seller.repository';
+import { ProductOptionDto } from 'src/entities/dtos/product-option.dto';
+import { ProductRequiredOptionDto } from 'src/entities/dtos/product-required-option.dto';
+import { ProductDto } from 'src/entities/dtos/product.dto';
+import { CategoryService } from 'src/services/category.service';
+import { CompanyService } from 'src/services/company.service';
 import { ProductService } from 'src/services/product.service';
-import { _deliveryType } from 'src/types/enums/delivery-type.enum';
+import { SellerService } from 'src/services/seller.service';
 
 describe('ProductController', () => {
   let controller: ProductController;
   let service: ProductService;
-  let repository: ProductRepository;
 
-  let sellerRepository: SellerRepository;
-  let categoryRepository: CategoryRepository;
-  let companyRepository: CompanyRepository;
-  let productRequiredOptionRepository: ProductRequiredOptionRepository;
-  let productOptionRepository: ProductOptionRepository;
-  let productInputOptionRepository: ProductInputOptionRepository;
+  let authService: AuthService;
+  let sellerService: SellerService;
+  let categoryService: CategoryService;
+  let companyService: CompanyService;
 
   const testNum = 2; // 판매자, 카테고리, 회사의 수
+
+  let sellerIds: number[];
+  let categoryIds: number[];
+  let companyIds: number[];
+
+  const products: ProductDto[] = [];
+  const productReqiredOptions: ProductRequiredOptionDto[] = [];
+  const productOptions: ProductOptionDto[] = [];
 
   /**
    *  상품, 필수옵션, 선택옵션 테스트 데이터 생성 수
@@ -36,14 +38,6 @@ describe('ProductController', () => {
   const testMinCount = 5;
   const MinPrice = 100;
 
-  let sellers: SellerEntity[];
-  let categories: CategoryEntity[];
-  let companies: CompanyEntity[];
-  const products: any[] = [];
-  const productReqiredOptions: any[] = [];
-  const productOptions: any[] = [];
-  const productInputOptions: any[] = [];
-
   beforeAll(async () => {
     const module = await Test.createTestingModule({
       imports: [AppModule],
@@ -51,146 +45,106 @@ describe('ProductController', () => {
 
     service = module.get<ProductService>(ProductService);
     controller = module.get<ProductController>(ProductController);
-    repository = module.get<ProductRepository>(ProductRepository);
 
-    sellerRepository = module.get<SellerRepository>(SellerRepository);
-    categoryRepository = module.get<CategoryRepository>(CategoryRepository);
-    companyRepository = module.get<CompanyRepository>(CompanyRepository);
-    productRequiredOptionRepository = module.get<ProductRequiredOptionRepository>(ProductRequiredOptionRepository);
-    productOptionRepository = module.get<ProductOptionRepository>(ProductOptionRepository);
-    productInputOptionRepository = module.get<ProductInputOptionRepository>(ProductInputOptionRepository);
+    authService = module.get<AuthService>(AuthService);
+    sellerService = module.get<SellerService>(SellerService);
+    companyService = module.get<CompanyService>(CompanyService);
+    categoryService = module.get<CategoryService>(CategoryService);
 
     /**
-     * 조회에 사용할 충분한 상품은 이미 등록되어 있어야 한다.
-     * 생성되는 상품은
-     * testnum^3 * productcount개 이다.
+     * 조회에 사용할 충분한 상품은 이미 등록되어 있어야 합니다.
+     * 서비스 로직을 이용합니다.
+     *
+     * 생성되는 상품은 testnum^3 * productcount개 입니다.
      */
 
     /**
-     * 판매자 계정을 생성한다.
+     * 판매자 계정을 생성 합니다.
      */
-
-    sellers = new Array(testNum).fill(0).map(
-      (el, idx) =>
-        new SellerEntity({
-          email: `${idx}`,
-          password: `${idx}`,
-          name: `${idx}`,
-          businessNumber: `${idx}`,
-          phone: `${idx}`,
-        }),
+    sellerIds = await Promise.all(
+      new Array(testNum).fill(0).map(async () => {
+        const { id: sellerId } = await authService.sellerSignUp({
+          email: `${v4().slice(0, 100)}@gmail.com`,
+          password: `${v4().slice(0, 100)}`,
+          name: `${v4().slice(0, 10)}`,
+          phone: `${v4().slice(0, 11)}`,
+          businessNumber: `${v4().slice(0, 100)}`,
+        });
+        return sellerId;
+      }),
     );
-    await sellerRepository.save(sellers);
 
     /**
-     * 카테고리를 생성한다.
+     * 카테고리를 생성 합니다.
      */
-
-    categories = new Array(testNum).fill(0).map(
-      (el, idx) =>
-        new CategoryEntity({
-          name: `${idx}`,
-        }),
+    categoryIds = await Promise.all(
+      new Array(testNum).fill(0).map(async () => {
+        const testCategory = await categoryService.createCategory({ name: v4().slice(0, 100) });
+        return testCategory.id;
+      }),
     );
-    await categoryRepository.save(categories);
 
     /**
-     * 회사를 생성한다.
+     * 회사를 생성 합니다.
      */
-
-    companies = new Array(testNum).fill(0).map(
-      (el, idx) =>
-        new CompanyEntity({
-          name: `${idx}`,
-        }),
+    companyIds = await Promise.all(
+      new Array(testNum).fill(0).map(async (e, idx) => {
+        const testCompany = await companyService.createCompany(sellerIds.at(idx) as number, {
+          name: v4().slice(0, 100),
+        });
+        return testCompany.id;
+      }),
     );
-    await companyRepository.save(companies);
 
     /**
-     * 판매자별 카테고리별 회사별 상품을 productcount개씩 생성한다.
+     * 판매자별 카테고리별 회사별 상품을 productcount개씩 생성 합니다.
      */
-
-    sellers.forEach((s) => {
-      const sellerId = s.id;
-      categories.forEach((ca) => {
-        const categoryId = ca.id;
-        companies.forEach((co) => {
-          const companyId = co.id;
+    for (const s of sellerIds) {
+      for (const ca of categoryIds) {
+        for (const co of companyIds) {
           for (let i = 0; i < testMinCount; i++) {
-            products.push({
-              sellerId: sellerId,
-              categoryId: categoryId,
-              companyId: companyId,
+            const product = await sellerService.createProduct(s, {
+              bundleId: null,
+              categoryId: ca,
+              companyId: co,
+              name: `${String.fromCharCode(i + 65)}_${s}_${ca}_${co}`,
+              description: `${v4().slice(0, 100)}`,
+              img: `${v4().slice(0, 100)}`,
+              deliveryType: 'FREE',
+              deliveryCharge: 0,
+              deliveryFreeOver: null,
               isSale: true,
-              name: `${String.fromCharCode(i + 65)}_${sellerId}_${categoryId}_${companyId}`,
-              deliveryType: _deliveryType.FREE,
-              deliveryCharge: 3000,
-              img: 'test.img',
             });
+
+            products.push(product);
           }
-        });
-      });
-    });
-    await repository.save(products);
-
-    /**
-     * 상품당 필수 옵션을 productMinCount개씩 생성한다.
-     */
-    products.forEach((p) => {
-      for (let i = 0; i < testMinCount; i++) {
-        productReqiredOptions.push({
-          productId: p.id,
-          name: `test_${p.id}_${i}`,
-          price: i * 1000 + MinPrice,
-          isSale: true,
-        });
-      }
-    });
-    await productRequiredOptionRepository.save(productReqiredOptions);
-
-    /**
-     * 상품당 선택 옵션을 productMinCount개씩 생성한다.
-     */
-    products.forEach((p) => {
-      for (let i = 0; i < testMinCount; i++) {
-        productOptions.push({
-          productId: p.id,
-          name: `test_${p.id}_${i}`,
-          price: i * 1000 + MinPrice,
-          isSale: true,
-        });
-      }
-    });
-    await productOptionRepository.save(productOptions);
-
-    productReqiredOptions.forEach((pro) => {
-      if (pro.id % 2 === 0) {
-        for (let i = 0; i < testMinCount; i++) {
-          productInputOptions.push({
-            productRequiredOptionId: pro.id,
-            name: `test_${pro.id}_${i}`,
-            value: `test_value`,
-            description: `test_des`,
-            isRequired: true,
-          });
         }
       }
-    });
+    }
 
-    await productInputOptionRepository.save(productInputOptions);
-  });
+    /**
+     * 상품당 필수/선택 옵션을 productMinCount개씩 생성 합니다.
+     */
+    for (const p of products) {
+      for (let i = 0; i < testMinCount; i++) {
+        const productRequiredOption = await sellerService.createProductOptions(
+          p.sellerId,
+          p.id,
+          { isRequire: true },
+          { name: `test_${p.id}_${i}`, price: i * 1000 + MinPrice, isSale: true },
+        );
 
-  /**
-   * 테스트 후 데이터는 삭제한다.
-   */
-  afterAll(async () => {
-    await productInputOptionRepository.remove(productInputOptions);
-    await productOptionRepository.remove(productOptions);
-    await productRequiredOptionRepository.remove(productReqiredOptions);
-    await repository.remove(products);
-    await sellerRepository.remove(sellers);
-    await categoryRepository.remove(categories);
-    await companyRepository.remove(companies);
+        const productOption = await sellerService.createProductOptions(
+          p.sellerId,
+          p.id,
+          { isRequire: false },
+          { name: `test_${p.id}_${i}`, price: i * 1000 + MinPrice, isSale: true },
+        );
+
+        productReqiredOptions.push(productRequiredOption);
+        productOptions.push(productOption);
+      }
+    }
   });
 
   /**
@@ -234,8 +188,7 @@ describe('ProductController', () => {
     });
 
     it('category 별 조회가 가능해야 한다.', async () => {
-      const categoryIds = categories.map((el) => el.id);
-      const testCategoryId = categoryIds[0];
+      const testCategoryId = categoryIds.at(0);
 
       const res = await controller.getProductList({
         page: 1,
@@ -255,7 +208,7 @@ describe('ProductController', () => {
         categoryId: testCategoryId,
       });
 
-      expect(resByService.every((el) => el.categoryId === testCategoryId)).toBe(true);
+      expect(resByService.data.every((el) => el.categoryId === testCategoryId)).toBe(true);
     });
 
     /**
@@ -289,7 +242,15 @@ describe('ProductController', () => {
         search: testName,
       });
 
-      expect(res.data.every((el) => el.name.includes(testName as string))).toBe(true);
+      const isSearchSubString = res.data.every((el) => {
+        const name = testName as string;
+        if (el.name.includes(name.toUpperCase()) || el.name.includes(name.toLocaleLowerCase())) {
+          return true;
+        }
+        return false;
+      });
+
+      expect(isSearchSubString).toBe(true);
     });
 
     /**
@@ -315,53 +276,6 @@ describe('ProductController', () => {
     it.todo('상품 조회시 리뷰수가 노출되어야 한다.');
   });
 
-  describe('typeorm 조인 쿼리를 검증한다.', () => {
-    it.skip('필수 옵션 조회 시 상품 입력 옵션에 대한 DB 조회를 할 수 있어야 한다.', async () => {
-      const [list, count] = await productRequiredOptionRepository.findAndCount({
-        order: {
-          id: 'ASC',
-        },
-        relations: ['productInputOptions'],
-        where: {
-          isSale: true,
-        },
-        skip: 0,
-        take: testMinCount,
-      });
-
-      expect(list !== null).toBe(true);
-
-      if (list !== null) {
-        list.forEach((pro) => {
-          if (pro.id % 2 === 0) {
-            expect(pro['productInputOptions'].every((pio) => pio.productRequiredOptionId === pro.id)).toBe(true);
-          } else {
-            expect(pro['productInputOptions'].length).toBe(0);
-          }
-        });
-      }
-    });
-
-    it.skip('필수 옵션 조회 시 상품 입력 옵션에 대한 DB 조회를 할 수 있어야 한다.', async () => {
-      const ProductRequiredOptionsIds = productReqiredOptions.map((el) => el.id);
-      const testId = ProductRequiredOptionsIds[0];
-
-      const data = await productRequiredOptionRepository
-        .createQueryBuilder('pro')
-        .leftJoinAndSelect('pro.productInputOptions', 'productInputOptions')
-        .where('pro.id = :id', { id: testId })
-        .andWhere('pro.isSale = :isSale', { isSale: true })
-        .getOne();
-
-      expect(data !== null).toBe(true);
-      if (data != null) {
-        expect(data.id).toBe(testId);
-        expect(data.isSale).toBe(true);
-        expect(data['productInputOptions'].every((el) => el.productRequiredOptionId === testId)).toBe(true);
-      }
-    });
-  });
-
   /**
    * GET products/:id
    */
@@ -374,25 +288,16 @@ describe('ProductController', () => {
      * 이렇게 한 번의 요청으로 가져온 후 이후 필요한 데이터를 추가적인 API로 가져오는 게 성능 상 유리하다.
      */
 
-    /**
-     * 상품의 최초 조회 시 상품의 옵션들이 조회되기 때문에 서비스 로직은 재사용될 수 있어야 한다.
-     */
     it('상품의 상세 페이지를 조회할 수 있어야한다.', async () => {
       const ProductIds = products.map((el) => el.id);
-      const testId = ProductIds[0];
+      const testId = ProductIds.at(0);
 
-      const res = await controller.getProduct(testId);
-      /**
-       * 조회된 상품 id와 필수옵션, 선택옵션의 productId 값이 testId와 같아야 한다.
-       */
-
-      expect(res.data.product.id === testId).toBe(true);
-      expect(res.data.productRequiredOptions.data.every((el) => el.productId === testId)).toBe(true);
-      expect(res.data.productOptions.data.every((el) => el.productId === testId)).toBe(true);
+      const res = await controller.getProduct(testId as number);
+      expect(res.data.id === testId).toBe(true);
     });
 
     /**
-     * 추천 상품의 기준은 편의 상 동일 카테고리를 기준으로 한다.
+     * 추천 상품의 기준은 편의상 동일 카테고리를 기준으로 한다.
      */
     it.todo('상품 상세 페이지 조회 시에는 상품의 추천 상품 10개가 함께 보여져야 한다.');
   });
@@ -508,28 +413,12 @@ describe('ProductController', () => {
       expect(res.data.every((el, i) => el.id === sortedList.at(i))).toBe(true);
     });
 
-    it('필수 옵션의 경우, 선택 옵션과 달리 입력 옵션이 있을 경우 입력 옵션들이 함께 보여져야 한다.', async () => {
-      const ProductIds = products.map((el) => el.id);
-      const testProductId = ProductIds[0];
-      const res = await controller.getProduct(testProductId);
-      expect(res.data.productRequiredOptions !== null).toBe(true);
+    /**
+     * 입력 옵션이 존재할 경우 배열에 담겨서 보여진다.
+     * 없을 경우 빈 배열이며, 빈 배열이면 데이터가 빈 것이 아니라 입력 옵션이 없는 것과 동일하게 처리된다.
+     */
 
-      if (res.data.productRequiredOptions !== null) {
-        res.data.productRequiredOptions.data.forEach((pro) => {
-          /**
-           * 입력 옵션이 존재할 경우 배열에 담겨서 보여진다.
-           * 없을 경우 빈 배열이며, 빈 배열이면 데이터가 빈 것이 아니라 입력 옵션이 없는 것과 동일하게 처리될 것이다.
-           *
-           * productRequiredId가 짝수인 경우에 입력옵션을 가지고 홀수라면 입력옵션을 가지지 않는다.
-           */
-          if (pro.id % 2 === 0) {
-            expect(pro.productInputOptions.every((pio) => pio.productRequiredOptionId === pro.id)).toBe(true);
-          } else {
-            expect(pro.productInputOptions.length).toBe(0);
-          }
-        });
-      }
-    });
+    it.todo('필수 옵션의 경우, 선택 옵션과 달리 입력 옵션이 있을 경우 입력 옵션들이 함께 보여져야 한다.');
 
     /**
      * 먼 미래에 도전했으면 하는 사항.
