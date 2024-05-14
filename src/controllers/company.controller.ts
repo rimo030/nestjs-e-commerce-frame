@@ -1,5 +1,5 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SellerJwtAuthGuard } from 'src/auth/guards/seller-jwt.guard';
 import { UserId } from 'src/decorators/user-id.decorator';
 import { CompanyDto } from 'src/entities/dtos/company.dto';
@@ -9,6 +9,7 @@ import { CompanyService } from 'src/services/company.service';
 import { createPaginationResponseDto } from 'src/util/functions/pagination-util.function';
 
 @Controller('company')
+@ApiBearerAuth('token')
 @ApiTags('Company API')
 @UseGuards(SellerJwtAuthGuard)
 export class CompanyController {
