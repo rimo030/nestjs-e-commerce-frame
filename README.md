@@ -23,8 +23,10 @@ NestJS로 커머스 백엔드 API 구현합니다.
 
 ## 📍프로젝트 실행 방법
 
-로컬에서 프로젝트를 실행하는 방법을 소개합니다. <br>
+로컬에서 프로젝트를 실행하는 방법을 소개합니다.
+
 TypeORM의 경우 [refactor/typrorm 브랜치](https://github.com/rimo030/nestjs-e-commerce-frame/tree/refactor/typeorm)에서 실행 가능합니다!
+
 
 ### 1. 설치
 
@@ -34,7 +36,6 @@ $ cd nestjs-e-commerce-frame
 
 $ npm install
 ```
-
 <br>
 
 ### 2. env 작성
@@ -59,7 +60,6 @@ $ docker exec -it CommerceDB bash
 $ mysql -u 계정이름 -p 비밀번호
 $ create database commerce;
 ```
-
 <br>
 
 ### 4. DB 스키마 생성
@@ -67,7 +67,6 @@ $ create database commerce;
 ```sh
 $ npx prisma db push
 ```
-
 <br>
 
 ### 5. 서버 실행
@@ -78,7 +77,6 @@ $ npm run start
 # dev
 $ npm run start:dev
 ```
-
 <br>
 
 ### 📍Swagger 접속 주소
@@ -91,7 +89,8 @@ http://localhost:3000/api
 
 ## 🔗ERD
 
-![Untitled (2)](https://github.com/rimo030/nestjs-e-commerce-frame/assets/109577985/5ff87344-b957-4f28-bea3-6c96a2fa5d86)
+![ERD](https://github.com/rimo030/nestjs-e-commerce-frame/assets/109577985/a98fcdfc-8087-4b67-9e6f-3852e2b45207)
+
 
 <br>
 
