@@ -127,7 +127,7 @@ export class AuthService {
   async buyerLogin(id: number): Promise<{ accessToken: string }> {
     const payload: { id: number } = { id };
     const accessToken = this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_SECRET_BUYER') ?? 'JWT_SECRET_BUYER',
+      secret: this.configService.get('JWT_SECRET_BUYER'),
     });
     return { accessToken };
   }
@@ -139,7 +139,7 @@ export class AuthService {
   async sellerLogin(id: number): Promise<{ accessToken: string }> {
     const payload: { id: number } = { id };
     const accessToken = this.jwtService.sign(payload, {
-      secret: this.configService.get('JWT_SECRET_SELLER') ?? 'JWT_SECRET_SELLER',
+      secret: this.configService.get('JWT_SECRET_SELLER'),
     });
     return { accessToken };
   }
