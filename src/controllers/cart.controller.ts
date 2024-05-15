@@ -25,18 +25,14 @@ export class CartController {
   async addCart(
     @UserId() buyerId: number,
     @Body() createCartDto: CreateCartDto,
-  ): Promise<{
-    data: CartDto | UpdateCartDto;
-  }> {
+  ): Promise<{ data: CartDto | UpdateCartDto }> {
     const cart = await this.cartService.addCart(buyerId, createCartDto);
     return { data: cart };
   }
 
   @Get()
   @ApiOperation({ summary: '장바구니 조회 API', description: '모든 사용자는 담은 상품을 장바구니에서 조회할 수 있다.' })
-  async readCarts(@UserId() buyerId: number): Promise<{
-    data: CartGroupByProductBundleDto[];
-  }> {
+  async readCarts(@UserId() buyerId: number): Promise<{ data: CartGroupByProductBundleDto[] }> {
     const cartDetils = await this.cartService.readCarts(buyerId);
     return { data: cartDetils };
   }
@@ -50,9 +46,7 @@ export class CartController {
     @UserId() buyerId: number,
     @Query() isRequireOptionDto: IsRequireOptionDto,
     @Body() updateCartOptionCountDto: UpdateCartOptionCountDto,
-  ): Promise<{
-    data: CartRequiredOptionDto | CartOptionDto;
-  }> {
+  ): Promise<{ data: CartRequiredOptionDto | CartOptionDto }> {
     const updateOption = await this.cartService.updateCartsOptionCount(
       buyerId,
       isRequireOptionDto,

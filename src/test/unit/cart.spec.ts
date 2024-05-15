@@ -83,7 +83,7 @@ describe('Cart Controller', () => {
      */
 
     const testCategory = await categoryService.createCategory({ name: v4().slice(0, 100) });
-    const testCompany = await companyService.createCompany({ sellerId, name: v4().slice(0, 100) });
+    const testCompany = await companyService.createCompany(sellerId, { name: v4().slice(0, 100) });
 
     /**
      * 테스트 상품 묶음을 등록합니다.
@@ -247,8 +247,11 @@ describe('Cart Controller', () => {
 
   it('테스트 상품들은 1개 이상의 필수/선택 옵션을 가져야 합니다.', async () => {
     const isAllTestProductHaveOptions = testProducts.every(async (p) => {
-      const productWithOption = await productService.getProduct(p.id);
-      if (productWithOption.productRequiredOptions.data.length && productWithOption.productOptions.data.length) {
+      const product = await productService.getProduct(p.id);
+
+      const productRequiredOptions = await productService.getProductOption(product.id, { isRequire: true }, {});
+      const productOptions = await productService.getProductOption(product.id, { isRequire: false }, {});
+      if (productRequiredOptions.data.length && productOptions.data.length) {
         return true;
       } else {
         return false;
@@ -298,7 +301,11 @@ describe('Cart Controller', () => {
           /**
            * 실제 DB에 저장되어있는 옵션을 이용합니다.
            */
-          const { product, productRequiredOptions, productOptions } = await productService.getProduct(p.id);
+          const [product, productRequiredOptions, productOptions] = await Promise.all([
+            productService.getProduct(p.id),
+            productService.getProductOption(p.id, { isRequire: true }, {}),
+            productService.getProductOption(p.id, { isRequire: false }, {}),
+          ]);
 
           const createCartRequiredOptionDtos: CreateCartRequiredOptionDto[] = [];
           productRequiredOptions.data.forEach((pro) => {
@@ -416,7 +423,7 @@ describe('Cart Controller', () => {
       const productPromises = data.map(async (group) => {
         const productDetails = await Promise.all(
           group.cartDetails.map(async (c) => {
-            const { product, ...rest } = await productService.getProduct(c.productId);
+            const product = await productService.getProduct(c.productId);
             return product.bundleId;
           }),
         );

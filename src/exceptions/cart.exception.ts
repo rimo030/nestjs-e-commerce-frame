@@ -35,3 +35,9 @@ export class CartDeliveryTypeNotFoundException extends HttpException {
     super(`Can't find delivery type`, HttpStatus.NOT_FOUND);
   }
 }
+
+export class CartDeliveryFreeOverNotFoundException extends HttpException {
+  constructor() {
+    super(`Can't find delivery free over`, HttpStatus.NOT_FOUND);
+  }
+}

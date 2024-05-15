@@ -67,8 +67,8 @@ describe('Controller', () => {
       expect(savedBuyerId).toBeDefined();
       expect(savedBuyerId).not.toBe(null);
 
-      const { accessToken } = await controller.buyerSignIn(testBuyer, { user: { id: savedBuyerId } });
-      const decode = jwtService.decode(accessToken);
+      const { data } = await controller.buyerSignIn(testBuyer, { user: { id: savedBuyerId } });
+      const decode = jwtService.decode(data.accessToken);
       expect(decode.id).toBe(savedBuyerId);
     });
   });
@@ -79,8 +79,6 @@ describe('Controller', () => {
 
       const savedSellerId = await service.findSellerEmail(testSeller.email);
 
-      console.log(savedSellerId);
-
       expect(savedSellerId).toBeDefined;
       expect(savedSellerId).not.toBe(null);
     });
@@ -90,8 +88,8 @@ describe('Controller', () => {
       expect(savedSellerId).toBeDefined;
       expect(savedSellerId).not.toBe(null);
 
-      const { accessToken } = await controller.sellerSignIn(testSeller, { user: { id: savedSellerId } });
-      const decode = jwtService.decode(accessToken!);
+      const { data } = await controller.sellerSignIn(testSeller, { user: { id: savedSellerId } });
+      const decode = jwtService.decode(data.accessToken);
 
       expect(decode.id).toBe(savedSellerId);
     });

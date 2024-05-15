@@ -60,7 +60,7 @@ describe('Seller Controller', () => {
     };
 
     const seller = await authController.sellerSignUp(testSeller);
-    testId = seller.id;
+    testId = seller.data.id;
 
     /**
      * 상품 묶음을 생성합니다.
@@ -71,7 +71,7 @@ describe('Seller Controller', () => {
     /**
      * 카테고리와 회사를 생성한다.
      */
-    const company = await companyService.createCompany({ sellerId: testId, name: v4() });
+    const company = await companyService.createCompany(testId, { name: v4() });
     testCompanyId = company.id;
 
     const category = await categoryService.createCategory({ name: v4() });
