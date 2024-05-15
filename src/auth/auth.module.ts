@@ -3,7 +3,6 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { CustomTypeOrmModule } from 'src/configs/custom-typeorm.module';
 import { typeORMConfig } from 'src/configs/typeorm.config';
 import { CartModule } from 'src/modules/cart.module';
 import { CategoryModule } from 'src/modules/category.module';
@@ -11,8 +10,6 @@ import { CompanyModule } from 'src/modules/company.module';
 import { PrismaModule } from 'src/modules/prisma.module';
 import { ProductModule } from 'src/modules/product.module';
 import { SellerModule } from 'src/modules/seller.module';
-import { BuyerRepository } from 'src/repositories/buyer.repository';
-import { SellerRepository } from 'src/repositories/seller.repository';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { BuyerJwtStrategy } from './strategies/buyer-jwt.strategy';
@@ -22,20 +19,13 @@ import { SellerLocalStrategy } from './strategies/seller-local.strategy';
 
 @Module({
   imports: [
-    PrismaModule,
     //BoardsModule,
+    PrismaModule,
     CompanyModule,
     CategoryModule,
-    CartModule,
-    ProductModule,
     SellerModule,
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        return typeORMConfig(configService);
-      },
-    }),
+    ProductModule,
+    CartModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
@@ -48,7 +38,13 @@ import { SellerLocalStrategy } from './strategies/seller-local.strategy';
         };
       },
     }),
-    CustomTypeOrmModule.forCustomRepository([BuyerRepository, SellerRepository]),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => {
+        return typeORMConfig(configService);
+      },
+    }),
   ],
   controllers: [AuthController],
   providers: [AuthService, BuyerLocalStrategy, SellerLocalStrategy, BuyerJwtStrategy, SellerJwtStrategy],
