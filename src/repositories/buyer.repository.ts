@@ -1,33 +1,63 @@
 import { Repository } from 'typeorm';
-import { CustomRepository } from '../configs/custom-typeorm.decorator';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { BuyerEntity } from '../entities/buyer.entity';
 import { CreateBuyerDto } from '../entities/dtos/create-buyer.dto';
 
-@CustomRepository(BuyerEntity)
-export class BuyerRepository extends Repository<BuyerEntity> {
-  async saveBuyer(createBuyerDto: CreateBuyerDto): Promise<void> {
-    await this.insert(createBuyerDto);
+@Injectable()
+export class BuyerRepository {
+  constructor(
+    @InjectRepository(BuyerEntity)
+    private buyerRepository: Repository<BuyerEntity>,
+  ) {}
+
+  /**
+   * buyer를 저장합니다.
+   * @param createBuyerDto 저장할 buyer의 정보입니다.
+   */
+  async saveBuyer(createBuyerDto: CreateBuyerDto): Promise<{ id: number }> {
+    const { email, password, name, gender, age, phone } = createBuyerDto;
+    const buyer = await this.buyerRepository.save({ email, password, name, gender, age, phone });
+    return { id: buyer.id };
   }
 
-  async findById(id: number): Promise<BuyerEntity> {
-    const [user] = await this.find({
+  /**
+   * 해당 아이디를 가진 buyer가 있는지 확인합니다.
+   * @param id 확인할 buyer의 아이디 입니다.
+   */
+  async findById(id: number): Promise<{ id: number } | null> {
+    const buyer = await this.buyerRepository.findOne({
+      select: { id: true },
       where: { id },
-      withDeleted: true,
-      take: 1,
     });
-    return user;
+
+    return buyer ? { id: buyer.id } : null;
   }
 
-  async findByEmail(email: string): Promise<BuyerEntity> {
-    const [user] = await this.find({
+  /**
+   *  해당 이메일을 가진 buyer의 이메일과 비밀번호를 조회합니다.
+   * @param email 확인할 이메일 입니다.
+   */
+  async findBuyer(email: string): Promise<{ id: number; password: string } | null> {
+    const buyer = await this.buyerRepository.findOne({
+      select: { id: true, password: true },
       where: { email },
       withDeleted: true,
-      take: 1,
     });
-    return user;
-  }
 
-  async deleteById(id: number): Promise<void> {
-    await this.delete({ id });
+    return buyer ? { id: buyer.id, password: buyer.password } : null;
+  }
+  /**
+   *  해당 이메일을 가진 buyer가 존재하는지 확인합니다.
+   * @param email 확인할 이메일 입니다.
+   */
+  async findByEmail(email: string): Promise<{ id: number } | null> {
+    const buyer = await this.buyerRepository.findOne({
+      select: { id: true },
+      where: { email },
+      withDeleted: true,
+    });
+
+    return buyer ? { id: buyer.id } : null;
   }
 }

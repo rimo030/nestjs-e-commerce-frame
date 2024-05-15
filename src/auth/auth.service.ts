@@ -2,7 +2,8 @@ import bcrypt from 'bcryptjs';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { PrismaService } from 'src/services/prisma.service';
+import { BuyerRepository } from 'src/repositories/buyer.repository';
+import { SellerRepository } from 'src/repositories/seller.repository';
 import { AuthCredentialsDto } from '../entities/dtos/auth-credentials.dto';
 import { CreateBuyerDto } from '../entities/dtos/create-buyer.dto';
 import { CreateSellerDto } from '../entities/dtos/create-seller.dto';
@@ -19,7 +20,9 @@ import {
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    // private readonly prisma: PrismaService,
+    private readonly buyerRepository: BuyerRepository,
+    private readonly sellerRepository: SellerRepository,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
   ) {}
@@ -32,20 +35,14 @@ export class AuthService {
    */
   async buyerSignUp(createBuyerDto: CreateBuyerDto): Promise<{ id: number }> {
     const { email, password, name, gender, age, phone } = createBuyerDto;
-    const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email } });
+    const buyer = await this.buyerRepository.findByEmail(email);
 
     if (buyer) {
       throw new BuyerUnauthrizedException();
     }
-
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
-
-    const buyerId = await this.prisma.buyer.create({
-      select: { id: true },
-      data: { email, password: hashedPassword, name, gender, age, phone },
-    });
-
+    const buyerId = await this.buyerRepository.saveBuyer({ email, password: hashedPassword, name, gender, age, phone });
     return buyerId;
   }
 
@@ -57,10 +54,7 @@ export class AuthService {
    */
   async sellerSignUp(createSellerDto: CreateSellerDto): Promise<{ id: number }> {
     const { email, password, name, phone, businessNumber } = createSellerDto;
-    const seller = await this.prisma.seller.findUnique({
-      select: { id: true },
-      where: { email },
-    });
+    const seller = await this.sellerRepository.findByEmail(email);
 
     if (seller) {
       throw new SellerUnauthrizedException();
@@ -69,9 +63,12 @@ export class AuthService {
     const salt = await bcrypt.genSalt();
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    const sellerId = await this.prisma.seller.create({
-      select: { id: true },
-      data: { email, password: hashedPassword, name, phone, businessNumber },
+    const sellerId = await this.sellerRepository.saveSeller({
+      email,
+      password: hashedPassword,
+      name,
+      phone,
+      businessNumber,
     });
     return sellerId;
   }
@@ -83,10 +80,7 @@ export class AuthService {
    * @param authCredentialsDto buyer의 이메일과 비밀번호 입니다.
    */
   async validateBuyer(authCredentialsDto: AuthCredentialsDto): Promise<{ id: number }> {
-    const buyer = await this.prisma.buyer.findUnique({
-      select: { id: true, password: true },
-      where: { email: authCredentialsDto.email },
-    });
+    const buyer = await this.buyerRepository.findBuyer(authCredentialsDto.email);
 
     if (buyer) {
       const isRightPassword = await bcrypt.compare(authCredentialsDto.password, buyer.password);
@@ -105,10 +99,7 @@ export class AuthService {
    * @param authCredentialsDto seller의 이메일과 비밀번호 입니다.
    */
   async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<{ id: number }> {
-    const seller = await this.prisma.seller.findUnique({
-      select: { id: true, password: true },
-      where: { email: authCredentialsDto.email },
-    });
+    const seller = await this.sellerRepository.findSeller(authCredentialsDto.email);
 
     if (seller) {
       const isRightPassword = await bcrypt.compare(authCredentialsDto.password, seller.password);
@@ -149,11 +140,7 @@ export class AuthService {
    * @param email 조회할 buyer의 이메일 입니다.
    */
   async findBuyerEmail(email: string): Promise<{ id: number }> {
-    const buyerId = await this.prisma.buyer.findUnique({
-      select: { id: true },
-      where: { email },
-    });
-
+    const buyerId = await this.buyerRepository.findByEmail(email);
     if (!buyerId) {
       throw new BuyerEmailNotfoundException();
     }
@@ -165,11 +152,7 @@ export class AuthService {
    * @param email 조회할 seller의 이메일 입니다.
    */
   async findSellerEmail(email: string): Promise<{ id: number }> {
-    const sellerId = await this.prisma.seller.findUnique({
-      select: { id: true },
-      where: { email },
-    });
-
+    const sellerId = await this.sellerRepository.findByEmail(email);
     if (!sellerId) {
       throw new SellerEmailNotfoundException();
     }
@@ -181,10 +164,7 @@ export class AuthService {
    * @param id 조회할 buyer의 id입니다.
    */
   async findBuyer(id: number): Promise<{ id: number }> {
-    const buyerId = await this.prisma.buyer.findUnique({
-      select: { id: true },
-      where: { id },
-    });
+    const buyerId = await this.buyerRepository.findById(id);
 
     if (!buyerId) {
       throw new AuthForbiddenException();
@@ -197,10 +177,7 @@ export class AuthService {
    * @param id 조회할 seller의 id입니다.
    */
   async findSeller(id: number): Promise<{ id: number }> {
-    const sellerId = await this.prisma.seller.findUnique({
-      select: { id: true },
-      where: { id },
-    });
+    const sellerId = await this.sellerRepository.findById(id);
 
     if (!sellerId) {
       throw new AuthForbiddenException();

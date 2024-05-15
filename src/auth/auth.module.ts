@@ -12,6 +12,8 @@ import { CompanyModule } from 'src/modules/company.module';
 import { PrismaModule } from 'src/modules/prisma.module';
 import { ProductModule } from 'src/modules/product.module';
 import { SellerModule } from 'src/modules/seller.module';
+import { BuyerRepository } from 'src/repositories/buyer.repository';
+import { SellerRepository } from 'src/repositories/seller.repository';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { BuyerJwtStrategy } from './strategies/buyer-jwt.strategy';
@@ -44,6 +46,14 @@ import { SellerLocalStrategy } from './strategies/seller-local.strategy';
     TypeOrmModule.forFeature([SellerEntity, BuyerEntity]),
   ],
   controllers: [AuthController],
-  providers: [AuthService, BuyerLocalStrategy, SellerLocalStrategy, BuyerJwtStrategy, SellerJwtStrategy],
+  providers: [
+    AuthService,
+    BuyerLocalStrategy,
+    SellerLocalStrategy,
+    BuyerJwtStrategy,
+    SellerJwtStrategy,
+    SellerRepository,
+    BuyerRepository,
+  ],
 })
 export class AuthModule {}
