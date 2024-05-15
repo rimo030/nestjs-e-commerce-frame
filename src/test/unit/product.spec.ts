@@ -3,9 +3,9 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { AuthService } from 'src/auth/auth.service';
 import { ProductController } from 'src/controllers/product.controller';
-import { ProductOptionDto } from 'src/entities/dtos/product-option.dto';
-import { ProductRequiredOptionDto } from 'src/entities/dtos/product-required-option.dto';
-import { ProductDto } from 'src/entities/dtos/product.dto';
+import { ProductOptionDto } from 'src/dtos/product-option.dto';
+import { ProductRequiredOptionDto } from 'src/dtos/product-required-option.dto';
+import { ProductDto } from 'src/dtos/product.dto';
 import { CategoryService } from 'src/services/category.service';
 import { CompanyService } from 'src/services/company.service';
 import { ProductService } from 'src/services/product.service';
@@ -405,12 +405,9 @@ describe('ProductController', () => {
       const res = await controller.getProductOptions(testProductId, { isRequire: true }, { page: 1, limit: 300 });
       expect(res.data.length > 0).toBe(true);
 
-      /**
-       * 조회 결과는 id 순으로 정렬 되어 있어야 한다.
-       */
       const resIds = res.data.map((el) => el.id);
-      const sortedList = resIds.sort();
-      expect(res.data.every((el, i) => el.id === sortedList.at(i))).toBe(true);
+      const sortedList = [...resIds].sort((a, b) => a - b);
+      expect(resIds).toEqual(sortedList);
     });
 
     /**

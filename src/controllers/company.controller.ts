@@ -2,9 +2,9 @@ import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { SellerJwtAuthGuard } from 'src/auth/guards/seller-jwt.guard';
 import { UserId } from 'src/decorators/user-id.decorator';
-import { CompanyDto } from 'src/entities/dtos/company.dto';
-import { GetCompanyPaginationDto } from 'src/entities/dtos/get-company-pagination.dto';
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
+import { CompanyDto } from 'src/dtos/company.dto';
+import { GetCompanyPaginationDto } from 'src/dtos/get-company-pagination.dto';
+import { PaginationDto } from 'src/dtos/pagination.dto';
 import { CompanyService } from 'src/services/company.service';
 import { createPaginationResponseDto } from 'src/util/functions/pagination-util.function';
 

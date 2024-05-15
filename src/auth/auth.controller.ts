@@ -1,8 +1,8 @@
 import { Body, Controller, HttpCode, Post, UseGuards, Request } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
-import { AuthCredentialsDto } from '../entities/dtos/auth-credentials.dto';
-import { CreateBuyerDto } from '../entities/dtos/create-buyer.dto';
-import { CreateSellerDto } from '../entities/dtos/create-seller.dto';
+import { AuthCredentialsDto } from '../dtos/auth-credentials.dto';
+import { CreateBuyerDto } from '../dtos/create-buyer.dto';
+import { CreateSellerDto } from '../dtos/create-seller.dto';
 import { AuthService } from './auth.service';
 import { BuyerLocalAuthGuard } from './guards/buyer-local.auth.guard';
 import { SellerLocalAuthGuard } from './guards/seller-local.auth.guard';

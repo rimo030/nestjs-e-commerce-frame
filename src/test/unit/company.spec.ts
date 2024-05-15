@@ -3,7 +3,7 @@ import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { AuthService } from 'src/auth/auth.service';
 import { CompanyController } from 'src/controllers/company.controller';
-import { GetPaginationDto } from 'src/entities/dtos/get-pagination.dto';
+import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
 import { CompanyService } from 'src/services/company.service';
 
 describe('Controller', () => {

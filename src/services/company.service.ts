@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CompanyDto } from 'src/entities/dtos/company.dto';
-import { GetCompanyPaginationDto } from 'src/entities/dtos/get-company-pagination.dto';
+import { CompanyDto } from 'src/dtos/company.dto';
+import { GetCompanyPaginationDto } from 'src/dtos/get-company-pagination.dto';
 import { SellerNotfoundException } from 'src/exceptions/auth.exception';
 import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
 import { getOffset } from 'src/util/functions/pagination-util.function';

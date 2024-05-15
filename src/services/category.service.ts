@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { CategoryDto } from 'src/entities/dtos/category.dto';
-import { GetPaginationDto } from 'src/entities/dtos/get-pagination.dto';
+import { CategoryDto } from 'src/dtos/category.dto';
+import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
 import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
 import { getOffset } from 'src/util/functions/pagination-util.function';
 import { PrismaService } from './prisma.service';

@@ -2,8 +2,6 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { typeORMConfig } from 'src/configs/typeorm.config';
 import { CartModule } from 'src/modules/cart.module';
 import { CategoryModule } from 'src/modules/category.module';
 import { CompanyModule } from 'src/modules/company.module';
@@ -19,7 +17,6 @@ import { SellerLocalStrategy } from './strategies/seller-local.strategy';
 
 @Module({
   imports: [
-    //BoardsModule,
     PrismaModule,
     CompanyModule,
     CategoryModule,
@@ -36,13 +33,6 @@ import { SellerLocalStrategy } from './strategies/seller-local.strategy';
             expiresIn: configService.get('JWT_EXPIRATION_TIME'),
           },
         };
-      },
-    }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        return typeORMConfig(configService);
       },
     }),
   ],

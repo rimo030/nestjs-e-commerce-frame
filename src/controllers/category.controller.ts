@@ -1,8 +1,8 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { CategoryDto } from 'src/entities/dtos/category.dto';
-import { GetPaginationDto } from 'src/entities/dtos/get-pagination.dto';
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
+import { CategoryDto } from 'src/dtos/category.dto';
+import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
+import { PaginationDto } from 'src/dtos/pagination.dto';
 import { CategoryService } from 'src/services/category.service';
 import { createPaginationResponseDto } from 'src/util/functions/pagination-util.function';
 

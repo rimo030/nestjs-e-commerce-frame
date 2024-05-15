@@ -2,14 +2,14 @@ import { Controller, UseGuards, HttpCode, Post, Body, Param, ParseIntPipe, Query
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { SellerJwtAuthGuard } from 'src/auth/guards/seller-jwt.guard';
 import { UserId } from 'src/decorators/user-id.decorator';
-import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
-import { CreateProductOptionsDto } from 'src/entities/dtos/create-product-options.dto';
-import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
-import { IsRequireOptionDto } from 'src/entities/dtos/is-require-options.dto';
-import { ProductBundleDto } from 'src/entities/dtos/product-bundle.dto';
-import { ProductOptionDto } from 'src/entities/dtos/product-option.dto';
-import { ProductRequiredOptionDto } from 'src/entities/dtos/product-required-option.dto';
-import { ProductDto } from 'src/entities/dtos/product.dto';
+import { CreateProductBundleDto } from 'src/dtos/create-product-bundle.dto';
+import { CreateProductOptionsDto } from 'src/dtos/create-product-options.dto';
+import { CreateProductDto } from 'src/dtos/create-product.dto';
+import { IsRequireOptionDto } from 'src/dtos/is-require-options.dto';
+import { ProductBundleDto } from 'src/dtos/product-bundle.dto';
+import { ProductOptionDto } from 'src/dtos/product-option.dto';
+import { ProductRequiredOptionDto } from 'src/dtos/product-required-option.dto';
+import { ProductDto } from 'src/dtos/product.dto';
 import { SellerService } from 'src/services/seller.service';
 
 @Controller('seller')

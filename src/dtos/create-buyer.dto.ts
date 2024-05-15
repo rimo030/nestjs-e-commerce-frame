@@ -1,8 +1,8 @@
 import { Buyer } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmptyNumber } from '../../decorators/is-not-empty-number.decorator';
-import { IsNotEmptyString } from '../../decorators/is-not-empty-string.decorator';
+import { IsNotEmptyNumber } from '../decorators/is-not-empty-number.decorator';
+import { IsNotEmptyString } from '../decorators/is-not-empty-string.decorator';
 import { AuthCredentialsDto } from './auth-credentials.dto';
 
 export class CreateBuyerDto extends AuthCredentialsDto implements Pick<Buyer, 'name' | 'gender' | 'age' | 'phone'> {

@@ -3,9 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/services/prisma.service';
-import { AuthCredentialsDto } from '../entities/dtos/auth-credentials.dto';
-import { CreateBuyerDto } from '../entities/dtos/create-buyer.dto';
-import { CreateSellerDto } from '../entities/dtos/create-seller.dto';
+import { AuthCredentialsDto } from '../dtos/auth-credentials.dto';
+import { CreateBuyerDto } from '../dtos/create-buyer.dto';
+import { CreateSellerDto } from '../dtos/create-seller.dto';
 import {
   AuthForbiddenException,
   BuyerEmailNotfoundException,

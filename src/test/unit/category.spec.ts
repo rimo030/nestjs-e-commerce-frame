@@ -2,7 +2,7 @@ import { v4 } from 'uuid';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { CategoryController } from 'src/controllers/category.controller';
-import { GetPaginationDto } from 'src/entities/dtos/get-pagination.dto';
+import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
 import { CategoryService } from 'src/services/category.service';
 
 describe('CategoryController', () => {

@@ -1,5 +1,5 @@
-import { GetPaginationDto } from 'src/entities/dtos/get-pagination.dto';
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
+import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
+import { PaginationDto } from 'src/dtos/pagination.dto';
 import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
 
 /**
