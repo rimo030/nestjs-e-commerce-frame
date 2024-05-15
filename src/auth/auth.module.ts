@@ -4,6 +4,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeORMConfig } from 'src/configs/typeorm.config';
+import { BuyerEntity } from 'src/entities/buyer.entity';
+import { SellerEntity } from 'src/entities/seller.entity';
 import { CartModule } from 'src/modules/cart.module';
 import { CategoryModule } from 'src/modules/category.module';
 import { CompanyModule } from 'src/modules/company.module';
@@ -38,13 +40,8 @@ import { SellerLocalStrategy } from './strategies/seller-local.strategy';
         };
       },
     }),
-    TypeOrmModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        return typeORMConfig(configService);
-      },
-    }),
+    TypeOrmModule.forRootAsync(typeORMConfig),
+    TypeOrmModule.forFeature([SellerEntity, BuyerEntity]),
   ],
   controllers: [AuthController],
   providers: [AuthService, BuyerLocalStrategy, SellerLocalStrategy, BuyerJwtStrategy, SellerJwtStrategy],
