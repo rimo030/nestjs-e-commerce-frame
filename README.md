@@ -23,7 +23,8 @@ NestJS로 커머스 백엔드 API 구현합니다.
 
 ## 📍프로젝트 실행 방법
 
-로컬에서 프로젝트를 실행하는 방법을 소개합니다.
+로컬에서 프로젝트를 실행하는 방법을 소개합니다. <br>
+TypeORM의 경우 [refactor/typrorm 브랜치](https://github.com/rimo030/nestjs-e-commerce-frame/tree/refactor/typeorm)에서 실행 가능합니다!
 
 ### 1. 설치
 
@@ -64,11 +65,7 @@ $ create database commerce;
 ### 4. DB 스키마 생성
 
 ```sh
-# Prisma
 $ npx prisma db push
-
-# TypeORM
-$ schema:sync:local
 ```
 
 <br>
@@ -84,7 +81,7 @@ $ npm run start:dev
 
 <br>
 
-### Swagger 접속 주소
+### 📍Swagger 접속 주소
 
 ```sh
 http://localhost:3000/api
