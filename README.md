@@ -38,7 +38,7 @@ $ npm install
 
 ### 2. env 작성
 
-`.env.example`을 참고해 `.env`파일을 작성 합니다.
+`.env.example`을 참고해 `.env`파일을 작성합니다.
 
 <br>
 
@@ -100,10 +100,10 @@ http://localhost:3000/api
 
 ## ✌️기술적 경험
 
-[이슈](https://github.com/rimo030/nestjs-e-commerce-frame/issues)를 통해 여러 기술적인 내용을 논의하고 배웠습니다. <br>
-배운 내용을 잘 기억하고 나누기 위해 [개인블로그](https://munak.tistory.com/)에 정리하고 있습니다!
+[이슈](https://github.com/rimo030/nestjs-e-commerce-frame/issues)를 통해 여러 기술적인 내용을 논의 하였습니다. <br>
+배운 내용은 잘 기억하고 나누기 위해 [개인블로그](https://munak.tistory.com/)에 정리하고 있습니다!
 
-### Git
+### 📍Git
 
 Git 이용한 첫 프로젝트 입니다. 기초적인 clone, pull, push 부터 cherry-pick, rebase등 Git의 여러 기능을 학습했습니다. <br>
 프로젝트에 Git-commit-convention과 Git-flow를 적용하였습니다.
@@ -114,7 +114,7 @@ Git 이용한 첫 프로젝트 입니다. 기초적인 clone, pull, push 부터 
 
 <br>
 
-### Node.js / JS
+### 📍Node.js / JS
 
 Node.js 백엔드 개발 생태계와 학습했습니다. <br>
 근간이 되는 자바스크립트을 더 잘 이해하고자 노력하였습니다. 블로그에 관련 도서나 자료를 읽고 정리하고 있습니다.
@@ -130,7 +130,7 @@ Node.js 백엔드 개발 생태계와 학습했습니다. <br>
 
 <br>
 
-### NestJS
+### 📍NestJS
 
 NestJS를 이용한 첫 프로젝트 입니다. DI와 레이어간 역할 분리의 개념에 대해 배울 수 있었습니다. <br>
 
@@ -139,12 +139,13 @@ NestJS를 이용한 첫 프로젝트 입니다. DI와 레이어간 역할 분리
 - [NestJS 구조정리](https://github.com/rimo030/nestjs-e-commerce-frame/issues/6)
 - ✏️[[NestJS] Swagger 적용하기 (feat. API 문서화)](https://munak.tistory.com/186)
 - ✏️[[NestJS] Exception filters 추가하기 (feat.Custom Exception)](https://munak.tistory.com/189)
-  <br>
 
-### TS
+<br>
 
-NestJS를 보다 잘 다루기 위해 타입스크립트를 심도있게 공부하고자 했습니다. <br>
-타입챌린지([rimo030/type-challenges](https://github.com/rimo030/type-challenges))에 도전해 100문제 이상 풀이했습니다.
+### 📍TS
+
+NestJS를 보다 잘 다루기 위해 타입스크립트를 심도있게 공부하고자 노력 하였습니다. <br>
+타입챌린지([rimo030/type-challenges](https://github.com/rimo030/type-challenges))에 도전해 100문제 이상 풀이 했습니다!
 
 **학습 기록**
 
@@ -161,17 +162,17 @@ NestJS를 보다 잘 다루기 위해 타입스크립트를 심도있게 공부�
 
 <br>
 
-### TDD
+### 📍TDD
 
 TDD의 개념을 배우고 좋은 테스트 코드가 무엇인지 고민해볼 수 있었습니다.
 
 **학습 기록**
 
-- [TDD/BDD/ATDD](https://github.com/rimo030/nestjs-e-commerce-frame/issues/34)
+- [TDD/BDD/ATDD #34](https://github.com/rimo030/nestjs-e-commerce-frame/issues/34)
 
 <br>
 
-### TypeORM / Prisma
+### 📍TypeORM / Prisma
 
 NestJS의 주요 ORM인 TypeORM과 Prisma를 모두 사용해 보면서, 기술 스택의 다양성을 가지게 되었습니다.
 
