@@ -1,30 +1,49 @@
+import { v4 } from 'uuid';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
+import { AuthService } from 'src/auth/auth.service';
 import { CompanyController } from 'src/controllers/company.controller';
-import { CompanyEntity } from 'src/entities/company.entity';
-import { PaginationDto } from 'src/entities/dtos/pagination.dto';
-import { CompanyRepository } from 'src/repositories/company.repository';
+import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
 import { CompanyService } from 'src/services/company.service';
 
-describe('Company Test suite', () => {
+describe('Controller', () => {
   let controller: CompanyController;
   let service: CompanyService;
-  let repository: CompanyRepository;
+  let authService: AuthService;
 
-  beforeEach(async () => {
+  let testSellerId: number;
+
+  beforeAll(async () => {
     const module = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
     service = module.get<CompanyService>(CompanyService);
     controller = module.get<CompanyController>(CompanyController);
-    repository = module.get<CompanyRepository>(CompanyRepository);
+    authService = module.get<AuthService>(AuthService);
+
+    /**
+     * 테스트시 사용할 판매자 계정아이디를 생성합니다.
+     */
+    const { id } = await authService.sellerSignUp({
+      email: `${v4().slice(0, 120)}@gmail.com`,
+      name: v4().slice(0, 10),
+      password: v4().slice(0, 20),
+      phone: '01012341234',
+      businessNumber: v4().slice(0, 120),
+    });
+    testSellerId = id;
   });
 
   it('should be defined', () => {
     expect(service).toBeDefined();
     expect(controller).toBeDefined();
-    expect(repository).toBeDefined();
+    expect(authService).toBeDefined();
+    expect(testSellerId).toBeDefined();
+  });
+
+  it('테스트 판매자 계정을 가져와야 한다.', () => {
+    expect(testSellerId).not.toBe(null);
   });
 
   describe('POST company', () => {
@@ -56,56 +75,76 @@ describe('Company Test suite', () => {
   });
 
   describe('GET company', () => {
-    it('회사를 조회할 수 있어야 한다.', async () => {
-      const testLimit = 10;
+    it('company를 페이지네이션으로 조회할 수 있어야 한다.', async () => {
       /**
-       * 회사 추가
-       * 테스트로 10개의 회사를 추가한다.
+       * 테스트할 company를 추가 합니다.
        */
-      const entities = new Array(testLimit).fill(0).map((el) => new CompanyEntity({ name: 'test' }));
-      await repository.save(entities);
+      const testCount = 10;
+      const companys = new Array(testCount).fill(0).map(() => {
+        return { name: v4() };
+      });
+      await service.createCompanies(testSellerId, companys);
 
-      /**
-       * 첫번째 페이지로 설정
-       */
-      const paginationDto = new PaginationDto();
-      paginationDto.page = 1;
-      paginationDto.limit = testLimit;
+      const testPaginationDto: GetPaginationDto = { page: 1, limit: testCount };
 
-      /**
-       * 회사 가져오기
-       */
-      const company = await controller.getCompany(paginationDto);
-      expect(company.data.list.length).toBe(paginationDto.limit);
-    });
-    it('회사는 페이지네이션을 통해, 10개, 20개,,,, n개씩 나눠서 조회가 가능하다.', async () => {
-      /**
-       * 회사 추가
-       * 테스트로 100개의 회사를 추가한다.
-       */
-      const entities = new Array(100).fill(0).map((el) => new CompanyEntity({ name: 'test' }));
-      await repository.save(entities);
+      const company = await controller.getCompany(testSellerId, testPaginationDto);
 
-      const paginationDto = new PaginationDto();
-      paginationDto.page = 1;
-      paginationDto.limit = 20;
-      const firstPageList = await controller.getCompany(paginationDto);
-
-      paginationDto.page = 2;
-      const secondPageList = await controller.getCompany(paginationDto);
-      /**
-       * limit 대로 회사를 가져오는지 확인
-       */
-      expect(firstPageList.data.list.length).toBe(paginationDto.limit);
-
-      const firstPagefirstItemId = firstPageList.data.list[0].id;
-      const secondPagefirstItemId = secondPageList.data.list[0].id;
-
-      expect(firstPagefirstItemId + paginationDto.limit).toBe(secondPagefirstItemId);
+      expect(company.data.length).toBe(testPaginationDto.limit);
+      expect(company.meta.page).toBe(testPaginationDto.page);
+      expect(company.meta.take).toBe(testPaginationDto.limit);
+      expect(company.meta.totalCount).toBeDefined();
+      expect(company.meta.totalPage).toBeDefined();
     });
 
+    it('페이지네이션으로 다음 페이지를 조회할 수 있다.', async () => {
+      /**
+       * 테스트할 company를 추가 합니다.
+       */
+      const testCount = 100;
+      const companys = new Array(testCount).fill(0).map(() => {
+        return { name: v4() };
+      });
+      await service.createCompanies(testSellerId, companys);
+
+      const testPaginationDto: GetPaginationDto = { page: 1, limit: 20 };
+      const firstPageData = await controller.getCompany(testSellerId, testPaginationDto);
+      expect(firstPageData.meta.page).toBe(testPaginationDto.page);
+      expect(firstPageData.data.length).toBe(testPaginationDto.limit);
+      expect(firstPageData.meta.take).toBe(testPaginationDto.limit);
+
+      testPaginationDto.page = 2;
+      const secondPageData = await controller.getCompany(testSellerId, testPaginationDto);
+
+      expect(secondPageData.meta.page).toBe(testPaginationDto.page);
+      expect(secondPageData.data.length).toBe(testPaginationDto.limit);
+      expect(secondPageData.meta.take).toBe(testPaginationDto.limit);
+
+      expect(firstPageData.meta.totalCount).toBe(secondPageData.meta.totalCount);
+      expect(firstPageData.meta.totalPage).toBe(secondPageData.meta.totalPage);
+    });
+
+    it('회사 이름으로 검색이 가능해야 한다.', async () => {
+      /**
+       * 테스트할 company를 추가 합니다.
+       */
+      const testCount = 100;
+      const companys = new Array(testCount).fill(0).map(() => {
+        return { name: v4() };
+      });
+      await service.createCompanies(testSellerId, companys);
+
+      const testName = companys.at(0)?.name.substring(0, 1);
+      const { data } = await controller.getCompany(testSellerId, { search: testName });
+      const isSearchSubString = data.every((d) => {
+        const name = testName as string;
+        if (d.name.includes(name.toUpperCase()) || d.name.includes(name.toLocaleLowerCase())) {
+          return true;
+        }
+        return false;
+      });
+      expect(isSearchSubString).toBe(true);
+    });
     it.todo('사업자 번호를 통한 검색이 가능해야 한다.');
-    it.todo('회사 이름으로 검색이 가능해야 한다.');
     it.todo('회사의 업종, 업태, 종목 등 상세한 정보가 조회되어야 한다.');
   });
 });

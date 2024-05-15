@@ -13,11 +13,11 @@ services:
 
     # 접근 포트 설정 (컨테이너 외부:컨테이너 내부)
     ports:
-      - '3306:3306'
+      - '${DATABASE_PORT}:3306'
 
     # 환경 변수 설정
     environment:
-      MYSQL_ROOT_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: '${DATABASE_PASSWORD}'
 
     # 명령어 설정
     command:

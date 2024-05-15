@@ -1,5 +1,6 @@
 export interface GetResponse<T> {
-  list: T[];
+  data: T[];
+  skip: number;
   count: number;
   take: number;
 }

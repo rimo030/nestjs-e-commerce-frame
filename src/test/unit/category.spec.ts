@@ -2,29 +2,25 @@ import { v4 } from 'uuid';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { CategoryController } from 'src/controllers/category.controller';
-import { CategoryEntity } from 'src/entities/category.entity';
-import { CategoryRepository } from 'src/repositories/category.repository';
+import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
 import { CategoryService } from 'src/services/category.service';
 
 describe('CategoryController', () => {
-  let Controller: CategoryController;
-  let Service: CategoryService;
-  let repository: CategoryRepository;
+  let controller: CategoryController;
+  let service: CategoryService;
 
   beforeEach(async () => {
     const module = await Test.createTestingModule({
       imports: [AppModule],
     }).compile();
 
-    Service = module.get<CategoryService>(CategoryService);
-    Controller = module.get<CategoryController>(CategoryController);
-    repository = module.get<CategoryRepository>(CategoryRepository);
+    service = module.get<CategoryService>(CategoryService);
+    controller = module.get<CategoryController>(CategoryController);
   });
 
   it('should be defined.', async () => {
-    expect(Controller).toBeDefined();
-    expect(Service).toBeDefined();
-    expect(repository).toBeDefined();
+    expect(controller).toBeDefined();
+    expect(service).toBeDefined();
   });
 
   describe('서버 실행 시 카테고리 데이터를 추가하는 스크립트', () => {
@@ -38,26 +34,58 @@ describe('CategoryController', () => {
     it.todo('서버 최초 실행 시 기본적인 카테고리 셋이 없을 경우 추가한다.');
   });
 
-  describe('GET categories', () => {
-    /**
-     * 카테고리는 이미 들어 있는 rows 라고 가정한다.
-     * 따라서 새로 추가하는 등 POST API는 없고 오로지 조회 요청만을 테스트한다.
-     *
-     */
-    it('카테고리가 조회되어야 한다.', async () => {
+  describe('GET category', () => {
+    it('카테고리를 페이지네이션으로 조회할 수 있어야 한다.', async () => {
       /**
-       * 카테고리를 10개 생성한다.
-       * 카테고리 명은 unique 해야한다.
+       * 테스트할 카테고리를 미리 추가 합니다.
        */
+      const testCount = 10;
+      const categorys = new Array(testCount).fill(0).map(() => {
+        return { name: v4() };
+      });
 
-      const entities = new Array(10).fill(0).map((el) => new CategoryEntity({ name: v4() }));
-      await repository.save(entities);
+      await service.createCategories(categorys);
 
       /**
-       * 저장한 카테고리를 조회할 수 있는 지 확인한다.
+       * 테스트 페이지 설정
        */
-      const categorylist = Controller.getCategory({ page: 1, limit: 10 });
-      expect((await categorylist).data.list.length).toBe(10);
+      const testPaginationDto: GetPaginationDto = { page: 1, limit: testCount };
+
+      const category = await controller.getCategory(testPaginationDto);
+
+      expect(category.data.length).toBe(testPaginationDto.limit);
+      expect(category.meta.page).toBe(testPaginationDto.page);
+      expect(category.meta.take).toBe(testPaginationDto.limit);
+      expect(category.meta.totalCount).toBeDefined();
+      expect(category.meta.totalPage).toBeDefined();
+    });
+
+    it('페이지 네이션으로 다음 페이지를 조회할 수 있다.', async () => {
+      /**
+       * 테스트할 카테고리를 미리 추가 합니다.
+       */
+      const testCount = 100;
+      const categorys = new Array(testCount).fill(0).map(() => {
+        return { name: v4() };
+      });
+
+      await service.createCategories(categorys);
+
+      const testPaginationDto: GetPaginationDto = { page: 1, limit: 20 };
+      const firstPageData = await controller.getCategory(testPaginationDto);
+      expect(firstPageData.meta.page).toBe(testPaginationDto.page);
+      expect(firstPageData.data.length).toBe(testPaginationDto.limit);
+      expect(firstPageData.meta.take).toBe(testPaginationDto.limit);
+
+      testPaginationDto.page = 2;
+      const secondPageData = await controller.getCategory(testPaginationDto);
+
+      expect(secondPageData.meta.page).toBe(testPaginationDto.page);
+      expect(secondPageData.data.length).toBe(testPaginationDto.limit);
+      expect(secondPageData.meta.take).toBe(testPaginationDto.limit);
+
+      expect(firstPageData.meta.totalCount).toBe(secondPageData.meta.totalCount);
+      expect(firstPageData.meta.totalPage).toBe(secondPageData.meta.totalPage);
     });
   });
 });

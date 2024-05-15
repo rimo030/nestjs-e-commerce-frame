@@ -66,7 +66,7 @@ model CartOption {
   cartId            Int            @map("cart_id")
   productOptionId   Int            @map("product_option_id")
   count             Int
-  ProductOption     ProductOption  @relation(fields: [productOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  productOption     ProductOption  @relation(fields: [productOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   carts             Cart           @relation(fields: [cartId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([productOptionId])
@@ -225,6 +225,13 @@ model OrderProductRequiredOption {
   @@map("order_product_required_option")
 }
 
+enum DeliveryType {
+  FREE
+  NOT_FREE
+  COUNT_FREE
+  PRICE_FREE
+}
+
 model Product {
   id                        Int                       @id @default(autoincrement())
   createdAt                 DateTime                  @default(now()) @db.DateTime(6) @map("created_at")
@@ -234,10 +241,10 @@ model Product {
   bundleId                  Int?                      @map("bundle_id")
   categoryId                Int                       @map("category_id")
   companyId                 Int                       @map("company_id")
-  isSale                    Int                       @db.TinyInt @map("is_sale")
+  isSale                    Boolean                   @default(true) @map("is_sale")
   name                      String                    @db.VarChar(128)
   description               String?                   @db.VarChar(255)
-  deliveryType              String                    @db.VarChar(128) @map("delivery_type")
+  deliveryType              DeliveryType              @map("delivery_type")
   deliveryFreeOver          Int?                      @map("delivery_free_over")
   deliveryCharge            Int                       @map("delivery_charge")
   img                       String                    @db.VarChar(255)
@@ -257,6 +264,11 @@ model Product {
   @@map("product")
 }
 
+enum ChargeStandard {
+  MIN
+  MAX
+}
+
 model ProductBundle {
   id                Int       @id @default(autoincrement())
   createdAt         DateTime  @default(now()) @db.DateTime(6) @map("created_at")
@@ -264,7 +276,7 @@ model ProductBundle {
   deletedAt         DateTime? @db.DateTime(6) @map("deleted_at")
   sellerId          Int       @map("seller_id")
   name              String    @db.VarChar(128)
-  chargeStandard    String    @db.VarChar(128) @map("charge_standard")
+  chargeStandard    ChargeStandard  @map("charge_standard")
   products          Product[]
   seller            Seller    @relation(fields: [sellerId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
@@ -281,7 +293,7 @@ model ProductInputOption {
   name                      String                      @db.VarChar(128)
   value                     String                      @db.VarChar(128)
   description               String                      @db.VarChar(255)
-  isRequired                Int                         @db.TinyInt  @map("is_required")
+  isRequired                Boolean                         @db.TinyInt  @map("is_required")
   cartInputOptions          CartInputOption[]
   productRequiredOption     ProductRequiredOption       @relation(fields: [productRequiredOptionId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
@@ -297,7 +309,7 @@ model ProductOption {
   productId       Int           @map("product_id")
   name            String        @db.VarChar(128)
   price           Int
-  isSale          Int           @db.TinyInt @map("is_sale")
+  isSale          Boolean           @db.TinyInt @map("is_sale")
   cartOptions     CartOption[]
   product         Product       @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
@@ -314,7 +326,7 @@ model ProductRequiredOption {
   productId               Int                    @map("product_id")
   name                    String                 @db.VarChar(128)
   price                   Int
-  isSale                  Int                    @db.TinyInt @map("is_sale")
+  isSale                  Boolean                    @db.TinyInt @map("is_sale")
   cartRequiredOptions     CartRequiredOption[]
   productInputOptions     ProductInputOption[]
   product                 Product                @relation(fields: [productId], references: [id], onDelete: NoAction, onUpdate: NoAction)
