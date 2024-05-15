@@ -1,13 +1,12 @@
 import { Repository, ILike } from 'typeorm';
 import { CustomRepository } from 'src/configs/custom-typeorm.decorator';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
-import { ProductDto } from 'src/entities/dtos/product.dto';
 import { ProductEntity } from 'src/entities/product.entity';
-import { chargeStandard } from 'src/types/enums/charge-standard.enum';
+import { chargeStandard } from 'src/types/charge-standard.type';
 
 @CustomRepository(ProductEntity)
 export class ProductRepository extends Repository<ProductEntity> {
-  async saveProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductEntity> {
+  async saveProduct(sellerId: number, createProductDto: CreateProductDto) {
     return await this.save({ sellerId, ...createProductDto });
   }
 
@@ -32,7 +31,7 @@ export class ProductRepository extends Repository<ProductEntity> {
     sellerId: number | undefined | null,
     skip: number,
     take: number,
-  ): Promise<[ProductDto[], number]> {
+  ): Promise<[ProductEntity[], number]> {
     return await this.findAndCount({
       select: {
         id: true,
@@ -59,7 +58,7 @@ export class ProductRepository extends Repository<ProductEntity> {
 
   async getProductsByBundleGroup(
     ids: number[],
-  ): Promise<{ bundleId: number; chargeStandard: keyof typeof chargeStandard; productIds: number[] }[]> {
+  ): Promise<{ bundleId: number; chargeStandard: chargeStandard; productIds: number[] }[]> {
     const results = await this.createQueryBuilder('product')
       .leftJoinAndSelect('product.bundle', 'bundle')
       .select([

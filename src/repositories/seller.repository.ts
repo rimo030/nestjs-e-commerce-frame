@@ -1,7 +1,7 @@
 import { Repository } from 'typeorm';
-import { CustomRepository } from '../configs/custom-typeorm.decorator';
-import { CreateSellerDto } from '../entities/dtos/create-seller.dto';
-import { SellerEntity } from '../entities/seller.entity';
+import { CustomRepository } from 'src/configs/custom-typeorm.decorator';
+import { CreateSellerDto } from 'src/entities/dtos/create-seller.dto';
+import { SellerEntity } from 'src/entities/seller.entity';
 
 @CustomRepository(SellerEntity)
 export class SellerRepository extends Repository<SellerEntity> {

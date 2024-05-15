@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { _deliveryType } from 'src/types/enums/delivery-type.enum';
+import { deliveryType } from 'src/types/delivery-type.type';
 import { CartEntity } from './cart.entity';
 import { CategoryEntity } from './category.entity';
 import { CommonEntity } from './common/common.entity';
@@ -34,7 +34,7 @@ export class ProductEntity extends CommonEntity {
   description?: string | null;
 
   @Column({ type: 'varchar', length: 128 })
-  deliveryType!: keyof typeof _deliveryType;
+  deliveryType!: deliveryType;
 
   @Column({ type: 'int', nullable: true })
   deliveryFreeOver?: number | null;

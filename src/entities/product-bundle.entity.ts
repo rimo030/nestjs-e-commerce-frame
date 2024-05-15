@@ -1,5 +1,5 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { chargeStandard } from 'src/types/enums/charge-standard.enum';
+import { chargeStandard } from 'src/types/charge-standard.type';
 import { CommonEntity } from './common/common.entity';
 import { ProductEntity } from './product.entity';
 import { SellerEntity } from './seller.entity';
@@ -13,7 +13,7 @@ export class ProductBundleEntity extends CommonEntity {
   name!: string;
 
   @Column({ type: 'varchar', length: 128 })
-  chargeStandard!: keyof typeof chargeStandard;
+  chargeStandard!: chargeStandard;
 
   /**
    * relations
