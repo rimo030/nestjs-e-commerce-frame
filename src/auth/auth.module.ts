@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { jwtConfig } from 'src/configs/jwt.config';
 import { typeORMConfig } from 'src/configs/typeorm.config';
 import { BuyerEntity } from 'src/entities/buyer.entity';
 import { SellerEntity } from 'src/entities/seller.entity';
@@ -31,17 +31,7 @@ import { SellerLocalStrategy } from './strategies/seller-local.strategy';
     ProductModule,
     CartModule,
     PassportModule,
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => {
-        return {
-          signOptions: {
-            expiresIn: configService.get('JWT_EXPIRATION_TIME'),
-          },
-        };
-      },
-    }),
+    JwtModule.registerAsync(jwtConfig),
     TypeOrmModule.forRootAsync(typeORMConfig),
     TypeOrmModule.forFeature([SellerEntity, BuyerEntity]),
   ],
