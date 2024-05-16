@@ -5,7 +5,6 @@ import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
 import { ProductListDto } from 'src/entities/dtos/product-list.dto';
 import { ProductDto } from 'src/entities/dtos/product.dto';
 import { ProductEntity } from 'src/entities/product.entity';
-import { chargeStandard } from 'src/types/charge-standard.type';
 
 @Injectable()
 export class ProductRepository {
@@ -48,17 +47,6 @@ export class ProductRepository {
       deliveryFreeOver: product.deliveryFreeOver,
       img: product.img,
     };
-  }
-
-  async getProductSellerId(id: number): Promise<{ sellerId: number } | null> {
-    return await this.productRepository.findOne({
-      select: {
-        sellerId: true,
-      },
-      where: {
-        id,
-      },
-    });
   }
 
   /**
@@ -122,27 +110,5 @@ export class ProductRepository {
       skip,
       take,
     });
-  }
-
-  async getProductsByBundleGroup(
-    ids: number[],
-  ): Promise<{ bundleId: number; chargeStandard: chargeStandard; productIds: number[] }[]> {
-    const results = await this.productRepository
-      .createQueryBuilder('product')
-      .leftJoinAndSelect('product.bundle', 'bundle')
-      .select([
-        'product.bundleId AS bundleId',
-        'bundle.chargeStandard As chargeStandard',
-        'GROUP_CONCAT(product.id) AS productIds',
-      ])
-      .whereInIds(ids)
-      .groupBy('product.bundleId')
-      .getRawMany();
-
-    return results.map((result) => ({
-      bundleId: result.bundleId,
-      chargeStandard: result.chargeStandard,
-      productIds: result.productIds.split(',').map((id) => parseInt(id)),
-    }));
   }
 }
