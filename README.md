@@ -2,13 +2,17 @@
 
 ## ⭐프로젝트 소개
 
-NestJS로 커머스 백엔드 API 구현합니다.
+NestJS로 커머스 백엔드 API를 구현합니다.
 
 회원가입, 상품 관리, 장바구니, 결제 등의 주요 API를 제공하여 쉽게 커머스 애플리케이션을 만들 수 있도록 합니다.
 
 <br>
 
 ## ⚙️기술 스택
+
+TypeORM이 적용된 코드는 [refactor/typrorm 브랜치](https://github.com/rimo030/nestjs-e-commerce-frame/tree/refactor/typeorm)에서 확인할 수 있습니다!
+
+<br>
 
 | 분류          | 기술 스택                                                                                                                                                                                                                                                                                                                                                                      |
 | :------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -23,10 +27,8 @@ NestJS로 커머스 백엔드 API 구현합니다.
 
 ## 📍프로젝트 실행 방법
 
-로컬에서 프로젝트를 실행하는 방법을 소개합니다.
-
-TypeORM의 경우 [refactor/typrorm 브랜치](https://github.com/rimo030/nestjs-e-commerce-frame/tree/refactor/typeorm)에서 실행 가능합니다!
-
+로컬에서 프로젝트를 실행하는 방법을 소개합니다. <br>
+TypeORM의 경우 [refactor/typrorm 브랜치](https://github.com/rimo030/nestjs-e-commerce-frame/tree/refactor/typeorm)에서 실행할 수 있습니다!
 
 ### 1. 설치
 
@@ -36,6 +38,7 @@ $ cd nestjs-e-commerce-frame
 
 $ npm install
 ```
+
 <br>
 
 ### 2. env 작성
@@ -60,6 +63,7 @@ $ docker exec -it CommerceDB bash
 $ mysql -u 계정이름 -p 비밀번호
 $ create database commerce;
 ```
+
 <br>
 
 ### 4. DB 스키마 생성
@@ -67,6 +71,7 @@ $ create database commerce;
 ```sh
 $ npx prisma db push
 ```
+
 <br>
 
 ### 5. 서버 실행
@@ -77,6 +82,7 @@ $ npm run start
 # dev
 $ npm run start:dev
 ```
+
 <br>
 
 ### 📍Swagger 접속 주소
@@ -89,19 +95,18 @@ http://localhost:3000/api
 
 ## 🔗ERD
 
-![ERD](https://github.com/rimo030/nestjs-e-commerce-frame/assets/109577985/a98fcdfc-8087-4b67-9e6f-3852e2b45207)
-
+![Untitled (2)](https://github.com/rimo030/nestjs-e-commerce-frame/assets/109577985/5ff87344-b957-4f28-bea3-6c96a2fa5d86)
 
 <br>
 
 ## ✌️기술적 경험
 
-[이슈](https://github.com/rimo030/nestjs-e-commerce-frame/issues)를 통해 여러 기술적인 내용을 논의 하였습니다. <br>
-배운 내용은 잘 기억하고 나누기 위해 [개인블로그](https://munak.tistory.com/)에 정리하고 있습니다!
+[이슈](https://github.com/rimo030/nestjs-e-commerce-frame/issues)를 통해 여러 기술적인 내용을 논의하였습니다. <br>
+배운 내용은 잘 기억하고 나누기 위해 [개인 블로그](https://munak.tistory.com/)에 정리하고 있습니다!
 
 ### 📍Git
 
-Git 이용한 첫 프로젝트 입니다. 기초적인 clone, pull, push 부터 cherry-pick, rebase등 Git의 여러 기능을 학습했습니다. <br>
+Git 이용한 첫 프로젝트입니다. 기초적인 clone, pull, push부터 cherry-pick, rebase등 Git의 여러 기능을 학습했습니다. <br>
 프로젝트에 Git-commit-convention과 Git-flow를 적용하였습니다.
 
 **학습 기록**
@@ -113,7 +118,7 @@ Git 이용한 첫 프로젝트 입니다. 기초적인 clone, pull, push 부터 
 ### 📍Node.js / JS
 
 Node.js 백엔드 개발 생태계와 학습했습니다. <br>
-근간이 되는 자바스크립트을 더 잘 이해하고자 노력하였습니다. 블로그에 관련 도서나 자료를 읽고 정리하고 있습니다.
+근간이 되는 자바스크립트를 더 잘 이해하고자 노력하였습니다. 블로그에 관련 도서나 자료를 읽고 정리하고 있습니다.
 
 **학습 기록**
 
@@ -128,7 +133,7 @@ Node.js 백엔드 개발 생태계와 학습했습니다. <br>
 
 ### 📍NestJS
 
-NestJS를 이용한 첫 프로젝트 입니다. DI와 레이어간 역할 분리의 개념에 대해 배울 수 있었습니다. <br>
+NestJS를 이용한 첫 프로젝트입니다. DI와 계층 간 역할 분리의 개념에 대해 배울 수 있었습니다. <br>
 
 **학습 기록**
 
@@ -140,8 +145,8 @@ NestJS를 이용한 첫 프로젝트 입니다. DI와 레이어간 역할 분리
 
 ### 📍TS
 
-NestJS를 보다 잘 다루기 위해 타입스크립트를 심도있게 공부하고자 노력 하였습니다. <br>
-타입챌린지([rimo030/type-challenges](https://github.com/rimo030/type-challenges))에 도전해 100문제 이상 풀이 했습니다!
+NestJS를 보다 잘 다루기 위해 타입스크립트를 심도 있게 공부하고자 노력하였습니다. <br>
+타입챌린지([rimo030/type-challenges](https://github.com/rimo030/type-challenges))에 도전해 100문제 이상 풀이했습니다!
 
 **학습 기록**
 
@@ -160,7 +165,7 @@ NestJS를 보다 잘 다루기 위해 타입스크립트를 심도있게 공부�
 
 ### 📍TDD
 
-TDD의 개념을 배우고 좋은 테스트 코드가 무엇인지 고민해볼 수 있었습니다.
+TDD의 개념을 배우고 좋은 테스트 코드가 무엇인지 고민해 볼 수 있었습니다.
 
 **학습 기록**
 
