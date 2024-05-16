@@ -1,5 +1,4 @@
 import { Column, Entity, OneToMany } from 'typeorm';
-import { BoardEntity } from './board.entity';
 import { CartEntity } from './cart.entity';
 import { CommonEntity } from './common/common.entity';
 import { OrderEntity } from './order.entity';
@@ -27,9 +26,6 @@ export class BuyerEntity extends CommonEntity {
   /**
    * relations
    */
-
-  @OneToMany(() => BoardEntity, (b) => b.buyer)
-  boards!: BoardEntity[];
 
   @OneToMany(() => CartEntity, (c) => c.buyer)
   carts!: CartEntity[];
