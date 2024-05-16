@@ -15,36 +15,25 @@ import {
   ProductRequiredOptionsNotFoundException,
 } from 'src/exceptions/product.exception';
 import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
+import { ProductOptionRepository } from 'src/repositories/product-option-repository';
+import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
+import { ProductRepository } from 'src/repositories/product.repository';
 import { getOffset } from 'src/util/functions/pagination-util.function';
-import { PrismaService } from './prisma.service';
 
 @Injectable()
 export class ProductService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly productRepository: ProductRepository,
+    private readonly productRequiredOptionRepository: ProductRequiredOptionRepository,
+    private readonly productOptionRepository: ProductOptionRepository,
+  ) {}
 
   /**
    * 상품의 정보를 조회합니다.
-   * @param id  조회할 상품의 아이디
-   *
+   * @param id 조회할 상품의 아이디 입니다.
    */
-  async getProductById(id: number): Promise<ProductDto> {
-    const product = await this.prisma.product.findUnique({
-      select: {
-        id: true,
-        sellerId: true,
-        bundleId: true,
-        categoryId: true,
-        companyId: true,
-        isSale: true,
-        name: true,
-        description: true,
-        deliveryType: true,
-        deliveryFreeOver: true,
-        deliveryCharge: true,
-        img: true,
-      },
-      where: { id },
-    });
+  async getProduct(id: number): Promise<ProductDto> {
+    const product = await this.productRepository.getProduct(id);
 
     if (!product) {
       throw new ProductNotFoundException();
@@ -57,10 +46,7 @@ export class ProductService {
    * @param requiredOptionId 조회할 상품 필수 옵션의 아이디 입니다.
    */
   async getProductRequiredOptionById(requiredOptionId: number): Promise<ProductRequiredOptionDto> {
-    const requiredOption = await this.prisma.productRequiredOption.findUnique({
-      select: { id: true, productId: true, name: true, price: true, isSale: true },
-      where: { id: requiredOptionId },
-    });
+    const requiredOption = await this.productRequiredOptionRepository.getRequiredOption(requiredOptionId);
 
     if (!requiredOption) {
       throw new ProductRequiredOptionNotFoundException();
@@ -73,29 +59,13 @@ export class ProductService {
    * @param optionId 조회할 상품 선택 옵션의 아이디 입니다.
    */
   async getProductOptionById(optionId: number): Promise<ProductOptionDto> {
-    const option = await this.prisma.productOption.findUnique({
-      select: { id: true, productId: true, name: true, price: true, isSale: true },
-      where: { id: optionId },
-    });
-
+    const option = await this.productOptionRepository.getOption(optionId);
     if (!option) {
       throw new ProductOptionNotFoundException();
     }
     return option;
   }
 
-  /**
-   * 상품의 정보를 조회합니다.
-   * @param id 조회할 상품의 아이디 입니다.
-   */
-  async getProduct(id: number): Promise<ProductDto> {
-    const product = await this.getProductById(id);
-
-    if (!product) {
-      throw new ProductNotFoundException();
-    }
-    return product;
-  }
   /**
    * 상품의 목록과 최소 가격을 페이지네이션으로 조회합니다.
    * 상품명, 카테고리명, 판매자ID 검색 쿼리를 설정할 수 있습니다.
@@ -125,19 +95,11 @@ export class ProductService {
    * @param productIds 상품의 아이디 배열입니다.
    */
   async getMinimumPriceRows(productIds: number[]) {
-    const minimumPriceRows = await this.prisma.productRequiredOption.groupBy({
-      by: ['productId'],
-      _min: { price: true },
-      where: {
-        productId: {
-          in: productIds,
-        },
-      },
-    });
+    const minimumPriceRows = await this.productRequiredOptionRepository.getMiniumPriceRows(productIds);
 
     return minimumPriceRows.map((row) => ({
       productId: row.productId,
-      minimumPrice: row._min.price ?? 0,
+      minimumPrice: row.minimumPrice ?? 0,
     }));
   }
 
@@ -154,38 +116,7 @@ export class ProductService {
     const { page, limit, search, categoryId, sellerId } = getProductListPaginationDto;
     const { skip, take } = getOffset({ page, limit });
 
-    const [data, count] = await Promise.all([
-      this.prisma.product.findMany({
-        select: {
-          id: true,
-          sellerId: true,
-          categoryId: true,
-          companyId: true,
-          name: true,
-          deliveryType: true,
-          img: true,
-        },
-        orderBy: {
-          id: 'desc',
-        },
-        where: {
-          isSale: true,
-          ...(categoryId && { categoryId }),
-          ...(sellerId && { sellerId }),
-          ...(search && { name: { contains: search } }),
-        },
-        skip,
-        take,
-      }),
-      this.prisma.product.count({
-        where: {
-          isSale: true,
-          ...(categoryId && { categoryId }),
-          ...(sellerId && { sellerId }),
-          ...(search && { name: { contains: search } }),
-        },
-      }),
-    ]);
+    const [data, count] = await this.productRepository.getProductList(search, categoryId, sellerId, skip, take);
 
     if (!data.length) {
       throw new ProductsNotFoundException();
@@ -220,39 +151,17 @@ export class ProductService {
    *
    * @param productId 조회할 상품의 아이디
    * @param paginationDto 페이지네이션 요청 객체
-   *
    */
   async getRequiredOptionJoinInputOptions(
     productId: number,
     paginationDto: GetPaginationDto,
   ): Promise<PaginationResponse<ProductRequiredOptionJoinInputOptionDto>> {
     const { skip, take } = getOffset(paginationDto);
-    const [data, count] = await Promise.all([
-      this.prisma.productRequiredOption.findMany({
-        select: {
-          id: true,
-          productId: true,
-          name: true,
-          price: true,
-          isSale: true,
-          productInputOptions: {
-            select: {
-              id: true,
-              productRequiredOptionId: true,
-              name: true,
-              value: true,
-              description: true,
-              isRequired: true,
-            },
-          },
-        },
-        where: { productId, isSale: true },
-        orderBy: { id: 'asc' },
-        skip,
-        take,
-      }),
-      this.prisma.productRequiredOption.count({ where: { productId, isSale: true } }),
-    ]);
+    const [data, count] = await this.productRequiredOptionRepository.getRequiredOptionJoinInputOptions(
+      productId,
+      skip,
+      take,
+    );
 
     if (!data.length) {
       throw new ProductRequiredOptionsNotFoundException();
@@ -262,32 +171,16 @@ export class ProductService {
 
   /**
    * 해당 productId를 가진 상품 선택옵션을 페이지네이션으로 조회합니다.
+   *
    * @param productId 조회할 상품의 아이디
    * @param paginationDto 페이지네이션 요청 객체
-   *
    */
   async getProductOptions(
     productId: number,
     paginationDto: GetPaginationDto,
   ): Promise<PaginationResponse<ProductOptionDto>> {
     const { skip, take } = getOffset(paginationDto);
-
-    const [data, count] = await Promise.all([
-      this.prisma.productOption.findMany({
-        select: {
-          id: true,
-          productId: true,
-          name: true,
-          price: true,
-          isSale: true,
-        },
-        where: { productId, isSale: true },
-        orderBy: { id: 'asc' },
-        skip,
-        take,
-      }),
-      this.prisma.productRequiredOption.count({ where: { productId, isSale: true } }),
-    ]);
+    const [data, count] = await this.productOptionRepository.getProductOptions(productId, skip, take);
     return { data, skip, take, count };
   }
 }

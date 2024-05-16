@@ -16,7 +16,7 @@ export class ProductEntity extends CommonEntity {
   sellerId!: number;
 
   @Column({ nullable: true })
-  bundleId?: number | null;
+  bundleId!: number | null;
 
   @Column()
   categoryId!: number;
@@ -31,13 +31,13 @@ export class ProductEntity extends CommonEntity {
   name!: string;
 
   @Column({ type: 'varchar', length: 255, nullable: true })
-  description?: string | null;
+  description!: string | null;
 
   @Column({ type: 'varchar', length: 128 })
   deliveryType!: deliveryType;
 
   @Column({ type: 'int', nullable: true })
-  deliveryFreeOver?: number | null;
+  deliveryFreeOver!: number | null;
 
   @Column({ type: 'int' })
   deliveryCharge!: number;
