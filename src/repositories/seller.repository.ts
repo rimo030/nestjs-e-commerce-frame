@@ -13,7 +13,7 @@ export class SellerRepository {
 
   /**
    * seller를 저장합니다.
-   * @param createSellerDto
+   * @param createSellerDto 저장할 seller의 아이디 입니다.
    */
   async saveSeller(createSellerDto: CreateSellerDto): Promise<{ id: number }> {
     const { email, password, name, businessNumber, phone } = createSellerDto;
@@ -26,11 +26,10 @@ export class SellerRepository {
    * @param id 확인할 아이디 입니다.
    */
   async findById(id: number): Promise<{ id: number } | null> {
-    const seller = await this.sellerRepository.findOne({
+    return await this.sellerRepository.findOne({
       select: { id: true },
       where: { id },
     });
-    return seller ? { id: seller.id } : null;
   }
 
   /**
@@ -38,25 +37,21 @@ export class SellerRepository {
    * @param email 확인할 이메일 입니다.
    */
   async findSeller(email: string): Promise<{ id: number; password: string } | null> {
-    const seller = await this.sellerRepository.findOne({
+    return await this.sellerRepository.findOne({
       select: { id: true, password: true },
       where: { email },
       withDeleted: true,
     });
-
-    return seller ? { id: seller.id, password: seller.password } : null;
   }
   /**
    * 해당 이메일을 가진 seller가 존재하는지 확인합니다.
    * @param email 확인할 이메일 입니다.
    */
   async findByEmail(email: string): Promise<{ id: number } | null> {
-    const seller = await this.sellerRepository.findOne({
+    return await this.sellerRepository.findOne({
       select: { id: true },
       where: { email },
       withDeleted: true,
     });
-
-    return seller ? { id: seller.id } : null;
   }
 }

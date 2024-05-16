@@ -26,12 +26,10 @@ export class BuyerRepository {
    * @param id 확인할 buyer의 아이디 입니다.
    */
   async findById(id: number): Promise<{ id: number } | null> {
-    const buyer = await this.buyerRepository.findOne({
+    return await this.buyerRepository.findOne({
       select: { id: true },
       where: { id },
     });
-
-    return buyer ? { id: buyer.id } : null;
   }
 
   /**
@@ -39,25 +37,21 @@ export class BuyerRepository {
    * @param email 확인할 이메일 입니다.
    */
   async findBuyer(email: string): Promise<{ id: number; password: string } | null> {
-    const buyer = await this.buyerRepository.findOne({
+    return await this.buyerRepository.findOne({
       select: { id: true, password: true },
       where: { email },
       withDeleted: true,
     });
-
-    return buyer ? { id: buyer.id, password: buyer.password } : null;
   }
   /**
    *  해당 이메일을 가진 buyer가 존재하는지 확인합니다.
    * @param email 확인할 이메일 입니다.
    */
   async findByEmail(email: string): Promise<{ id: number } | null> {
-    const buyer = await this.buyerRepository.findOne({
+    return await this.buyerRepository.findOne({
       select: { id: true },
       where: { email },
       withDeleted: true,
     });
-
-    return buyer ? { id: buyer.id } : null;
   }
 }
