@@ -1,4 +1,7 @@
-import { ProductRequiredOption } from '@prisma/client';
-
-export interface ProductRequiredOptionDto
-  extends Pick<ProductRequiredOption, 'id' | 'productId' | 'name' | 'price' | 'isSale'> {}
+export interface ProductRequiredOptionDto {
+  id: number;
+  productId: number;
+  name: string;
+  price: number;
+  isSale: boolean;
+}
