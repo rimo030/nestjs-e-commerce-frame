@@ -10,7 +10,7 @@ NestJS로 커머스 백엔드 API를 구현합니다.
 
 ## ⚙️기술 스택
 
-TypeORM이 적용된 코드는 [refactor/typrorm 브랜치](https://github.com/rimo030/nestjs-e-commerce-frame/tree/refactor/typeorm)에서 확인할 수 있습니다!
+TypeORM이 적용된 코드는 [refactor/typeorm 브랜치](https://github.com/rimo030/nestjs-e-commerce-frame/tree/refactor/typeorm)에서 확인할 수 있습니다!
 
 <br>
 
@@ -28,7 +28,7 @@ TypeORM이 적용된 코드는 [refactor/typrorm 브랜치](https://github.com/r
 ## 📍프로젝트 실행 방법
 
 로컬에서 프로젝트를 실행하는 방법을 소개합니다. <br>
-TypeORM의 경우 [refactor/typrorm 브랜치](https://github.com/rimo030/nestjs-e-commerce-frame/tree/refactor/typeorm)에서 실행할 수 있습니다!
+TypeORM 코드의 경우 [refactor/typeorm 리드미](https://github.com/rimo030/nestjs-e-commerce-frame/blob/refactor/typeorm/README.md)에서 별도로 확인 가능합니다!
 
 ### 1. 설치
 
@@ -95,7 +95,7 @@ http://localhost:3000/api
 
 ## 🔗ERD
 
-![Untitled (2)](https://github.com/rimo030/nestjs-e-commerce-frame/assets/109577985/5ff87344-b957-4f28-bea3-6c96a2fa5d86)
+![ERD](https://github.com/rimo030/nestjs-e-commerce-frame/assets/109577985/a98fcdfc-8087-4b67-9e6f-3852e2b45207)
 
 <br>
 
