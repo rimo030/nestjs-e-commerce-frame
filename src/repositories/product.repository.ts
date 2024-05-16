@@ -1,17 +1,57 @@
 import { Repository, ILike } from 'typeorm';
-import { CustomRepository } from 'src/configs/custom-typeorm.decorator';
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductDto } from 'src/entities/dtos/create-product.dto';
+import { ProductListDto } from 'src/entities/dtos/product-list.dto';
+import { ProductDto } from 'src/entities/dtos/product.dto';
 import { ProductEntity } from 'src/entities/product.entity';
 import { chargeStandard } from 'src/types/charge-standard.type';
 
-@CustomRepository(ProductEntity)
-export class ProductRepository extends Repository<ProductEntity> {
-  async saveProduct(sellerId: number, createProductDto: CreateProductDto) {
-    return await this.save({ sellerId, ...createProductDto });
+@Injectable()
+export class ProductRepository {
+  constructor(
+    @InjectRepository(ProductEntity)
+    private productRepository: Repository<ProductEntity>,
+  ) {}
+
+  /**
+   * 상품을 저장합니다.
+   * @param sellerId 저장할 판매자의 아이디 입니다.
+   * @param createProductDto 저장할 상품의 데이터 입니다.
+   */
+  async saveProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductDto> {
+    const product = await this.productRepository.save({
+      sellerId,
+      bundleId: createProductDto.bundleId,
+      categoryId: createProductDto.categoryId,
+      companyId: createProductDto.companyId,
+      name: createProductDto.name,
+      isSale: createProductDto.isSale,
+      description: createProductDto.description,
+      deliveryType: createProductDto.deliveryType,
+      deliveryCharge: createProductDto.deliveryCharge,
+      deliveryFreeOver: createProductDto.deliveryFreeOver,
+      img: createProductDto.img,
+    });
+
+    return {
+      id: product.id,
+      sellerId: product.sellerId,
+      bundleId: product.bundleId,
+      categoryId: product.categoryId,
+      companyId: product.companyId,
+      name: product.name,
+      isSale: product.isSale,
+      description: product.description,
+      deliveryType: product.deliveryType,
+      deliveryCharge: product.deliveryCharge,
+      deliveryFreeOver: product.deliveryFreeOver,
+      img: product.img,
+    };
   }
 
   async getProductSellerId(id: number): Promise<{ sellerId: number } | null> {
-    return await this.findOne({
+    return await this.productRepository.findOne({
       select: {
         sellerId: true,
       },
@@ -21,18 +61,46 @@ export class ProductRepository extends Repository<ProductEntity> {
     });
   }
 
-  async getProduct(id: number): Promise<ProductEntity | null> {
-    return await this.findOne({ where: { id } });
+  /**
+   * 상품의 아이디가 존재하는지 조회합니다.
+   * @param id 조회할 상품의 아이디 입니다.
+   */
+  async getProduct(id: number): Promise<ProductDto | null> {
+    return await this.productRepository.findOne({
+      select: {
+        id: true,
+        sellerId: true,
+        bundleId: true,
+        categoryId: true,
+        companyId: true,
+        isSale: true,
+        name: true,
+        description: true,
+        deliveryType: true,
+        deliveryFreeOver: true,
+        deliveryCharge: true,
+        img: true,
+      },
+      where: { id },
+    });
   }
 
+  /**
+   * 상품리스트를 페이지 네이션으로 조회합니다.
+   * @param search 검색어 옵션 입니다
+   * @param categoryId 카테고리 별 조회 옵션 입니다.
+   * @param sellerId 판매자 별 조회 옵션 입니다.
+   * @param skip 건너뛸 요소의 개수 입니다.
+   * @param take 가져올 요소의 개수 입니다.
+   */
   async getProductList(
     search: string | undefined | null,
     categoryId: number | undefined | null,
     sellerId: number | undefined | null,
     skip: number,
     take: number,
-  ): Promise<[ProductEntity[], number]> {
-    return await this.findAndCount({
+  ): Promise<[Omit<ProductListDto, 'salePrice'>[], number]> {
+    return await this.productRepository.findAndCount({
       select: {
         id: true,
         sellerId: true,
@@ -43,13 +111,13 @@ export class ProductRepository extends Repository<ProductEntity> {
         img: true,
       },
       order: {
-        id: 'DESC',
+        id: 'desc',
       },
       where: {
         isSale: true,
-        ...{ categoryId: categoryId ?? undefined },
-        ...{ sellerId: sellerId ?? undefined },
-        ...{ name: search ? ILike(`%${search}%`) : undefined },
+        ...(categoryId && { categoryId }),
+        ...(sellerId && { sellerId }),
+        ...(search && { name: ILike(`%${search}%`) }),
       },
       skip,
       take,
@@ -59,7 +127,8 @@ export class ProductRepository extends Repository<ProductEntity> {
   async getProductsByBundleGroup(
     ids: number[],
   ): Promise<{ bundleId: number; chargeStandard: chargeStandard; productIds: number[] }[]> {
-    const results = await this.createQueryBuilder('product')
+    const results = await this.productRepository
+      .createQueryBuilder('product')
       .leftJoinAndSelect('product.bundle', 'bundle')
       .select([
         'product.bundleId AS bundleId',

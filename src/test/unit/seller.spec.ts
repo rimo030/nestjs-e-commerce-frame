@@ -156,7 +156,7 @@ describe('Seller Controller', () => {
   describe('seller는 상품을 생성할 수 있다.', () => {
     it('상품이 생성 되었다면 DB에서 조회할 수 있어야 한다.', async () => {
       const { data } = await controller.createProduct(testId as number, testProduct);
-      const { id: savedId, sellerId: savedSellerId, ...savedProduct } = await productService.getProductById(data.id);
+      const { id: savedId, sellerId: savedSellerId, ...savedProduct } = await productService.getProduct(data.id);
 
       expect(savedId).toBe(data.id);
       expect(savedSellerId).toBe(testId);
@@ -224,7 +224,7 @@ describe('Seller Controller', () => {
 
     it('해당 상품을 생성한 판매자가 아닐 경우 권한 에러를 던져야 한다.', async () => {
       const { data } = await controller.createProduct(testId as number, testProduct);
-      const savedProduct = await productService.getProductById(data.id);
+      const savedProduct = await productService.getProduct(data.id);
       expect(savedProduct).not.toBe(null);
 
       try {

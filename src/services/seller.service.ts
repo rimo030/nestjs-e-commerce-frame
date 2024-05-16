@@ -10,11 +10,21 @@ import { ProductDto } from 'src/entities/dtos/product.dto';
 import { SellerNotfoundException } from 'src/exceptions/auth.exception';
 import { ProductBundleNotFoundException, ProductNotFoundException } from 'src/exceptions/product.exception';
 import { ProductUnauthrizedException } from 'src/exceptions/seller.exception';
-import { PrismaService } from './prisma.service';
+import { ProductBundleRepository } from 'src/repositories/product-bundle.repository';
+import { ProductOptionRepository } from 'src/repositories/product-option-repository';
+import { ProductRequiredOptionRepository } from 'src/repositories/product-required-option.repository';
+import { ProductRepository } from 'src/repositories/product.repository';
+import { SellerRepository } from 'src/repositories/seller.repository';
 
 @Injectable()
 export class SellerService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly productBundleRepository: ProductBundleRepository,
+    private readonly productRepository: ProductRepository,
+    private readonly productRequiredOptionRepository: ProductRequiredOptionRepository,
+    private readonly productOptionRepository: ProductOptionRepository,
+    private readonly sellerRepository: SellerRepository,
+  ) {}
 
   /**
    * 상품 묶음을 저장합니다.
@@ -26,15 +36,12 @@ export class SellerService {
     sellerId: number,
     createProductBundleDto: CreateProductBundleDto,
   ): Promise<ProductBundleDto> {
-    const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
+    const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
       throw new SellerNotfoundException();
     }
 
-    const productBundle = await this.prisma.productBundle.create({
-      select: { id: true, name: true, sellerId: true, chargeStandard: true },
-      data: { sellerId, name: createProductBundleDto.name, chargeStandard: createProductBundleDto.chargeStandard },
-    });
+    const productBundle = await this.productBundleRepository.saveProductBundle(sellerId, createProductBundleDto);
     return productBundle;
   }
 
@@ -43,43 +50,14 @@ export class SellerService {
    *
    * @param sellerId 판매자 계정의 아이디가 있어야 상품 묶음을 저장할 수 있습니다.
    * @param createProductDto 저장할 상품의 데이터 입니다.
-   *
    */
   async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductDto> {
-    const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
+    const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
       throw new SellerNotfoundException();
     }
 
-    const product = await this.prisma.product.create({
-      select: {
-        id: true,
-        sellerId: true,
-        bundleId: true,
-        categoryId: true,
-        companyId: true,
-        name: true,
-        isSale: true,
-        description: true,
-        deliveryType: true,
-        deliveryCharge: true,
-        deliveryFreeOver: true,
-        img: true,
-      },
-      data: {
-        sellerId,
-        bundleId: createProductDto.bundleId,
-        categoryId: createProductDto.categoryId,
-        companyId: createProductDto.companyId,
-        name: createProductDto.name,
-        isSale: createProductDto.isSale,
-        description: createProductDto.description,
-        deliveryType: createProductDto.deliveryType,
-        deliveryCharge: createProductDto.deliveryCharge,
-        deliveryFreeOver: createProductDto.deliveryFreeOver,
-        img: createProductDto.img,
-      },
-    });
+    const product = await this.productRepository.saveProduct(sellerId, createProductDto);
     return product;
   }
 
@@ -97,8 +75,7 @@ export class SellerService {
     isRequireOptionDto: IsRequireOptionDto,
     createProductOptionsDto: CreateProductOptionsDto,
   ): Promise<ProductRequiredOptionDto | ProductOptionDto> {
-    const savedProduct = await this.prisma.product.findUnique({ select: { sellerId: true }, where: { id: productId } });
-
+    const savedProduct = await this.productRepository.getProduct(productId);
     if (!savedProduct) {
       throw new ProductNotFoundException();
     }
@@ -108,26 +85,13 @@ export class SellerService {
     }
 
     if (isRequireOptionDto.isRequire) {
-      const requiredOption = await this.prisma.productRequiredOption.create({
-        select: { id: true, productId: true, name: true, price: true, isSale: true },
-        data: {
-          productId,
-          name: createProductOptionsDto.name,
-          price: createProductOptionsDto.price,
-          isSale: createProductOptionsDto.isSale,
-        },
-      });
+      const requiredOption = await this.productRequiredOptionRepository.saveRequiredOption(
+        productId,
+        createProductOptionsDto,
+      );
       return requiredOption;
     } else {
-      const option = await this.prisma.productOption.create({
-        select: { id: true, productId: true, name: true, price: true, isSale: true },
-        data: {
-          productId,
-          name: createProductOptionsDto.name,
-          price: createProductOptionsDto.price,
-          isSale: createProductOptionsDto.isSale,
-        },
-      });
+      const option = await this.productOptionRepository.saveOption(productId, createProductOptionsDto);
       return option;
     }
   }
@@ -137,11 +101,7 @@ export class SellerService {
    * @param bundleId 조회할 상품 묶음의 아이디 입니다.
    */
   async getProductBundle(bundleId: number): Promise<ProductBundleDto> {
-    const productBundle = await this.prisma.productBundle.findUnique({
-      select: { id: true, sellerId: true, name: true, chargeStandard: true },
-      where: { id: bundleId },
-    });
-
+    const productBundle = await this.productBundleRepository.getProductBundle(bundleId);
     if (!productBundle) {
       throw new ProductBundleNotFoundException();
     }
