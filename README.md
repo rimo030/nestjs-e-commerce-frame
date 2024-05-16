@@ -25,7 +25,9 @@
 
 ```sh
 $ git clone https://github.com/rimo030/nestjs-e-commerce-frame.git
+
 $ cd nestjs-e-commerce-frame
+$ git checkout "refactor/typeorm"
 
 $ npm install
 ```
@@ -60,7 +62,11 @@ $ create database commerce;
 ### 4. DB 스키마 생성
 
 ```sh
-$ schema:sync:local
+# 스키마 생성
+$ npm run schema:sync
+
+# 스키마 제거
+$ npm run schema:drop
 ```
 
 <br>
