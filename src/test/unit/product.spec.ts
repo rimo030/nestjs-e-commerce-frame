@@ -409,8 +409,8 @@ describe('ProductController', () => {
        * 조회 결과는 id 순으로 정렬 되어 있어야 한다.
        */
       const resIds = res.data.map((el) => el.id);
-      const sortedList = resIds.sort();
-      expect(res.data.every((el, i) => el.id === sortedList.at(i))).toBe(true);
+      const sortedList = [...resIds].sort((a, b) => a - b);
+      expect(resIds).toEqual(sortedList);
     });
 
     /**
