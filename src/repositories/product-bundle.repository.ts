@@ -1,4 +1,4 @@
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateProductBundleDto } from 'src/entities/dtos/create-product-bundle.dto';
@@ -37,18 +37,20 @@ export class ProductBundleRepository {
    * @param id 조회할 상품 묶음의 아이디 입니다.
    */
   async getProductBundle(id: number): Promise<ProductBundleDto | null> {
-    const productBundle = await this.productBundleRepository.findOne({
+    return await this.productBundleRepository.findOne({
       select: { id: true, sellerId: true, name: true, chargeStandard: true },
       where: { id },
     });
+  }
 
-    return productBundle
-      ? {
-          id: productBundle.id,
-          sellerId: productBundle.sellerId,
-          name: productBundle.name,
-          chargeStandard: productBundle.chargeStandard,
-        }
-      : null;
+  /**
+   * 해당 아이디를 가진 상품 묶음들을 조회합니다.
+   * @param ids 조회할 상품 묶음의 아이디 배열 입니다.
+   */
+  async getProductBundles(ids: number[]): Promise<ProductBundleDto[]> {
+    return await this.productBundleRepository.find({
+      select: { id: true, sellerId: true, name: true, chargeStandard: true },
+      where: { id: In(ids) },
+    });
   }
 }

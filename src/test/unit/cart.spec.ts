@@ -308,14 +308,14 @@ describe('Cart Controller', () => {
           ]);
 
           const createCartRequiredOptionDtos: CreateCartRequiredOptionDto[] = [];
-          productRequiredOptions.data.forEach((pro) => {
+          for (const pro of productRequiredOptions.data) {
             createCartRequiredOptionDtos.push({ productRequiredOptionId: pro.id, count: testCount });
-          });
+          }
 
           const createCartOptionDtos: CreateCartOptionDto[] = [];
-          productOptions.data.forEach((po) => {
+          for (const po of productOptions.data) {
             createCartOptionDtos.push({ productOptionId: po.id, count: testCount });
-          });
+          }
 
           const testCartDto: CreateCartDto = {
             productId: product.id,

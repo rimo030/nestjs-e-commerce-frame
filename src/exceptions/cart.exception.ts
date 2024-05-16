@@ -24,9 +24,21 @@ export class CartForbiddenException extends HttpException {
   }
 }
 
-export class CartIntercnalServerErrorException extends HttpException {
+export class CartInternalServerErrorException extends HttpException {
   constructor() {
     super(`Cart update error`, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+}
+
+export class CartRequiredOptionInternalServerErrorException extends HttpException {
+  constructor() {
+    super(`Cart required option update error`, HttpStatus.INTERNAL_SERVER_ERROR);
+  }
+}
+
+export class CartOptionInternalServerErrorException extends HttpException {
+  constructor() {
+    super(`Cart option update error`, HttpStatus.INTERNAL_SERVER_ERROR);
   }
 }
 
