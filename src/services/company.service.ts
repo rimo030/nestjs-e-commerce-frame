@@ -3,12 +3,16 @@ import { CompanyDto } from 'src/entities/dtos/company.dto';
 import { GetCompanyPaginationDto } from 'src/entities/dtos/get-company-pagination.dto';
 import { SellerNotfoundException } from 'src/exceptions/auth.exception';
 import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
+import { CompanyRepository } from 'src/repositories/company.repository';
+import { SellerRepository } from 'src/repositories/seller.repository';
 import { getOffset } from 'src/util/functions/pagination-util.function';
-import { PrismaService } from './prisma.service';
 
 @Injectable()
 export class CompanyService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly companyRepository: CompanyRepository,
+    private readonly sellerRepository: SellerRepository,
+  ) {}
 
   /**
    * 회사를 생성합니다.
@@ -16,18 +20,12 @@ export class CompanyService {
    * @param createCompanyDto 생성할 회사의 정보입니다.
    */
   async createCompany(sellerId: number, createCompanyDto: { name: string }): Promise<{ id: number; name: string }> {
-    const seller = await this.prisma.seller.findUnique({
-      select: { id: true },
-      where: { id: sellerId },
-    });
+    const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
       throw new SellerNotfoundException();
     }
 
-    const category = await this.prisma.company.create({
-      select: { id: true, name: true },
-      data: { name: createCompanyDto.name },
-    });
+    const category = await this.companyRepository.saveCompany(createCompanyDto);
     return category;
   }
 
@@ -41,22 +39,12 @@ export class CompanyService {
     sellerId: number,
     createCompanyDtos: { name: string }[],
   ): Promise<{ id: number; name: string }[]> {
-    const seller = await this.prisma.seller.findUnique({
-      select: { id: true },
-      where: { id: sellerId },
-    });
+    const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
       throw new SellerNotfoundException();
     }
 
-    const savedCompanies = await this.prisma.$transaction(
-      createCompanyDtos.map((c) =>
-        this.prisma.company.create({
-          select: { id: true, name: true },
-          data: { name: c.name },
-        }),
-      ),
-    );
+    const savedCompanies = await this.companyRepository.saveCompanies(createCompanyDtos);
     return savedCompanies;
   }
 
@@ -71,23 +59,13 @@ export class CompanyService {
     getCompanyPaginationDto: GetCompanyPaginationDto,
   ): Promise<PaginationResponse<CompanyDto>> {
     const { search, page, limit } = getCompanyPaginationDto;
-    const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
+    const seller = await this.sellerRepository.findById(sellerId);
     if (!seller) {
       throw new SellerNotfoundException();
     }
-
     const { skip, take } = getOffset({ page, limit });
 
-    const [data, count] = await Promise.all([
-      this.prisma.company.findMany({
-        select: { id: true, name: true },
-        skip,
-        take,
-        where: { ...(search && { name: { contains: search } }) },
-        orderBy: [{ name: 'asc' }, { id: 'asc' }],
-      }),
-      this.prisma.company.count({ where: { ...(search && { name: { contains: search } }) } }),
-    ]);
+    const [data, count] = await this.companyRepository.getCompany(skip, take, search);
     return { data, skip, count, take };
   }
 }
