@@ -11,6 +11,7 @@ import { CategoryService } from 'src/services/category.service';
 import { CompanyService } from 'src/services/company.service';
 import { ProductService } from 'src/services/product.service';
 import { SellerService } from 'src/services/seller.service';
+import { Omit } from 'src/types/omit-type';
 import { isEqual } from 'src/util/functions/is-equal.function';
 
 describe('Seller Controller', () => {
@@ -242,6 +243,28 @@ describe('Seller Controller', () => {
       } catch (err) {
         expect(err).toBeInstanceOf(ProductUnauthrizedException);
       }
+    });
+  });
+
+  describe('seller는 본인이 등록한 상품묶음, 상품, 상품 옵션들을 조회할 수 있다.', () => {
+    it.todo('seller는 등록된 상품 묶음을 조회할 수 있다.', async () => {});
+
+    it.todo('seller는 등록된 상품을 조회할 수 있다.', async () => {});
+
+    it.todo('seller는 등록된 상품 옵션을 조회할 수 있다.', async () => {});
+  });
+
+  describe('seller는 등록된 상품의 정보를 수정할 수 있다.', () => {
+    it.todo('상품의 데이터를 수정할 수 있다.', async () => {
+      const { data: savedProduct } = await controller.createProduct(testId as number, testProduct);
+
+      const testUpdateDto: Partial<CreateProductDto> = {};
+
+      const { data } = await controller.updateProductBundle(testId, savedProduct.id, testUpdateDto);
+
+      const { id, ...updateProduct } = data;
+      expect(id).toBe(savedProduct.id);
+      expect(isEqual(testUpdateDto, updateProduct)).toBe(true);
     });
   });
 });
