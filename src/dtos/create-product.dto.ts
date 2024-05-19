@@ -56,7 +56,7 @@ export class CreateProductDto
   @ApiProperty({
     type: 'enum',
     enum: ['FREE', 'NOT_FREE', 'COUNT_FREE', 'PRICE_FREE'],
-    description: '배송비 종류 ("FREE", "NOT_FREE", "COUNT_FREE", "PRICE_FREE" 을 허용합니다.)',
+    description: '배송비 종류',
     required: true,
   })
   @IsEnum(['FREE', 'NOT_FREE', 'COUNT_FREE', 'PRICE_FREE'])
