@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreateProductBundleDto } from 'src/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/dtos/create-product.dto';
+import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
 import { IsRequireOptionDto } from 'src/dtos/is-require-options.dto';
 import { ProductBundleDto } from 'src/dtos/product-bundle.dto';
 import { ProductOptionDto } from 'src/dtos/product-option.dto';
@@ -10,11 +11,24 @@ import { ProductDto } from 'src/dtos/product.dto';
 import { SellerNotfoundException } from 'src/exceptions/auth.exception';
 import { ProductBundleNotFoundException, ProductNotFoundException } from 'src/exceptions/product.exception';
 import { ProductUnauthrizedException } from 'src/exceptions/seller.exception';
+import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
+import { getOffset } from 'src/util/functions/pagination-util.function';
 import { PrismaService } from './prisma.service';
 
 @Injectable()
 export class SellerService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * 실제 등록된 판매자 아이디인지 확인합니다.
+   * @param sellerId
+   */
+  async isSeller(sellerId: number): Promise<void> {
+    const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
+    if (!seller) {
+      throw new SellerNotfoundException();
+    }
+  }
 
   /**
    * 상품 묶음을 저장합니다.
@@ -26,10 +40,7 @@ export class SellerService {
     sellerId: number,
     createProductBundleDto: CreateProductBundleDto,
   ): Promise<ProductBundleDto> {
-    const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
-    if (!seller) {
-      throw new SellerNotfoundException();
-    }
+    await this.isSeller(sellerId);
 
     const productBundle = await this.prisma.productBundle.create({
       select: { id: true, name: true, sellerId: true, chargeStandard: true },
@@ -46,10 +57,7 @@ export class SellerService {
    *
    */
   async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductDto> {
-    const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
-    if (!seller) {
-      throw new SellerNotfoundException();
-    }
+    await this.isSeller(sellerId);
 
     const product = await this.prisma.product.create({
       select: {
@@ -146,5 +154,31 @@ export class SellerService {
       throw new ProductBundleNotFoundException();
     }
     return productBundle;
+  }
+
+  /**
+   * 등록한 상품 묶음을 페이지네이션으로 조회합니다.
+   *
+   * @param sellerId 조회할 판매자의 아이디 입니다.
+   * @param getPaginationDto 페이지네이션 요청 객체 입니다.
+   */
+  async getProductBundles(
+    sellerId: number,
+    getPaginationDto: GetPaginationDto,
+  ): Promise<PaginationResponse<ProductBundleDto>> {
+    await this.isSeller(sellerId);
+
+    const { skip, take } = getOffset(getPaginationDto);
+
+    const [data, count] = await Promise.all([
+      this.prisma.productBundle.findMany({
+        select: { id: true, sellerId: true, name: true, chargeStandard: true },
+        where: { sellerId },
+        skip,
+        take,
+      }),
+      this.prisma.productBundle.count({ where: { sellerId } }),
+    ]);
+    return { data, count, skip, take };
   }
 }

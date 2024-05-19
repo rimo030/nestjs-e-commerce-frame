@@ -246,7 +246,14 @@ describe('Seller Controller', () => {
   });
 
   describe('seller는 본인이 등록한 상품묶음, 상품, 상품 옵션들을 조회할 수 있다.', () => {
-    it.todo('seller는 등록된 상품 묶음을 페이지네이션으로 조회할 수 있다.');
+    it('seller는 등록된 상품 묶음을 페이지네이션으로 조회할 수 있다.', async () => {
+      /** 최소 한 개의 데이터 삽입 */
+      await controller.createProductBundle(testId, { name: v4().slice(0, 10), chargeStandard: 'MAX' });
+      const { data } = await controller.getProductBundles(testId, {});
+
+      const isAllSellerIdTrue = data.every((d) => d.sellerId === testId);
+      expect(isAllSellerIdTrue).toBe(true);
+    });
 
     /**
      * seller는 본인이 등록한 상품을 조회할 수 있다.
