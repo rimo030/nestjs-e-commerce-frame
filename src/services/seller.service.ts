@@ -3,6 +3,7 @@ import { CreateProductBundleDto } from 'src/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/dtos/create-product.dto';
 import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
+import { GetProductPaginationDto } from 'src/dtos/get-product-pagination.dto';
 import { IsRequireOptionDto } from 'src/dtos/is-require-options.dto';
 import { ProductBundleDto } from 'src/dtos/product-bundle.dto';
 import { ProductOptionDto } from 'src/dtos/product-option.dto';
@@ -179,6 +180,85 @@ export class SellerService {
       }),
       this.prisma.productBundle.count({ where: { sellerId } }),
     ]);
+    return { data, count, skip, take };
+  }
+
+  /**
+   * 등록한 상품을 페이지네이션으로 조회합니다.
+   * @param sellerId 조회할 판매자의 아이디 입니다.
+   * @param getProductPaginationDto 검색 쿼리 및 페이지 네이션 요청 객체 입니다.
+   */
+  async getProducts(
+    sellerId: number,
+    getProductPaginationDto: GetProductPaginationDto,
+  ): Promise<PaginationResponse<ProductDto>> {
+    const {
+      bundleId,
+      categoryId,
+      companyId,
+      name,
+      description,
+      isSale,
+      deliveryType,
+      deliveryFreeOver,
+      deliveryCharge,
+      page,
+      limit,
+    } = getProductPaginationDto;
+    await this.isSeller(sellerId);
+
+    const { skip, take } = getOffset({ page, limit });
+
+    const [data, count] = await Promise.all([
+      this.prisma.product.findMany({
+        select: {
+          id: true,
+          sellerId: true,
+          bundleId: true,
+          categoryId: true,
+          companyId: true,
+          isSale: true,
+          name: true,
+          description: true,
+          deliveryType: true,
+          deliveryFreeOver: true,
+          deliveryCharge: true,
+          img: true,
+        },
+        orderBy: {
+          id: 'desc',
+        },
+        where: {
+          sellerId,
+          ...(bundleId !== undefined && { bundleId }),
+          ...(categoryId && { categoryId }),
+          ...(companyId && { companyId }),
+          ...(name && { name: { contains: name } }),
+          ...(description && { description: { contains: description } }),
+          ...(isSale !== undefined && { isSale }),
+          ...(deliveryType && { deliveryType }),
+          ...(deliveryFreeOver !== undefined && { deliveryFreeOver }),
+          ...(deliveryCharge && { deliveryCharge }),
+        },
+        skip,
+        take,
+      }),
+      this.prisma.product.count({
+        where: {
+          sellerId,
+          ...(bundleId !== undefined && { bundleId }),
+          ...(categoryId && { categoryId }),
+          ...(companyId && { companyId }),
+          ...(name && { name: { contains: name } }),
+          ...(description && { description: { contains: description } }),
+          ...(isSale !== undefined && { isSale }),
+          ...(deliveryType && { deliveryType }),
+          ...(deliveryFreeOver !== undefined && { deliveryFreeOver }),
+          ...(deliveryCharge && { deliveryCharge }),
+        },
+      }),
+    ]);
+
     return { data, count, skip, take };
   }
 }
