@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { CreateProductBundleDto } from 'src/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/dtos/create-product-options.dto';
@@ -209,6 +210,21 @@ export class SellerService {
 
     const { skip, take } = getOffset({ page, limit });
 
+    const productWhereInput: Prisma.ProductWhereInput = {
+      sellerId,
+      ...(bundleId !== undefined && { bundleId }),
+      ...(categoryId && { categoryId }),
+      ...(companyId && { companyId }),
+      ...(name && { name: { contains: name } }),
+      ...(description !== undefined && description === null
+        ? { description }
+        : { description: { contains: description } }),
+      ...(isSale !== undefined && { isSale }),
+      ...(deliveryType && { deliveryType }),
+      ...(deliveryFreeOver !== undefined && { deliveryFreeOver }),
+      ...(deliveryCharge && { deliveryCharge }),
+    };
+
     const [data, count] = await Promise.all([
       this.prisma.product.findMany({
         select: {
@@ -228,34 +244,12 @@ export class SellerService {
         orderBy: {
           id: 'desc',
         },
-        where: {
-          sellerId,
-          ...(bundleId !== undefined && { bundleId }),
-          ...(categoryId && { categoryId }),
-          ...(companyId && { companyId }),
-          ...(name && { name: { contains: name } }),
-          ...(description && { description: { contains: description } }),
-          ...(isSale !== undefined && { isSale }),
-          ...(deliveryType && { deliveryType }),
-          ...(deliveryFreeOver !== undefined && { deliveryFreeOver }),
-          ...(deliveryCharge && { deliveryCharge }),
-        },
+        where: productWhereInput,
         skip,
         take,
       }),
       this.prisma.product.count({
-        where: {
-          sellerId,
-          ...(bundleId !== undefined && { bundleId }),
-          ...(categoryId && { categoryId }),
-          ...(companyId && { companyId }),
-          ...(name && { name: { contains: name } }),
-          ...(description && { description: { contains: description } }),
-          ...(isSale !== undefined && { isSale }),
-          ...(deliveryType && { deliveryType }),
-          ...(deliveryFreeOver !== undefined && { deliveryFreeOver }),
-          ...(deliveryCharge && { deliveryCharge }),
-        },
+        where: productWhereInput,
       }),
     ]);
 
