@@ -6,6 +6,7 @@ import { CreateProductBundleDto } from 'src/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/dtos/create-product.dto';
 import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
+import { GetProductPaginationDto } from 'src/dtos/get-product-pagination.dto';
 import { IsRequireOptionDto } from 'src/dtos/is-require-options.dto';
 import { PaginationDto } from 'src/dtos/pagination.dto';
 import { ProductBundleDto } from 'src/dtos/product-bundle.dto';
@@ -46,6 +47,19 @@ export class SellerController {
   }> {
     const productBundle = await this.sellerservice.createProductBundle(sellerId, createProductBundleDto);
     return { data: productBundle };
+  }
+
+  @Get('/product')
+  @ApiOperation({
+    summary: '상품 조회 API',
+    description: 'seller는 등록한 상품을 페이지네이션으로 조회할 수 있다.',
+  })
+  async getProducts(
+    @UserId() sellerId: number,
+    @Query() getProductPaginationDto: GetProductPaginationDto,
+  ): Promise<PaginationDto<ProductDto>> {
+    const paginationResponse = await this.sellerservice.getProducts(sellerId, getProductPaginationDto);
+    return createPaginationResponseDto(paginationResponse);
   }
 
   @HttpCode(201)
