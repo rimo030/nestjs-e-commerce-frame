@@ -1,7 +1,10 @@
+import { Prisma } from '@prisma/client';
 import { Injectable } from '@nestjs/common';
 import { CreateProductBundleDto } from 'src/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/dtos/create-product.dto';
+import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
+import { GetProductPaginationDto } from 'src/dtos/get-product-pagination.dto';
 import { IsRequireOptionDto } from 'src/dtos/is-require-options.dto';
 import { ProductBundleDto } from 'src/dtos/product-bundle.dto';
 import { ProductOptionDto } from 'src/dtos/product-option.dto';
@@ -10,11 +13,24 @@ import { ProductDto } from 'src/dtos/product.dto';
 import { SellerNotfoundException } from 'src/exceptions/auth.exception';
 import { ProductBundleNotFoundException, ProductNotFoundException } from 'src/exceptions/product.exception';
 import { ProductUnauthrizedException } from 'src/exceptions/seller.exception';
+import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
+import { getOffset } from 'src/util/functions/pagination-util.function';
 import { PrismaService } from './prisma.service';
 
 @Injectable()
 export class SellerService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * 실제 등록된 판매자 아이디인지 확인합니다.
+   * @param sellerId
+   */
+  async isSeller(sellerId: number): Promise<void> {
+    const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
+    if (!seller) {
+      throw new SellerNotfoundException();
+    }
+  }
 
   /**
    * 상품 묶음을 저장합니다.
@@ -26,10 +42,7 @@ export class SellerService {
     sellerId: number,
     createProductBundleDto: CreateProductBundleDto,
   ): Promise<ProductBundleDto> {
-    const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
-    if (!seller) {
-      throw new SellerNotfoundException();
-    }
+    await this.isSeller(sellerId);
 
     const productBundle = await this.prisma.productBundle.create({
       select: { id: true, name: true, sellerId: true, chargeStandard: true },
@@ -46,10 +59,7 @@ export class SellerService {
    *
    */
   async createProduct(sellerId: number, createProductDto: CreateProductDto): Promise<ProductDto> {
-    const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
-    if (!seller) {
-      throw new SellerNotfoundException();
-    }
+    await this.isSeller(sellerId);
 
     const product = await this.prisma.product.create({
       select: {
@@ -146,5 +156,103 @@ export class SellerService {
       throw new ProductBundleNotFoundException();
     }
     return productBundle;
+  }
+
+  /**
+   * 등록한 상품 묶음을 페이지네이션으로 조회합니다.
+   *
+   * @param sellerId 조회할 판매자의 아이디 입니다.
+   * @param getPaginationDto 페이지네이션 요청 객체 입니다.
+   */
+  async getProductBundles(
+    sellerId: number,
+    getPaginationDto: GetPaginationDto,
+  ): Promise<PaginationResponse<ProductBundleDto>> {
+    await this.isSeller(sellerId);
+
+    const { skip, take } = getOffset(getPaginationDto);
+
+    const [data, count] = await Promise.all([
+      this.prisma.productBundle.findMany({
+        select: { id: true, sellerId: true, name: true, chargeStandard: true },
+        where: { sellerId },
+        skip,
+        take,
+      }),
+      this.prisma.productBundle.count({ where: { sellerId } }),
+    ]);
+    return { data, count, skip, take };
+  }
+
+  /**
+   * 등록한 상품을 페이지네이션으로 조회합니다.
+   * @param sellerId 조회할 판매자의 아이디 입니다.
+   * @param getProductPaginationDto 검색 쿼리 및 페이지 네이션 요청 객체 입니다.
+   */
+  async getProducts(
+    sellerId: number,
+    getProductPaginationDto: GetProductPaginationDto,
+  ): Promise<PaginationResponse<ProductDto>> {
+    const {
+      bundleId,
+      categoryId,
+      companyId,
+      name,
+      description,
+      isSale,
+      deliveryType,
+      deliveryFreeOver,
+      deliveryCharge,
+      page,
+      limit,
+    } = getProductPaginationDto;
+    await this.isSeller(sellerId);
+
+    const { skip, take } = getOffset({ page, limit });
+
+    const productWhereInput: Prisma.ProductWhereInput = {
+      sellerId,
+      ...(bundleId !== undefined && { bundleId }),
+      ...(categoryId && { categoryId }),
+      ...(companyId && { companyId }),
+      ...(name && { name: { contains: name } }),
+      ...(description !== undefined && description === null
+        ? { description }
+        : { description: { contains: description } }),
+      ...(isSale !== undefined && { isSale }),
+      ...(deliveryType && { deliveryType }),
+      ...(deliveryFreeOver !== undefined && { deliveryFreeOver }),
+      ...(deliveryCharge && { deliveryCharge }),
+    };
+
+    const [data, count] = await Promise.all([
+      this.prisma.product.findMany({
+        select: {
+          id: true,
+          sellerId: true,
+          bundleId: true,
+          categoryId: true,
+          companyId: true,
+          isSale: true,
+          name: true,
+          description: true,
+          deliveryType: true,
+          deliveryFreeOver: true,
+          deliveryCharge: true,
+          img: true,
+        },
+        orderBy: {
+          id: 'desc',
+        },
+        where: productWhereInput,
+        skip,
+        take,
+      }),
+      this.prisma.product.count({
+        where: productWhereInput,
+      }),
+    ]);
+
+    return { data, count, skip, take };
   }
 }

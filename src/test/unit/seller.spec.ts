@@ -82,12 +82,12 @@ describe('Seller Controller', () => {
       categoryId: testCategoryId,
       companyId: testCompanyId,
       isSale: true,
-      name: 'test product',
-      description: '테스트 상품 입니다!',
+      name: v4().slice(0, 10),
+      description: v4().slice(0, 10),
       deliveryType: 'FREE',
       deliveryFreeOver: null,
       deliveryCharge: 0,
-      img: 'test.img',
+      img: v4().slice(0, 10),
     };
   });
 
@@ -243,5 +243,80 @@ describe('Seller Controller', () => {
         expect(err).toBeInstanceOf(ProductUnauthrizedException);
       }
     });
+  });
+
+  describe('seller는 등록한 상품묶음을 조회할 수 있다.', () => {
+    it('seller는 등록된 상품 묶음을 페이지네이션으로 조회할 수 있다.', async () => {
+      /** 최소 한 개의 데이터 삽입 */
+      await controller.createProductBundle(testId, { name: v4().slice(0, 10), chargeStandard: 'MAX' });
+      const { data } = await controller.getProductBundles(testId, {});
+
+      const isAllSellerIdTrue = data.every((d) => d.sellerId === testId);
+      expect(isAllSellerIdTrue).toBe(true);
+    });
+  });
+
+  describe('seller는 등록한 상품을 조회할 수 있다.', () => {
+    /**
+     * seller는 본인이 등록한 상품을 조회할 수 있다.
+     * 상품 묶음별, 카테고리별, 회사별 등 정보에 따라 조회가 가능해야 한다.
+     */
+    it('seller는 상품 묶음 별로 상품을 조회할 수 있다.', async () => {
+      const testBundle = await service.createProductBundle(testId, {
+        name: v4().slice(0, 10),
+        chargeStandard: 'MAX',
+      });
+
+      const { bundleId, ...restOption } = testProduct;
+      await Promise.all(
+        new Array(10).fill(0).map(() => {
+          return controller.createProduct(testId, { ...restOption, bundleId: testBundle.id });
+        }),
+      );
+
+      const { data } = await controller.getProducts(testId, { bundleId: testBundle.id });
+      const isAllProductBudleTrue = data.every((d) => d.bundleId === testBundle.id);
+
+      expect(data.length > 0).toBe(true);
+      expect(isAllProductBudleTrue).toBe(true);
+    });
+
+    it('상품 묶음이 없는 경우(null일 경우)도 조회가 가능해야 한다.', async () => {
+      const { bundleId, ...restOption } = testProduct;
+      await Promise.all(
+        new Array(10).fill(0).map(() => {
+          return controller.createProduct(testId, { ...restOption, bundleId: null });
+        }),
+      );
+
+      const { data } = await controller.getProducts(testId, { bundleId: null });
+      const isAllProductBudleTrue = data.every((d) => d.bundleId === null);
+
+      expect(data.length > 0).toBe(true);
+      expect(isAllProductBudleTrue).toBe(true);
+    });
+
+    it('상품이 판매되는 상태가 아닌 경우(isSale = false)에도 조회가 가능해야 한다.', async () => {
+      const { isSale, ...restOption } = testProduct;
+      await Promise.all(
+        new Array(10).fill(0).map(() => {
+          return controller.createProduct(testId, { ...restOption, isSale: false });
+        }),
+      );
+
+      const { data } = await controller.getProducts(testId, { isSale: false });
+      const isAllProductSaleTrue = data.every((d) => d.isSale === false);
+
+      expect(data.length > 0).toBe(true);
+      expect(isAllProductSaleTrue).toBe(true);
+    });
+  });
+
+  describe('seller는 등록한 상품 옵션을 조회할 수 있다.', () => {
+    it.todo('seller는 등록된 상품 옵션을 조회할 수 있다.');
+  });
+
+  describe('seller는 등록된 상품의 정보를 수정할 수 있다.', () => {
+    it.todo('상품의 데이터를 수정할 수 있다.');
   });
 });
