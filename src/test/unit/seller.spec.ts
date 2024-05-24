@@ -312,8 +312,48 @@ describe('Seller Controller', () => {
     });
   });
 
-  describe('seller는 등록한 상품 옵션을 조회할 수 있다.', () => {
-    it.todo('seller는 등록된 상품 옵션을 조회할 수 있다.');
+  describe('seller는 등록한 필수 상품 옵션을 조회할 수 있다.', () => {
+    it.skip('seller는 등록된 상품 필수 옵션을 페이지네이션으로 조회할 수 있다.', async () => {
+      /**
+       * 새로운 상품에 대한 새로운 필수 옵션을 10개를 생성하고, 페이지네이션으로 5개씩 조회하는 상황을 테스트 합니다.
+       */
+
+      const { data: product } = await controller.createProduct(testId, testProduct);
+
+      await Promise.all(
+        new Array(10).fill(0).map(() => {
+          return controller.createProductOptions(
+            testId,
+            product.id,
+            { isRequire: true },
+            { name: v4().slice(0, 10), isSale: true, price: 1000 },
+          );
+        }),
+      );
+
+      const { data, meta } = await controller.getProductOptions(testId, product.id, { isRequire: true }, { limit: 5 });
+
+      const isTrueProduct = data.every((d) => d.productId === product.id);
+      expect(isTrueProduct).toBe(true);
+
+      expect(data.length).toBe(5);
+      expect(meta.take).toBe(5);
+      expect(meta.page).toBe(2);
+    });
+
+    it.todo('seller는 판매중이 아닌(isSale = false) 상품 필수 옵션도 조회할 수 있다.');
+
+    it.todo('seller는 특정 가격의 상품 필수 옵션을 조회할 수 있다.');
+
+    it.todo('seller는 가격 오름차순으로 상품 필수 옵션을 조회할 수 있다.');
+
+    it.todo('seller는 가격 내림차순으로 상품 필수 옵션을 조회할 수 있다.');
+
+    it.todo('seller는 해당 키워드를 가진 상품 필수 옵션을 조회할 수 있다.');
+  });
+
+  describe('seller는 등록된 선택 상품의 정보를 조회할 수 있다.', () => {
+    it.todo('seller는 등록된 상품 선택 옵션을 조회할 수 있다.');
   });
 
   describe('seller는 등록된 상품의 정보를 수정할 수 있다.', () => {

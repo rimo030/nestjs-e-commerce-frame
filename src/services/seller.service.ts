@@ -4,6 +4,7 @@ import { CreateProductBundleDto } from 'src/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/dtos/create-product.dto';
 import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
+import { GetProductOptionsPaginationDto } from 'src/dtos/get-product-option-pagination.dto';
 import { GetProductPaginationDto } from 'src/dtos/get-product-pagination.dto';
 import { IsRequireOptionDto } from 'src/dtos/is-require-options.dto';
 import { ProductBundleDto } from 'src/dtos/product-bundle.dto';
@@ -254,5 +255,22 @@ export class SellerService {
     ]);
 
     return { data, count, skip, take };
+  }
+
+  /**
+   *등록한 상품 필수/선택옵션을 페이지네이션으로 조회합니다.
+
+   * @param sellerId 조회할 판매자의 아이디 입니다.
+   * @param productId 옵션을 조회하려는 상품의 아이디 입니다.
+   * @param isRequireOptionDto 상품 필수 옵션의 여부 입니다. fasle라면 상품 선택 옵션이 조회되어야 합니다.
+   * @param getProductOptionsPaginationDto 상품 옵션 검색 및 페이지네이션 요청 객체 입니다.
+   */
+  async getProductOptions(
+    sellerId: number,
+    productId: number,
+    isRequireOptionDto: IsRequireOptionDto,
+    getProductOptionsPaginationDto: GetProductOptionsPaginationDto,
+  ): Promise<PaginationResponse<ProductRequiredOptionDto | ProductOptionDto>> {
+    return 1 as any;
   }
 }
