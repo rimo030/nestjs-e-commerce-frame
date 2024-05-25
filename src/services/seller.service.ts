@@ -12,8 +12,11 @@ import { ProductOptionDto } from 'src/dtos/product-option.dto';
 import { ProductRequiredOptionDto } from 'src/dtos/product-required-option.dto';
 import { ProductDto } from 'src/dtos/product.dto';
 import { SellerNotfoundException } from 'src/exceptions/auth.exception';
-import { ProductBundleNotFoundException, ProductNotFoundException } from 'src/exceptions/product.exception';
-import { ProductUnauthrizedException } from 'src/exceptions/seller.exception';
+import {
+  ProductNotFoundException,
+  ProductUnauthrizedException,
+  ProductBundleNotFoundException,
+} from 'src/exceptions/seller.exception';
 import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
 import { getOffset } from 'src/util/functions/pagination-util.function';
 import { PrismaService } from './prisma.service';
@@ -271,6 +274,72 @@ export class SellerService {
     isRequireOptionDto: IsRequireOptionDto,
     getProductOptionsPaginationDto: GetProductOptionsPaginationDto,
   ): Promise<PaginationResponse<ProductRequiredOptionDto | ProductOptionDto>> {
-    return 1 as any;
+    await this.isSeller(sellerId);
+
+    const product = await this.prisma.product.findUnique({
+      select: { sellerId: true, id: true },
+      where: { sellerId, id: productId },
+    });
+
+    if (!product) {
+      throw new ProductNotFoundException();
+    }
+
+    const { name, price, isSale, page, limit } = getProductOptionsPaginationDto;
+    const { skip, take } = getOffset({ page, limit });
+
+    const productOptionsWhereInput: Prisma.ProductRequiredOptionWhereInput & Prisma.ProductOptionWhereInput = {
+      productId,
+      ...(name && { name: { contains: name } }),
+      ...(isSale !== undefined && { isSale }),
+      ...(price !== undefined && { price }),
+    };
+
+    if (isRequireOptionDto.isRequire) {
+      const [data, count] = await Promise.all([
+        this.prisma.productRequiredOption.findMany({
+          select: {
+            id: true,
+            productId: true,
+            name: true,
+            price: true,
+            isSale: true,
+          },
+          orderBy: {
+            id: 'desc',
+          },
+          where: productOptionsWhereInput,
+          skip,
+          take,
+        }),
+        this.prisma.productRequiredOption.count({
+          where: productOptionsWhereInput,
+        }),
+      ]);
+
+      return { data, count, skip, take };
+    } else {
+      const [data, count] = await Promise.all([
+        this.prisma.productOption.findMany({
+          select: {
+            id: true,
+            productId: true,
+            name: true,
+            price: true,
+            isSale: true,
+          },
+          orderBy: {
+            id: 'desc',
+          },
+          where: productOptionsWhereInput,
+          skip,
+          take,
+        }),
+        this.prisma.productOption.count({
+          where: productOptionsWhereInput,
+        }),
+      ]);
+      return { data, count, skip, take };
+    }
   }
 }
