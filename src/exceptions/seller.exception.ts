@@ -1,5 +1,11 @@
 import { HttpException, HttpStatus } from '@nestjs/common';
 
+export class SellerNotfoundException extends HttpException {
+  constructor() {
+    super(`Can't find seller`, HttpStatus.NOT_FOUND);
+  }
+}
+
 export class ProductBundleNotFoundException extends HttpException {
   constructor() {
     super(`Can't find product Budle`, HttpStatus.NOT_FOUND);
