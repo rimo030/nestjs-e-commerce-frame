@@ -313,43 +313,138 @@ describe('Seller Controller', () => {
   });
 
   describe('seller는 등록한 필수 상품 옵션을 조회할 수 있다.', () => {
-    it.skip('seller는 등록된 상품 필수 옵션을 페이지네이션으로 조회할 수 있다.', async () => {
-      /**
-       * 새로운 상품에 대한 새로운 필수 옵션을 10개를 생성하고, 페이지네이션으로 5개씩 조회하는 상황을 테스트 합니다.
-       */
-
-      const { data: product } = await controller.createProduct(testId, testProduct);
+    /**
+     * 상품 등록 후 count 개수 만큼 필수 옵션을 생성하는 함수입니다. 등록된 상품의 아이디를 반환합니다.
+     *
+     * @param sellerId 테스트 시 사용할 판매자의 아이디 입니다.
+     * @param testProduct CreateProductDto 등록할 상품의 데이터입니다.
+     * @param count 생성할 필수 옵션의 수 입니다.
+     */
+    async function createProductAndRequiredOption(
+      sellerId: number,
+      testProduct: CreateProductDto,
+      count: number = 10,
+    ): Promise<number> {
+      const { data: product } = await controller.createProduct(sellerId, testProduct);
 
       await Promise.all(
-        new Array(10).fill(0).map(() => {
+        new Array(count).fill(0).map((e, i) => {
           return controller.createProductOptions(
-            testId,
+            sellerId,
             product.id,
             { isRequire: true },
-            { name: v4().slice(0, 10), isSale: true, price: 1000 },
+            { name: v4().slice(0, 10), isSale: i / 2 === 0 ? true : false, price: 1000 * i },
           );
         }),
       );
+      return product.id;
+    }
 
-      const { data, meta } = await controller.getProductOptions(testId, product.id, { isRequire: true }, { limit: 5 });
+    it('seller는 등록된 상품 필수 옵션을 페이지네이션으로 조회할 수 있다.', async () => {
+      /**
+       * 새로운 상품에 대한 새로운 필수 옵션을 10개를 생성하고, 페이지네이션으로 5개씩 조회하는 상황을 테스트 합니다.
+       */
+      const productId = await createProductAndRequiredOption(testId, testProduct, 10);
 
-      const isTrueProduct = data.every((d) => d.productId === product.id);
+      const { data, meta } = await controller.getProductOptions(testId, productId, { isRequire: true }, { limit: 5 });
+
+      const isTrueProduct = data.every((d) => d.productId === productId);
+      expect(data.length).toBe(5);
       expect(isTrueProduct).toBe(true);
 
-      expect(data.length).toBe(5);
+      expect(meta.page).toBe(1);
       expect(meta.take).toBe(5);
-      expect(meta.page).toBe(2);
+      expect(meta.totalPage).toBe(2);
+      expect(meta.totalCount).toBe(10);
     });
 
-    it.todo('seller는 판매중이 아닌(isSale = false) 상품 필수 옵션도 조회할 수 있다.');
+    it('seller는 판매중이 아닌(isSale = false) 상품 필수 옵션도 조회할 수 있다.', async () => {
+      const productId = await createProductAndRequiredOption(testId, testProduct, 15);
 
-    it.todo('seller는 특정 가격의 상품 필수 옵션을 조회할 수 있다.');
+      const { data, meta } = await controller.getProductOptions(
+        testId,
+        productId,
+        { isRequire: true },
+        { isSale: false },
+      );
 
-    it.todo('seller는 가격 오름차순으로 상품 필수 옵션을 조회할 수 있다.');
+      const isTrueProduct = data.every((d) => d.productId === productId);
+      expect(data.length > 0).toBe(true);
+      expect(isTrueProduct).toBe(true);
 
-    it.todo('seller는 가격 내림차순으로 상품 필수 옵션을 조회할 수 있다.');
+      const isTrueNotSaleProduct = data.every((d) => d.isSale === false);
+      expect(isTrueNotSaleProduct).toBe(true);
+    });
 
-    it.todo('seller는 해당 키워드를 가진 상품 필수 옵션을 조회할 수 있다.');
+    it('seller는 특정 가격의 상품 필수 옵션을 조회할 수 있다.', async () => {
+      const productId = await createProductAndRequiredOption(testId, testProduct, 10);
+
+      const { data, meta } = await controller.getProductOptions(testId, productId, { isRequire: true }, { price: 0 });
+
+      const isTrueProduct = data.every((d) => d.productId === productId);
+      expect(data.length > 0).toBe(true);
+      expect(isTrueProduct).toBe(true);
+
+      const isTruePriceProduct = data.every((d) => d.price === 0);
+      expect(isTruePriceProduct).toBe(true);
+    });
+
+    it('seller는 가격 오름차순으로 상품 필수 옵션을 조회할 수 있다.', async () => {
+      const productId = await createProductAndRequiredOption(testId, testProduct, 10);
+
+      const { data, meta } = await controller.getProductOptions(
+        testId,
+        productId,
+        { isRequire: true },
+        { priceOrder: 'asc' },
+      );
+
+      const isTrueProduct = data.every((d) => d.productId === productId);
+      expect(data.length > 0).toBe(true);
+      expect(isTrueProduct).toBe(true);
+
+      const price = data.map((d) => d.price);
+      const sortedAscPrice = price.slice().sort((a, b) => a - b);
+      expect(price).toEqual(sortedAscPrice);
+    });
+
+    it('seller는 가격 내림차순으로 상품 필수 옵션을 조회할 수 있다.', async () => {
+      const productId = await createProductAndRequiredOption(testId, testProduct, 10);
+
+      const { data, meta } = await controller.getProductOptions(
+        testId,
+        productId,
+        { isRequire: true },
+        { priceOrder: 'desc' },
+      );
+
+      const isTrueProduct = data.every((d) => d.productId === productId);
+      expect(data.length > 0).toBe(true);
+      expect(isTrueProduct).toBe(true);
+
+      const price = data.map((d) => d.price);
+      const sortedDescPrice = price.slice().sort((a, b) => b - a);
+      expect(price).toEqual(sortedDescPrice);
+    });
+
+    it('seller는 해당 키워드를 가진 상품 필수 옵션을 조회할 수 있다.', async () => {
+      const productId = await createProductAndRequiredOption(testId, testProduct, 10);
+
+      const { data, meta } = await controller.getProductOptions(testId, productId, { isRequire: true }, { name: 'a' });
+
+      const isTrueProduct = data.every((d) => d.productId === productId);
+      expect(data.length > 0).toBe(true);
+      expect(isTrueProduct).toBe(true);
+
+      const isNameSubString = data.every((d) => {
+        const name = 'a';
+        if (d.name.includes(name.toUpperCase()) || d.name.includes(name.toLocaleLowerCase())) {
+          return true;
+        }
+        return false;
+      });
+      expect(isNameSubString).toBe(true);
+    });
   });
 
   describe('seller는 등록된 선택 상품의 정보를 조회할 수 있다.', () => {
