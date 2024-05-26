@@ -11,11 +11,11 @@ import { ProductBundleDto } from 'src/dtos/product-bundle.dto';
 import { ProductOptionDto } from 'src/dtos/product-option.dto';
 import { ProductRequiredOptionDto } from 'src/dtos/product-required-option.dto';
 import { ProductDto } from 'src/dtos/product.dto';
-import { SellerNotfoundException } from 'src/exceptions/auth.exception';
 import {
   ProductNotFoundException,
   ProductUnauthrizedException,
   ProductBundleNotFoundException,
+  SellerNotfoundException,
 } from 'src/exceptions/seller.exception';
 import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
 import { getOffset } from 'src/util/functions/pagination-util.function';
@@ -285,7 +285,7 @@ export class SellerService {
       throw new ProductNotFoundException();
     }
 
-    const { name, price, isSale, page, limit } = getProductOptionsPaginationDto;
+    const { name, price, priceOrder, isSale, page, limit } = getProductOptionsPaginationDto;
     const { skip, take } = getOffset({ page, limit });
 
     const productOptionsWhereInput: Prisma.ProductRequiredOptionWhereInput & Prisma.ProductOptionWhereInput = {
@@ -305,9 +305,7 @@ export class SellerService {
             price: true,
             isSale: true,
           },
-          orderBy: {
-            id: 'desc',
-          },
+          orderBy: [{ ...(priceOrder && { price: priceOrder }) }],
           where: productOptionsWhereInput,
           skip,
           take,
@@ -328,9 +326,7 @@ export class SellerService {
             price: true,
             isSale: true,
           },
-          orderBy: {
-            id: 'desc',
-          },
+          orderBy: [{ ...(priceOrder && { price: priceOrder }) }],
           where: productOptionsWhereInput,
           skip,
           take,
