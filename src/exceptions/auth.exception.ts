@@ -15,13 +15,13 @@ export class BuyerUnauthrizedException extends HttpException {
   }
 }
 
-export class BuyerNotfoundException extends HttpException {
+export class BuyerNotFoundException extends HttpException {
   constructor() {
     super('please double-check your email and password.', HttpStatus.NOT_FOUND);
   }
 }
 
-export class BuyerEmailNotfoundException extends HttpException {
+export class BuyerEmailNotFoundException extends HttpException {
   constructor() {
     super(`Can't find buyer email`, HttpStatus.NOT_FOUND);
   }
@@ -36,13 +36,13 @@ export class SellerUnauthrizedException extends HttpException {
   }
 }
 
-export class SellerNotfoundException extends HttpException {
+export class SellerNotFoundException extends HttpException {
   constructor() {
     super('please double-check your email and password.', HttpStatus.NOT_FOUND);
   }
 }
 
-export class SellerEmailNotfoundException extends HttpException {
+export class SellerEmailNotFoundException extends HttpException {
   constructor() {
     super(`Can't find seller email`, HttpStatus.NOT_FOUND);
   }

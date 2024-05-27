@@ -6,6 +6,7 @@ import { CreateProductBundleDto } from 'src/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/dtos/create-product.dto';
 import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
+import { GetProductOptionsPaginationDto } from 'src/dtos/get-product-option-pagination.dto';
 import { GetProductPaginationDto } from 'src/dtos/get-product-pagination.dto';
 import { IsRequireOptionDto } from 'src/dtos/is-require-options.dto';
 import { PaginationDto } from 'src/dtos/pagination.dto';
@@ -73,6 +74,26 @@ export class SellerController {
   }> {
     const product = await this.sellerservice.createProduct(sellerId, createProductDto);
     return { data: product };
+  }
+
+  @Get('/product/:productId/options')
+  @ApiOperation({
+    summary: '상품 옵션 조회 API',
+    description: 'seller는 등록한 상품 필수/선택 옵션을 페이지네이션으로 조회할 수 있다.',
+  })
+  async getProductOptions(
+    @UserId() sellerId: number,
+    @Param('productId', ParseIntPipe) productId: number,
+    @Query() isRequireOptionDto: IsRequireOptionDto,
+    @Query() getProductOptionsPaginationDto: GetProductOptionsPaginationDto,
+  ): Promise<PaginationDto<ProductRequiredOptionDto | ProductOptionDto>> {
+    const paginationResponse = await this.sellerservice.getProductOptions(
+      sellerId,
+      productId,
+      isRequireOptionDto,
+      getProductOptionsPaginationDto,
+    );
+    return createPaginationResponseDto(paginationResponse);
   }
 
   @HttpCode(201)

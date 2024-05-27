@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CompanyDto } from 'src/dtos/company.dto';
 import { GetCompanyPaginationDto } from 'src/dtos/get-company-pagination.dto';
-import { SellerNotfoundException } from 'src/exceptions/auth.exception';
+import { SellerNotFoundException } from 'src/exceptions/auth.exception';
 import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
 import { getOffset } from 'src/util/functions/pagination-util.function';
 import { PrismaService } from './prisma.service';
@@ -21,7 +21,7 @@ export class CompanyService {
       where: { id: sellerId },
     });
     if (!seller) {
-      throw new SellerNotfoundException();
+      throw new SellerNotFoundException();
     }
 
     const category = await this.prisma.company.create({
@@ -46,7 +46,7 @@ export class CompanyService {
       where: { id: sellerId },
     });
     if (!seller) {
-      throw new SellerNotfoundException();
+      throw new SellerNotFoundException();
     }
 
     const savedCompanies = await this.prisma.$transaction(
@@ -73,7 +73,7 @@ export class CompanyService {
     const { search, page, limit } = getCompanyPaginationDto;
     const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
     if (!seller) {
-      throw new SellerNotfoundException();
+      throw new SellerNotFoundException();
     }
 
     const { skip, take } = getOffset({ page, limit });

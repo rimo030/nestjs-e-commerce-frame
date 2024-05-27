@@ -4,15 +4,19 @@ import { CreateProductBundleDto } from 'src/dtos/create-product-bundle.dto';
 import { CreateProductOptionsDto } from 'src/dtos/create-product-options.dto';
 import { CreateProductDto } from 'src/dtos/create-product.dto';
 import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
+import { GetProductOptionsPaginationDto } from 'src/dtos/get-product-option-pagination.dto';
 import { GetProductPaginationDto } from 'src/dtos/get-product-pagination.dto';
 import { IsRequireOptionDto } from 'src/dtos/is-require-options.dto';
 import { ProductBundleDto } from 'src/dtos/product-bundle.dto';
 import { ProductOptionDto } from 'src/dtos/product-option.dto';
 import { ProductRequiredOptionDto } from 'src/dtos/product-required-option.dto';
 import { ProductDto } from 'src/dtos/product.dto';
-import { SellerNotfoundException } from 'src/exceptions/auth.exception';
-import { ProductBundleNotFoundException, ProductNotFoundException } from 'src/exceptions/product.exception';
-import { ProductUnauthrizedException } from 'src/exceptions/seller.exception';
+import {
+  ProductNotFoundException,
+  ProductUnauthrizedException,
+  ProductBundleNotFoundException,
+  SellerNotFoundException,
+} from 'src/exceptions/seller.exception';
 import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
 import { getOffset } from 'src/util/functions/pagination-util.function';
 import { PrismaService } from './prisma.service';
@@ -28,7 +32,7 @@ export class SellerService {
   async isSeller(sellerId: number): Promise<void> {
     const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
     if (!seller) {
-      throw new SellerNotfoundException();
+      throw new SellerNotFoundException();
     }
   }
 
@@ -254,5 +258,84 @@ export class SellerService {
     ]);
 
     return { data, count, skip, take };
+  }
+
+  /**
+   *등록한 상품 필수/선택옵션을 페이지네이션으로 조회합니다.
+
+   * @param sellerId 조회할 판매자의 아이디 입니다.
+   * @param productId 옵션을 조회하려는 상품의 아이디 입니다.
+   * @param isRequireOptionDto 상품 필수 옵션의 여부 입니다. fasle라면 상품 선택 옵션이 조회되어야 합니다.
+   * @param getProductOptionsPaginationDto 상품 옵션 검색 및 페이지네이션 요청 객체 입니다.
+   */
+  async getProductOptions(
+    sellerId: number,
+    productId: number,
+    isRequireOptionDto: IsRequireOptionDto,
+    getProductOptionsPaginationDto: GetProductOptionsPaginationDto,
+  ): Promise<PaginationResponse<ProductRequiredOptionDto | ProductOptionDto>> {
+    await this.isSeller(sellerId);
+
+    const product = await this.prisma.product.findUnique({
+      select: { sellerId: true, id: true },
+      where: { sellerId, id: productId },
+    });
+
+    if (!product) {
+      throw new ProductNotFoundException();
+    }
+
+    const { name, price, priceOrder, isSale, page, limit } = getProductOptionsPaginationDto;
+    const { skip, take } = getOffset({ page, limit });
+
+    const productOptionsWhereInput: Prisma.ProductRequiredOptionWhereInput & Prisma.ProductOptionWhereInput = {
+      productId,
+      ...(name && { name: { contains: name } }),
+      ...(isSale !== undefined && { isSale }),
+      ...(price !== undefined && { price }),
+    };
+
+    if (isRequireOptionDto.isRequire) {
+      const [data, count] = await Promise.all([
+        this.prisma.productRequiredOption.findMany({
+          select: {
+            id: true,
+            productId: true,
+            name: true,
+            price: true,
+            isSale: true,
+          },
+          orderBy: [{ ...(priceOrder && { price: priceOrder }) }],
+          where: productOptionsWhereInput,
+          skip,
+          take,
+        }),
+        this.prisma.productRequiredOption.count({
+          where: productOptionsWhereInput,
+        }),
+      ]);
+
+      return { data, count, skip, take };
+    } else {
+      const [data, count] = await Promise.all([
+        this.prisma.productOption.findMany({
+          select: {
+            id: true,
+            productId: true,
+            name: true,
+            price: true,
+            isSale: true,
+          },
+          orderBy: [{ ...(priceOrder && { price: priceOrder }) }],
+          where: productOptionsWhereInput,
+          skip,
+          take,
+        }),
+        this.prisma.productOption.count({
+          where: productOptionsWhereInput,
+        }),
+      ]);
+      return { data, count, skip, take };
+    }
   }
 }
