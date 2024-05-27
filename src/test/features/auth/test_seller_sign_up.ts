@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { v4 } from 'uuid';
 import { AuthController } from 'src/auth/auth.controller';
+import { AuthCredentialsDto } from 'src/dtos/auth-credentials.dto';
 import { CreateSellerDto } from 'src/dtos/create-seller.dto';
 
 /**
@@ -10,15 +11,21 @@ import { CreateSellerDto } from 'src/dtos/create-seller.dto';
  *
  *  endpoint는 `POST auth/signup-seller` 에 해당한다.
  *
+ * @param PORT 테스트하기 위한 포트를 넣어준다.
+ * @param option 만약, 회원가입 시 이메일과 패스워드를 지정하고자 한다면, 값을 대입한다. 단 리턴 결과로 나오지 않으므로 주의한다.
+ *
  * @returns 판매자가 회원가입한 후 아이디가 조회된다.
  */
-export async function test_seller_sign_up(PORT: number): Promise<ReturnType<AuthController['sellerSignUp']>> {
+export async function test_seller_sign_up(
+  PORT: number,
+  option?: AuthCredentialsDto,
+): Promise<ReturnType<AuthController['sellerSignUp']>> {
   const response = await axios(`http://localhost:${PORT}/auth/signup-seller`, {
     headers: {},
     method: 'POST',
     data: {
-      email: `${v4().slice(0, 100)}@gmail.com`,
-      password: v4().slice(0, 20),
+      email: option?.email ?? `${v4().slice(0, 100)}@gmail.com`,
+      password: option?.password ?? v4().slice(0, 20),
       name: v4().slice(0, 10),
       phone: v4().slice(0, 10),
       businessNumber: v4().slice(0, 100),
