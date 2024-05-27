@@ -15,7 +15,7 @@ import {
   ProductNotFoundException,
   ProductUnauthrizedException,
   ProductBundleNotFoundException,
-  SellerNotfoundException,
+  SellerNotFoundException,
 } from 'src/exceptions/seller.exception';
 import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
 import { getOffset } from 'src/util/functions/pagination-util.function';
@@ -32,7 +32,7 @@ export class SellerService {
   async isSeller(sellerId: number): Promise<void> {
     const seller = await this.prisma.seller.findUnique({ select: { id: true }, where: { id: sellerId } });
     if (!seller) {
-      throw new SellerNotfoundException();
+      throw new SellerNotFoundException();
     }
   }
 

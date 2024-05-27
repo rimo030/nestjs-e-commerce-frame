@@ -8,11 +8,9 @@ import { CreateBuyerDto } from '../dtos/create-buyer.dto';
 import { CreateSellerDto } from '../dtos/create-seller.dto';
 import {
   AuthForbiddenException,
-  BuyerEmailNotfoundException,
-  BuyerNotfoundException,
   BuyerUnauthrizedException,
-  SellerEmailNotfoundException,
-  SellerNotfoundException,
+  SellerEmailNotFoundException,
+  SellerNotFoundException,
   SellerUnauthrizedException,
 } from '../exceptions/auth.exception';
 
@@ -93,9 +91,9 @@ export class AuthService {
       if (isRightPassword) {
         return { id: buyer.id };
       }
-      throw new BuyerNotfoundException();
+      throw new SellerNotFoundException();
     }
-    throw new BuyerNotfoundException();
+    throw new SellerNotFoundException();
   }
 
   /**
@@ -115,9 +113,9 @@ export class AuthService {
       if (isRightPassword) {
         return { id: seller.id };
       }
-      throw new SellerNotfoundException();
+      throw new SellerNotFoundException();
     }
-    throw new SellerNotfoundException();
+    throw new SellerNotFoundException();
   }
 
   /**
@@ -155,7 +153,7 @@ export class AuthService {
     });
 
     if (!buyerId) {
-      throw new BuyerEmailNotfoundException();
+      throw new SellerEmailNotFoundException();
     }
     return buyerId;
   }
@@ -171,7 +169,7 @@ export class AuthService {
     });
 
     if (!sellerId) {
-      throw new SellerEmailNotfoundException();
+      throw new SellerEmailNotFoundException();
     }
     return sellerId;
   }
