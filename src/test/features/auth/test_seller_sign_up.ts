@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { v4 } from 'uuid';
 import { AuthController } from 'src/auth/auth.controller';
 import { CreateSellerDto } from 'src/dtos/create-seller.dto';
@@ -11,19 +12,18 @@ import { CreateSellerDto } from 'src/dtos/create-seller.dto';
  *
  * @returns 판매자가 회원가입한 후 아이디가 조회된다.
  */
-export async function test_seller_sign_up(): Promise<ReturnType<AuthController['sellerSignUp']>> {
-  const response = await fetch('localhost:3000/auth/signup-seller', {
+export async function test_seller_sign_up(PORT: number): Promise<ReturnType<AuthController['sellerSignUp']>> {
+  const response = await axios(`http://localhost:${PORT}/auth/signup-seller`, {
     headers: {},
     method: 'POST',
-    body: JSON.stringify({
+    data: {
       email: `${v4().slice(0, 100)}@gmail.com`,
       password: v4().slice(0, 20),
       name: v4().slice(0, 10),
       phone: v4().slice(0, 10),
       businessNumber: v4().slice(0, 100),
-    } satisfies CreateSellerDto),
+    } satisfies CreateSellerDto,
   });
 
-  const data: Awaited<ReturnType<AuthController['sellerSignUp']>> = await response.json();
-  return data;
+  return response.data as Awaited<ReturnType<AuthController['sellerSignUp']>>;
 }

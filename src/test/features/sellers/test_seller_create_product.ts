@@ -1,6 +1,8 @@
 import { v4 } from 'uuid';
 import { SellerController } from 'src/controllers/seller.controller';
 import { CreateProductDto } from 'src/dtos/create-product.dto';
+import { test_seller_sign_in } from '../auth/test_seller_sign_in';
+import { test_seller_sign_up } from '../auth/test_seller_sign_up';
 
 /**
  * 판매자가 직접 상품을 생성하는 상황을 가정한다.
@@ -20,8 +22,12 @@ export async function test_seller_create_product(options: {
   companyId: number;
 }): Promise<ReturnType<SellerController['createProduct']>> {
   const { bundleId, categoryId, companyId } = options;
-  const response = await fetch('http://localhost/3000', {
+  const sellerId = await test_seller_sign_up();
+  const signInResponse = await test_seller_sign_in();
+
+  const response = await fetch('http://localhost/3000/seller/product', {
     headers: {
+      authorization: `bearer ${signInResponse.data.accessToken}`,
       'content-type': 'application/json',
     },
     method: 'POST',
