@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Post, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation } from '@nestjs/swagger';
 import { CategoryDto } from 'src/dtos/category.dto';
 import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
