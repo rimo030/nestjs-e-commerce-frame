@@ -112,19 +112,20 @@ Git 이용한 첫 프로젝트입니다. 기초적인 clone, pull, push부터 ch
 **학습 기록**
 
 - [github commit convension #7](https://github.com/rimo030/nestjs-e-commerce-frame/issues/7#issue-1973493348)
+- ✏️[[Git] Git 브랜치 전략](https://munak.tistory.com/196)
 
 <br>
 
 ### 📍Node.js / JS
 
-Node.js 백엔드 개발 생태계와 학습했습니다. <br>
-근간이 되는 자바스크립트를 더 잘 이해하고자 노력하였습니다. 블로그에 관련 도서나 자료를 읽고 정리하고 있습니다.
+Node.js 개발 생태계에 대해 배웠습니다. <br>
+근간이 되는 자바스크립트를 더 잘 이해하고자 블로그에 관련 도서나 자료를 읽고 정리하고 있습니다.
 
 **학습 기록**
 
-- ✏️[[JS]JavaScript와 Node.js](https://munak.tistory.com/147)
+- ✏️[[JS] JavaScript와 Node.js](https://munak.tistory.com/147)
 - ✏️[[Node.js] npm과 package.json](https://munak.tistory.com/144)
-- ✏️[[JS] 함수형 프로그래밍(FP : Functional Programming)](https://munak.tistory.com/150)
+- ✏️[[JS] 함수형 프로그래밍 (FP : Functional Programming)](https://munak.tistory.com/150)
 - ✏️[[JS] 자바스크립트가 데이터를 할당하는 방법 (feat. 불변성, 가변성)](https://munak.tistory.com/181)
 - ✏️[[JS] 자바스크립트의 변수 복사 (feat. 얕은복사, 깊은복사)](https://munak.tistory.com/183)
 - ✏️[[JS] 프로토타입(Prototype) 이해하기](https://munak.tistory.com/188)
@@ -140,13 +141,15 @@ NestJS를 이용한 첫 프로젝트입니다. DI와 계층 간 역할 분리의
 - [NestJS 구조정리](https://github.com/rimo030/nestjs-e-commerce-frame/issues/6)
 - ✏️[[NestJS] Swagger 적용하기 (feat. API 문서화)](https://munak.tistory.com/186)
 - ✏️[[NestJS] Exception filters 추가하기 (feat.Custom Exception)](https://munak.tistory.com/189)
+- ✏️[[NestJS] Logging Interceptor 추가하기](https://munak.tistory.com/192)
 
 <br>
 
 ### 📍TS
 
-NestJS를 보다 잘 다루기 위해 타입스크립트를 심도 있게 공부하고자 노력하였습니다. <br>
-타입챌린지([rimo030/type-challenges](https://github.com/rimo030/type-challenges))에 도전해 100문제 이상 풀이했습니다!
+타입스크립트를 심도 있게 공부하고자 노력합니다. <br>
+타입챌린지([rimo030/type-challenges](https://github.com/rimo030/type-challenges))에 꾸준히 도전하여 100문제 이상 풀이했습니다. <br>
+관련 내용은 이슈와 블로그로 정리하고 있습니다!
 
 **학습 기록**
 
@@ -163,9 +166,27 @@ NestJS를 보다 잘 다루기 위해 타입스크립트를 심도 있게 공부
 
 <br>
 
+### 📍DB
+
+트랜잭션, 인덱스 등 데이터베이스의 이론적인 내용을 공부했습니다.
+
+- ✏️[[DB] ORM(Object Relational Mapping)이란, 객체-관계 불일치](https://munak.tistory.com/38)
+- ✏️[[DB] 트랜잭션(Transaction)과 트랜잭션 격리 수준(Isolation Level)](https://munak.tistory.com/149)
+- ✏️[[DB] NoSQL과 레디스(Redis)](https://munak.tistory.com/154)
+- ✏️[[DB] SQL의 기본 문법](https://munak.tistory.com/168)
+- ✏️[[DB] 인덱스(Index)](https://munak.tistory.com/175)
+- ✏️[[DB] 정규형(Normal form)](https://munak.tistory.com/176)
+- ✏️[[DB] 락(Lock)과 트랜잭션](https://munak.tistory.com/178)
+- ✏️[[DB] MySQL의 락 (feat. Auto Increment Lock)](https://munak.tistory.com/180)
+- ✏️[[DB] 인덱스에서 B+Tree를 사용하는 이유](https://munak.tistory.com/182)
+- ✏️[[DB] MySQL에서 UUID PK를 사용할 때 고려해야 할 점](https://munak.tistory.com/204)
+
+<br>
+
 ### 📍TDD
 
-TDD의 개념을 배우고 좋은 테스트 코드가 무엇인지 고민해 볼 수 있었습니다.
+TDD의 개념을 배우고 프로젝트에 유닛테스트 및 e2e 테스트를 적용하였습니다.<br>
+좋은 테스트 코드가 무엇일지 고민하며 작성하고 있습니다.
 
 **학습 기록**
 
@@ -181,5 +202,6 @@ NestJS의 주요 ORM인 TypeORM과 Prisma를 모두 사용해 보면서, 기술 
 
 - [TypeORM의 Repository Pattern과 QueryBuilder Pattern #41](https://github.com/rimo030/nestjs-e-commerce-frame/issues/41#issue-1992859474)
 - [Prisma (Migrate from TypeORM) #95](https://github.com/rimo030/nestjs-e-commerce-frame/issues/95#issue-2261681794)
+- [Prisma Soft-delete Client-extensions #108](https://github.com/rimo030/nestjs-e-commerce-frame/issues/108)
 
 <br>

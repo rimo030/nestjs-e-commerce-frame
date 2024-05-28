@@ -15,9 +15,10 @@ export class AuthController {
   @HttpCode(201)
   @Post('/signup')
   @ApiOperation({ summary: 'buyer 생성 API', description: 'buyer를 생성한다.' })
-  async buyerSignUp(@Body() createUserDto: CreateBuyerDto): Promise<{ data: { id: number } }> {
-    const id = await this.authService.buyerSignUp(createUserDto);
-    return { data: id };
+  async buyerSignUp(@Body() createUserDto: CreateBuyerDto): Promise<{ data: { id: number; accessToken: string } }> {
+    const { id } = await this.authService.buyerSignUp(createUserDto);
+    const { accessToken } = await this.authService.buyerLogin(id);
+    return { data: { id, accessToken } };
   }
 
   @UseGuards(BuyerLocalAuthGuard)
@@ -35,9 +36,10 @@ export class AuthController {
   @HttpCode(201)
   @Post('/signup-seller')
   @ApiOperation({ summary: 'seller 생성 API', description: 'seller 생성한다.' })
-  async sellerSignUp(@Body() createSellerDto: CreateSellerDto): Promise<{ data: { id: number } }> {
-    const id = await this.authService.sellerSignUp(createSellerDto);
-    return { data: id };
+  async sellerSignUp(@Body() createSellerDto: CreateSellerDto): Promise<{ data: { id: number; accessToken: string } }> {
+    const { id } = await this.authService.sellerSignUp(createSellerDto);
+    const { accessToken } = await this.authService.sellerLogin(id);
+    return { data: { id, accessToken } };
   }
 
   @UseGuards(SellerLocalAuthGuard)
