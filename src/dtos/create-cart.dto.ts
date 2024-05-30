@@ -12,13 +12,9 @@ export class CreateCartDto implements Pick<Cart, 'productId'> {
   productId!: number;
 
   @ApiProperty({
-    type: CreateCartRequiredOptionDto,
+    type: [CreateCartRequiredOptionDto],
     description: '장바구니에 담길 필수옵션의 정보',
     required: true,
-    example: [
-      { productRequiredOptionId: 1, count: 2 },
-      { productRequiredOptionId: 2, count: 1 },
-    ],
   })
   @IsArray()
   @ArrayNotEmpty()
@@ -27,13 +23,9 @@ export class CreateCartDto implements Pick<Cart, 'productId'> {
   createCartRequiredOptionDtos!: CreateCartRequiredOptionDto[];
 
   @ApiProperty({
-    type: CreateCartOptionDto,
+    type: [CreateCartOptionDto],
     description: '장바구니에 담길 선택옵션의 정보',
     required: false,
-    example: [
-      { productOptionId: 1, count: 2 },
-      { productOptionId: 2, count: 1 },
-    ],
   })
   @IsArray()
   @ValidateNested({ each: true })
