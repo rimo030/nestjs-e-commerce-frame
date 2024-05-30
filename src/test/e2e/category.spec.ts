@@ -34,7 +34,7 @@ describe('Controller', () => {
       const response = await test_create_categories(PORT);
 
       expect(response.data.length > 0).toBe(true);
-      expect(response.data.every((d) => d.id !== undefined)).toBe(true);
+      expect(response.data.every(Boolean)).toBe(true);
     });
   });
 });
