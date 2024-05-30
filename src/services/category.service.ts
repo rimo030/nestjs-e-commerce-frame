@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CategoryDto } from 'src/dtos/category.dto';
+import { CreateCategoryDto } from 'src/dtos/create-category.dto';
 import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
 import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
 import { getOffset } from 'src/util/functions/pagination-util.function';
@@ -11,12 +12,10 @@ export class CategoryService {
 
   /**
    * 카테고리를 저장합니다.
-   * @param createCategoryDto 저장할 카테고리의 이름이 저장된 객체 입니다.
+   *
+   * @param createCategoryDto 저장할 카테고리의 이름을 담은 객체 입니다.
    */
-  async createCategory(createCategoryDto: { name: string }): Promise<{
-    id: number;
-    name: string;
-  }> {
+  async createCategory(createCategoryDto: CreateCategoryDto): Promise<CategoryDto> {
     const category = await this.prisma.category.create({
       select: { id: true, name: true },
       data: { name: createCategoryDto.name },
@@ -26,9 +25,10 @@ export class CategoryService {
 
   /**
    * 카테고리들을 저장합니다.
-   * @param createCategoryDto 저장할 카테고리의 이름을 담은 배열 입니다.
+   *
+   * @param createCategoryDto 저장할 카테고리의 이름을 담은 객체 배열 입니다.
    */
-  async createCategories(createCategoryDtos: { name: string }[]): Promise<{ id: number; name: string }[]> {
+  async createCategories(createCategoryDtos: CreateCategoryDto[]): Promise<CategoryDto[]> {
     const savedCategories = await this.prisma.$transaction(
       createCategoryDtos.map((c) =>
         this.prisma.category.create({
@@ -41,7 +41,7 @@ export class CategoryService {
   }
 
   /**
-   * 카테고리를 페이지 네이션으로 조회합니다.
+   * 카테고리를 페이지네이션으로 조회합니다.
    * @param paginationDto 페이지네이션 요청 객체 입니다.
    */
   async getCategory(paginationDto: GetPaginationDto): Promise<PaginationResponse<CategoryDto>> {
