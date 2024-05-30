@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CompanyDto } from 'src/dtos/company.dto';
+import { CreateCompanyDto } from 'src/dtos/create-company.dto';
 import { GetCompanyPaginationDto } from 'src/dtos/get-company-pagination.dto';
 import { SellerNotFoundException } from 'src/exceptions/auth.exception';
 import { PaginationResponse } from 'src/interfaces/pagination-response.interface';
@@ -15,7 +16,7 @@ export class CompanyService {
    * @param sellerId 판매자 아이디가 존재해야 회사를 생성할 수 있습니다.
    * @param createCompanyDto 생성할 회사의 정보입니다.
    */
-  async createCompany(sellerId: number, createCompanyDto: { name: string }): Promise<{ id: number; name: string }> {
+  async createCompany(sellerId: number, createCompanyDto: CreateCompanyDto): Promise<CompanyDto> {
     const seller = await this.prisma.seller.findUnique({
       select: { id: true },
       where: { id: sellerId },
@@ -37,10 +38,7 @@ export class CompanyService {
    * @param sellerId 판매자 아이디가 존재해야 회사를 생성할 수 있습니다.
    * @param createCompanyDtos 생성할 회사들의 정보 입니다.
    */
-  async createCompanies(
-    sellerId: number,
-    createCompanyDtos: { name: string }[],
-  ): Promise<{ id: number; name: string }[]> {
+  async createCompanies(sellerId: number, createCompanyDtos: CreateCompanyDto[]): Promise<CompanyDto[]> {
     const seller = await this.prisma.seller.findUnique({
       select: { id: true },
       where: { id: sellerId },
