@@ -4,6 +4,7 @@ import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { test_seller_sign_up } from '../features/auth/test_seller_sign_up';
+import { test_create_companies } from '../features/companies/test_company_create_companies';
 import { test_create_company } from '../features/companies/test_company_create_company';
 
 describe('Controller', () => {
@@ -38,6 +39,12 @@ describe('Controller', () => {
 
       expect(response.data.id).toBeDefined();
       expect(response.data.name).toBe(testname);
+    });
+
+    it('회사 다수 등록에 성공해야 한다.', async () => {
+      const response = await test_create_companies(PORT);
+
+      expect(response.data.every(Boolean)).toBeDefined();
     });
   });
 });
