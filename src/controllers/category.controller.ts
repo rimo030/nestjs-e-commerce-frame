@@ -1,5 +1,5 @@
 import { Body, Controller, Get, HttpCode, Post, Query } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiBody } from '@nestjs/swagger';
 import { CategoryDto } from 'src/dtos/category.dto';
 import { CreateCategoryDto } from 'src/dtos/create-category.dto';
 import { GetPaginationDto } from 'src/dtos/get-pagination.dto';
@@ -11,6 +11,17 @@ import { createPaginationResponseDto } from 'src/util/functions/pagination-util.
 @ApiTags('Categry API')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
+
+  @HttpCode(201)
+  @Post('bulk')
+  @ApiBody({ type: [CreateCategoryDto] })
+  @ApiOperation({ summary: '카테고리 다수 등록 API', description: '다수의 카테고리를 등록할 수 있다.' })
+  async createCategories(@Body() createCategoryDtos: CreateCategoryDto[]): Promise<{
+    data: CategoryDto[];
+  }> {
+    const categories = await this.categoryService.createCategories(createCategoryDtos);
+    return { data: categories };
+  }
 
   @Get()
   @ApiOperation({ summary: '카테고리 조회 API', description: '등록된 카테고리를 페이지네이션으로 조회할 수 있다.' })
@@ -27,15 +38,5 @@ export class CategoryController {
   }> {
     const category = await this.categoryService.createCategory(createCategoryDto);
     return { data: category };
-  }
-
-  @HttpCode(201)
-  @Post('bulk')
-  @ApiOperation({ summary: '카테고리 다수 등록 API', description: '다수의 카테고리를 등록할 수 있다.' })
-  async createCategories(@Body() createCategoryDtos: CreateCategoryDto[]): Promise<{
-    data: CategoryDto[];
-  }> {
-    const categories = await this.categoryService.createCategories(createCategoryDtos);
-    return { data: categories };
   }
 }
