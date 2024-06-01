@@ -1,7 +1,8 @@
+import axios from 'axios';
 import { v4 } from 'uuid';
 import { SellerController } from 'src/controllers/seller.controller';
 import { CreateProductDto } from 'src/dtos/create-product.dto';
-import { test_seller_sign_in } from '../auth/test_seller_sign_in';
+import { deliveryType } from 'src/types/delivery-type.type';
 import { test_seller_sign_up } from '../auth/test_seller_sign_up';
 
 /**
@@ -20,38 +21,56 @@ import { test_seller_sign_up } from '../auth/test_seller_sign_up';
  * @param options 상품을 생성하기 위해 필요한 정보들
  * @returns
  */
-export async function test_seller_create_product(
+export async function test_create_product(
   PORT: number,
   options: {
-    bundleId: number;
+    bundleId: number | null;
     categoryId: number;
     companyId: number;
+    isSale?: boolean;
+    name?: string;
+    description?: string | null;
+    deliveryType?: deliveryType;
+    deliveryFreeOver?: number | null;
+    deliveryCharge?: number;
+    img?: string;
   },
+  accessToken?: string,
 ): Promise<ReturnType<SellerController['createProduct']>> {
-  const { bundleId, categoryId, companyId } = options;
-  const signUpResponse = await test_seller_sign_up(PORT);
-  const accessToken = signUpResponse.data.accessToken;
+  const {
+    bundleId,
+    categoryId,
+    companyId,
+    isSale,
+    name,
+    description,
+    deliveryType,
+    deliveryFreeOver,
+    deliveryCharge,
+    img,
+  } = options;
 
-  const response = await fetch('http://localhost/3000/seller/product', {
-    headers: {
-      authorization: `bearer ${accessToken}`,
-      'content-type': 'application/json',
-    },
+  if (!accessToken) {
+    const signUpResponse = await test_seller_sign_up(PORT);
+    accessToken = signUpResponse.data.accessToken;
+  }
+
+  const response = await axios(`http://localhost:${PORT}/seller/product`, {
     method: 'POST',
-    body: JSON.stringify({
+    headers: { Authorization: `Bearer ${accessToken}` },
+    data: {
       bundleId: bundleId,
       categoryId: categoryId,
       companyId: companyId,
-      isSale: true,
-      name: v4().slice(0, 10),
-      description: v4().slice(0, 10),
-      deliveryType: 'FREE',
-      deliveryFreeOver: null,
-      deliveryCharge: 0,
-      img: v4().slice(0, 10),
-    } satisfies CreateProductDto),
+      isSale: isSale === undefined ? true : isSale,
+      name: name === undefined ? v4() : name,
+      description: description === undefined ? v4() : description,
+      deliveryType: deliveryType === undefined ? 'FREE' : deliveryType,
+      deliveryFreeOver: deliveryFreeOver === undefined ? null : deliveryFreeOver,
+      deliveryCharge: deliveryCharge === undefined ? 0 : deliveryCharge,
+      img: img === undefined ? v4() : img,
+    } satisfies CreateProductDto,
   });
 
-  const data: Awaited<ReturnType<SellerController['createProduct']>> = await response.json();
-  return data;
+  return response.data as Awaited<ReturnType<SellerController['createProduct']>>;
 }

@@ -1,11 +1,12 @@
 import { randomInt } from 'crypto';
-import { v4 } from 'uuid';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
-import { test_seller_sign_in } from '../features/auth/test_seller_sign_in';
 import { test_seller_sign_up } from '../features/auth/test_seller_sign_up';
-import { test_seller_create_product } from '../features/sellers/test_seller_create_product';
+import { test_create_category } from '../features/categories/test_category_create_category';
+import { test_create_company } from '../features/companies/test_company_create_company';
+import { test_create_product } from '../features/sellers/test_seller_create_product';
+import { test_create_product_bundle } from '../features/sellers/test_seller_create_product_bundle';
 
 describe('Controller', () => {
   const PORT = randomInt(20000, 50000);
@@ -26,6 +27,30 @@ describe('Controller', () => {
   });
 
   describe('Seller 테스트', () => {
-    it('POST seller/product', async () => {});
+    it('seller는 상품 묶음을 생성할 수 있다.', async () => {
+      const { data: seller } = await test_seller_sign_up(PORT);
+      const response = await test_create_product_bundle(PORT, seller.accessToken);
+
+      expect(response.data.id).toBeDefined();
+      expect(response.data.sellerId).toBe(seller.id);
+    });
+
+    it('seller는 상품을 생성할 수 있다.', async () => {
+      const { data: seller } = await test_seller_sign_up(PORT);
+      const { data: bundle } = await test_create_product_bundle(PORT, seller.accessToken);
+      const { data: category } = await test_create_category(PORT);
+      const { data: company } = await test_create_company(PORT, seller.accessToken);
+
+      const response = await test_create_product(
+        PORT,
+        { bundleId: bundle.id, categoryId: category.id, companyId: company.id },
+        seller.accessToken,
+      );
+
+      expect(response.data.id).toBeDefined();
+      expect(response.data.sellerId).toBe(seller.id);
+      expect(response.data.bundleId).toBe(bundle.id);
+      expect(response.data.companyId).toBe(company.id);
+    });
   });
 });
