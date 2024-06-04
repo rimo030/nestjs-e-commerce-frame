@@ -338,4 +338,12 @@ export class SellerService {
       return { data, count, skip, take };
     }
   }
+
+  async updateProductBundle(
+    sellerId: number,
+    id: number,
+    updateProductBundleDto: Partial<CreateProductBundleDto>,
+  ): Promise<ProductBundleDto> {
+    return 1 as any;
+  }
 }

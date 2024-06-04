@@ -1,5 +1,5 @@
-import { Controller, UseGuards, HttpCode, Post, Body, Param, ParseIntPipe, Query, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import { Controller, UseGuards, HttpCode, Post, Body, Param, ParseIntPipe, Query, Get, Patch } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiBearerAuth, ApiBody, PartialType } from '@nestjs/swagger';
 import { SellerJwtAuthGuard } from 'src/auth/guards/seller-jwt.guard';
 import { UserId } from 'src/decorators/user-id.decorator';
 import { CreateProductBundleDto } from 'src/dtos/create-product-bundle.dto';
@@ -27,7 +27,7 @@ export class SellerController {
   @Get('/product-bundle')
   @ApiOperation({
     summary: '묶음 배송 그룹 조회 API',
-    description: 'seller는 등록한 묶음 배송 그룹을 페이지 네이션으로 조회할 수 있다.',
+    description: 'seller는 등록한 묶음 배송 그룹을 페이지네이션으로 조회할 수 있다.',
   })
   async getProductBundles(
     @UserId() sellerId: number,
@@ -47,6 +47,21 @@ export class SellerController {
     data: ProductBundleDto;
   }> {
     const productBundle = await this.sellerservice.createProductBundle(sellerId, createProductBundleDto);
+    return { data: productBundle };
+  }
+
+  @HttpCode(201)
+  @Patch('/product-bundle/:id')
+  @ApiBody({ type: PartialType(CreateProductBundleDto) })
+  @ApiOperation({ summary: '묶음 배송 그룹 수정 API', description: 'seller는 묶음 배송 그룹을 수정할 수 있다.' })
+  async updateProductBundle(
+    @UserId() sellerId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateProductBundleDto: Partial<CreateProductBundleDto>,
+  ): Promise<{
+    data: ProductBundleDto;
+  }> {
+    const productBundle = await this.sellerservice.updateProductBundle(sellerId, id, updateProductBundleDto);
     return { data: productBundle };
   }
 
