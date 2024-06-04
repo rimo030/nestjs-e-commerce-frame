@@ -339,11 +339,37 @@ export class SellerService {
     }
   }
 
+  /**
+   * 상품 묶음 그룹의 데이터를 수정합니다.
+   * @param sellerId 판매자 계정이 있어야 수정이 가능합니다. 판매자 본인이 등록한 상품 묶음만 수정할 수 있습니다.
+   * @param id 수정할 상품 묶음의 아이디 입니다.
+   * @param updateProductBundleDto 수정할 데이터가 담긴 객체 입니다.
+   */
   async updateProductBundle(
     sellerId: number,
     id: number,
     updateProductBundleDto: Partial<CreateProductBundleDto>,
   ): Promise<ProductBundleDto> {
-    return 1 as any;
+    const { name, chargeStandard } = updateProductBundleDto;
+
+    const productBundle = await this.prisma.productBundle.findUnique({
+      select: { id: true, sellerId: true, name: true, chargeStandard: true },
+      where: { id, sellerId },
+    });
+
+    if (!productBundle) {
+      throw new ProductBundleNotFoundException();
+    }
+
+    const updateProductBundle = await this.prisma.productBundle.update({
+      select: { id: true, sellerId: true, name: true, chargeStandard: true },
+      data: {
+        ...(name && { name }),
+        ...(chargeStandard && { chargeStandard }),
+      },
+      where: { id, sellerId },
+    });
+
+    return updateProductBundle;
   }
 }
