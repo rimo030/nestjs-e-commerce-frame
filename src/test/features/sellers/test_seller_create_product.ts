@@ -4,6 +4,9 @@ import { SellerController } from 'src/controllers/seller.controller';
 import { CreateProductDto } from 'src/dtos/create-product.dto';
 import { deliveryType } from 'src/types/delivery-type.type';
 import { test_seller_sign_up } from '../auth/test_seller_sign_up';
+import { test_create_category } from '../categories/test_category_create_category';
+import { test_create_company } from '../companies/test_company_create_company';
+import { test_create_product_bundle } from './test_seller_create_product_bundle';
 
 /**
  * 판매자가 직접 상품을 생성하는 상황을 가정한다.
@@ -19,14 +22,13 @@ import { test_seller_sign_up } from '../auth/test_seller_sign_up';
  *
  * @param PORT 테스트를 하기 위한 포트 번호
  * @param options 상품을 생성하기 위해 필요한 정보들
- * @returns
  */
 export async function test_create_product(
   PORT: number,
   options: {
-    bundleId: number | null;
-    categoryId: number;
-    companyId: number;
+    bundleId?: number | null;
+    categoryId?: number;
+    companyId?: number;
     isSale?: boolean;
     name?: string;
     description?: string | null;
@@ -55,13 +57,31 @@ export async function test_create_product(
     accessToken = signUpResponse.data.accessToken;
   }
 
+  let finalBundleId = bundleId;
+  if (finalBundleId === undefined) {
+    const { data: productBundle } = await test_create_product_bundle(PORT, accessToken);
+    finalBundleId = productBundle.id;
+  }
+
+  let finalCompanyId = companyId;
+  if (!finalCompanyId) {
+    const { data: company } = await test_create_company(PORT, accessToken);
+    finalCompanyId = company.id;
+  }
+
+  let finalCategoryId = categoryId;
+  if (!finalCategoryId) {
+    const { data: category } = await test_create_category(PORT);
+    finalCategoryId = category.id;
+  }
+
   const response = await axios(`http://localhost:${PORT}/seller/product`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${accessToken}` },
     data: {
-      bundleId: bundleId,
-      categoryId: categoryId,
-      companyId: companyId,
+      bundleId: finalBundleId,
+      categoryId: finalCategoryId,
+      companyId: finalCompanyId,
       isSale: isSale === undefined ? true : isSale,
       name: name === undefined ? v4() : name,
       description: description === undefined ? v4() : description,
