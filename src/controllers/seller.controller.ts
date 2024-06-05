@@ -80,7 +80,7 @@ export class SellerController {
 
   @HttpCode(201)
   @Post('/product')
-  @ApiOperation({ summary: 'product 등록 API', description: 'seller는 상품을 등록할 수 있다.' })
+  @ApiOperation({ summary: '상품 등록 API', description: 'seller는 상품을 등록할 수 있다.' })
   async createProduct(
     @UserId() sellerId: number,
     @Body() createProductDto: CreateProductDto,
@@ -88,6 +88,19 @@ export class SellerController {
     data: ProductDto;
   }> {
     const product = await this.sellerservice.createProduct(sellerId, createProductDto);
+    return { data: product };
+  }
+
+  @HttpCode(201)
+  @Patch('/product/:id')
+  @ApiBody({ type: PartialType(CreateProductDto) })
+  @ApiOperation({ summary: '상품 수정 API', description: 'seller는 상품을 등록할 수 있다.' })
+  async updateProduct(
+    @UserId() sellerId: number,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateProductDto: Partial<CreateProductDto>,
+  ): Promise<{ data: ProductDto }> {
+    const product = await this.sellerservice.updateProduct(sellerId, id, updateProductDto);
     return { data: product };
   }
 

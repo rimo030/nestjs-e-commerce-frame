@@ -372,4 +372,8 @@ export class SellerService {
 
     return updateProductBundle;
   }
+
+  async updateProduct(sellerId: number, id: number, updateProductDto: Partial<CreateProductDto>): Promise<ProductDto> {
+    return 1 as any;
+  }
 }
