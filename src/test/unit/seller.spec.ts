@@ -12,8 +12,15 @@ import { CompanyService } from 'src/services/company.service';
 import { ProductService } from 'src/services/product.service';
 import { SellerService } from 'src/services/seller.service';
 import { isEqual } from 'src/util/functions/is-equal.function';
+import { test_seller_sign_up } from '../features/auth/test_seller_sign_up';
+import { test_create_category } from '../features/categories/test_category_create_category';
+import { test_create_company } from '../features/companies/test_company_create_company';
+import { test_create_product } from '../features/sellers/test_seller_create_product';
+import { test_create_product_bundle } from '../features/sellers/test_seller_create_product_bundle';
 
 describe('Seller Controller', () => {
+  const PORT = 3000;
+
   let controller: SellerController;
   let service: SellerService;
 
@@ -452,6 +459,42 @@ describe('Seller Controller', () => {
   });
 
   describe('seller는 등록된 상품의 정보를 수정할 수 있다.', () => {
-    it.todo('상품의 데이터를 수정할 수 있다.');
+    it.only('상품의 데이터를 수정할 수 있다.', async () => {
+      const { data: seller } = await test_seller_sign_up(PORT);
+
+      const { data: bundle } = await test_create_product_bundle(PORT, seller.accessToken);
+      const { data: company } = await test_create_company(PORT, seller.accessToken);
+      const { data: category } = await test_create_category(PORT);
+
+      const { data: product } = await test_create_product(PORT, {}, seller.accessToken);
+
+      const testUpdateData: Partial<CreateProductDto> = {
+        bundleId: bundle.id,
+        categoryId: category.id,
+        companyId: company.id,
+        isSale: false,
+        name: v4(),
+        description: v4(),
+        deliveryType: 'COUNT_FREE',
+        deliveryCharge: Math.floor(Math.random() * 101),
+        deliveryFreeOver: Math.floor(Math.random() * 11),
+        img: v4(),
+      };
+      const updateProduct = await service.updateProduct(seller.id, product.id, testUpdateData);
+
+      expect(updateProduct.id).toBeDefined();
+      expect(updateProduct.sellerId).toBe(seller.id);
+
+      expect(updateProduct.bundleId).toBe(testUpdateData.bundleId);
+      expect(updateProduct.categoryId).toBe(testUpdateData.categoryId);
+      expect(updateProduct.companyId).toBe(testUpdateData.companyId);
+      expect(updateProduct.isSale).toBe(testUpdateData.isSale);
+      expect(updateProduct.name).toBe(testUpdateData.name);
+      expect(updateProduct.description).toBe(testUpdateData.description);
+      expect(updateProduct.deliveryType).toBe(testUpdateData.deliveryType);
+      expect(updateProduct.deliveryFreeOver).toBe(testUpdateData.deliveryFreeOver);
+      expect(updateProduct.deliveryCharge).toBe(testUpdateData.deliveryCharge);
+      expect(updateProduct.img).toBe(testUpdateData.img);
+    });
   });
 });
