@@ -120,15 +120,19 @@ describe('Seller Controller', () => {
     });
 
     it('[err] seller는 상품의 상품 묶음을 수정할 경우, 본인이 생성한 상품 묶음으로만 수정할 수 있다.', async () => {
-      const { data: seller } = await test_seller_sign_up(PORT);
+      const { data: seller1 } = await test_seller_sign_up(PORT);
+      const { data: bundle1 } = await test_create_product_bundle(PORT, seller1.accessToken);
 
       const { data: seller2 } = await test_seller_sign_up(PORT);
-      const { data: bundle } = await test_create_product_bundle(PORT, seller2.accessToken);
+      const { data: bundle2 } = await test_create_product_bundle(PORT, seller2.accessToken);
 
-      const response = await test_create_product(PORT, { bundleId: bundle.id }, seller.accessToken);
+      const { data: product } = await test_create_product(PORT, { bundleId: bundle1.id }, seller1.accessToken);
 
-      expect(seller.id).not.toBe(seller2.id);
-      expect(response.data.id).not.toBeDefined();
+      try {
+        await test_update_product(PORT, product.id, { bundleId: bundle2.id }, seller1.accessToken);
+      } catch (error) {
+        expect(1).toBe(2);
+      }
     });
   });
 });

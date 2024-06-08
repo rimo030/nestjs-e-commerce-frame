@@ -50,7 +50,7 @@ export async function test_update_product(
   }
 
   const response = await axios(`http://localhost:${PORT}/seller/product/${id}`, {
-    method: 'Patch',
+    method: 'PATCH',
     headers: { Authorization: `Bearer ${accessToken}` },
     data: {
       ...(bundleId !== undefined && { bundleId }),
