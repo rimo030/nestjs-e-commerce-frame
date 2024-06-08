@@ -26,8 +26,8 @@ export async function test_seller_sign_up(
     data: {
       email: option?.email ?? `${v4().slice(0, 100)}@gmail.com`,
       password: option?.password ?? v4().slice(0, 20),
-      name: v4().slice(0, 10),
-      phone: v4().slice(0, 10),
+      name: v4().slice(0, 32),
+      phone: v4().slice(0, 11),
       businessNumber: v4().slice(0, 100),
     } satisfies CreateSellerDto,
   });
