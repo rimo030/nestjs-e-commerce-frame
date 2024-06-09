@@ -1,6 +1,6 @@
 import { randomInt } from 'crypto';
 import { v4 } from 'uuid';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { test_seller_sign_in } from '../features/auth/test_seller_sign_in';
@@ -16,6 +16,7 @@ describe('Controller', () => {
     }).compile();
 
     const app = module.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     server = await app.init();
     await server.listen(PORT);
   });
@@ -33,7 +34,7 @@ describe('Controller', () => {
 
     it(`판매자 로그인에 성공해야 한다. 회원가입이 실패할 경우, 함께 실패한다.`, async () => {
       const response = await test_seller_sign_in(PORT, {
-        email: `${v4().slice(0, 100)}@gmail.com`,
+        email: `${v4()}@gmail.com`,
         password: v4().slice(0, 20),
       });
 

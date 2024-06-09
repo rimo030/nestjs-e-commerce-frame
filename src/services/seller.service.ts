@@ -446,7 +446,6 @@ export class SellerService {
       },
       where: { id },
     });
-    console.log(updateProduct);
 
     return updateProduct;
   }
