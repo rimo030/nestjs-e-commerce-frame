@@ -5,7 +5,7 @@ import { AuthCredentialsDto } from './auth-credentials.dto';
 
 export class CreateSellerDto extends AuthCredentialsDto implements Pick<Seller, 'name' | 'phone' | 'businessNumber'> {
   @ApiProperty({ type: String, description: '이름', required: true, example: 'myname' })
-  @IsNotEmptyString(1, 128)
+  @IsNotEmptyString(1, 32)
   name!: string;
 
   @ApiProperty({

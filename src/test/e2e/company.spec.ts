@@ -1,6 +1,6 @@
 import { randomInt } from 'crypto';
 import { v4 } from 'uuid';
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { test_seller_sign_up } from '../features/auth/test_seller_sign_up';
@@ -17,6 +17,7 @@ describe('Controller', () => {
     }).compile();
 
     const app = module.createNestApplication();
+    app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
     server = await app.init();
     await server.listen(PORT);
   });

@@ -338,4 +338,115 @@ export class SellerService {
       return { data, count, skip, take };
     }
   }
+
+  /**
+   * 상품 묶음 그룹의 데이터를 수정합니다.
+   * @param sellerId 판매자 계정이 있어야 수정이 가능합니다. 판매자 본인이 등록한 상품 묶음만 수정할 수 있습니다.
+   * @param id 수정할 상품 묶음의 아이디 입니다.
+   * @param updateProductBundleDto 수정할 데이터가 담긴 객체 입니다.
+   */
+  async updateProductBundle(
+    sellerId: number,
+    id: number,
+    updateProductBundleDto: Partial<CreateProductBundleDto>,
+  ): Promise<ProductBundleDto> {
+    const { name, chargeStandard } = updateProductBundleDto;
+
+    const productBundle = await this.prisma.productBundle.findUnique({
+      select: { id: true, sellerId: true, name: true, chargeStandard: true },
+      where: { id, sellerId },
+    });
+
+    if (!productBundle) {
+      throw new ProductBundleNotFoundException();
+    }
+
+    const updateProductBundle = await this.prisma.productBundle.update({
+      select: { id: true, sellerId: true, name: true, chargeStandard: true },
+      data: {
+        ...(name && { name }),
+        ...(chargeStandard && { chargeStandard }),
+      },
+      where: { id, sellerId },
+    });
+
+    return updateProductBundle;
+  }
+
+  /**
+   * 상품의 정보를 갱신합니다.
+   * @param sellerId  상품을 등록한 판매자 id여야 상품을 수정할 수 있습니다.
+   * @param id  상품의 아이디입니다.
+   * @param updateProductDto  갱신할 정보를 담은 객체입니다. 상품 묶음의 경우, 해당 판매자가 등록한 묶음으로만 변경이 가능합니다.
+   */
+  async updateProduct(sellerId: number, id: number, updateProductDto: Partial<CreateProductDto>): Promise<ProductDto> {
+    const {
+      bundleId,
+      categoryId,
+      companyId,
+      isSale,
+      name,
+      description,
+      deliveryType,
+      deliveryFreeOver,
+      deliveryCharge,
+      img,
+    } = updateProductDto;
+
+    const [product, productBundle] = await Promise.all([
+      this.prisma.product.findUnique({
+        select: { sellerId: true, id: true },
+        where: { id, sellerId },
+      }),
+      bundleId
+        ? this.prisma.productBundle.findUnique({
+            select: { id: true, sellerId: true },
+            where: {
+              id: bundleId,
+              sellerId,
+            },
+          })
+        : true,
+    ]);
+
+    if (!product) {
+      throw new ProductNotFoundException();
+    }
+
+    if (!productBundle) {
+      throw new ProductBundleNotFoundException();
+    }
+
+    const updateProduct = await this.prisma.product.update({
+      select: {
+        id: true,
+        sellerId: true,
+        bundleId: true,
+        categoryId: true,
+        companyId: true,
+        isSale: true,
+        name: true,
+        description: true,
+        deliveryType: true,
+        deliveryFreeOver: true,
+        deliveryCharge: true,
+        img: true,
+      },
+      data: {
+        ...(bundleId !== undefined && { bundleId }),
+        ...(categoryId && { categoryId }),
+        ...(companyId && { companyId }),
+        ...(name && { name }),
+        ...(description !== undefined && { description }),
+        ...(isSale !== undefined && { isSale }),
+        ...(deliveryType && { deliveryType }),
+        ...(deliveryFreeOver !== undefined && { deliveryFreeOver }),
+        ...(deliveryCharge && { deliveryCharge }),
+        ...(img && { img }),
+      },
+      where: { id },
+    });
+
+    return updateProduct;
+  }
 }
