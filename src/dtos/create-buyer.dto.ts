@@ -1,7 +1,8 @@
 import { Buyer } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmptyNumber } from '../decorators/is-not-empty-number.decorator';
+import { IsOptionalNumber } from 'src/decorators/is-optional-number.decorator';
+import { IsOptionalString } from 'src/decorators/is-optional-string.decorator';
 import { IsNotEmptyString } from '../decorators/is-not-empty-string.decorator';
 import { AuthCredentialsDto } from './auth-credentials.dto';
 
@@ -11,12 +12,12 @@ export class CreateBuyerDto extends AuthCredentialsDto implements Pick<Buyer, 'n
   name!: string;
 
   @ApiProperty({ type: Number, description: '성별(남자 0, 여자 1)', required: true, example: 1 })
-  @IsNotEmptyNumber()
-  gender!: number;
+  @IsOptionalNumber('int', { min: 0, max: 1 })
+  gender!: number | null;
 
   @ApiProperty({ type: Number, description: '나이', required: true, example: 20 })
-  @IsNotEmptyNumber()
-  age!: number;
+  @IsOptionalNumber('int')
+  age!: number | null;
 
   @ApiProperty({
     type: String,
@@ -25,6 +26,6 @@ export class CreateBuyerDto extends AuthCredentialsDto implements Pick<Buyer, 'n
     example: '01012341234',
   })
   @Transform(({ value }) => value.replace(/-/g, ''))
-  @IsNotEmptyString(11, 11)
-  phone!: string;
+  @IsOptionalString(11, 11)
+  phone!: string | null;
 }
