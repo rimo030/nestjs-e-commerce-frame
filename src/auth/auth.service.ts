@@ -130,6 +130,39 @@ export class AuthService {
   }
 
   /**
+   * buyer의 카카오 로그인을 처리합니다.
+   * 등록되지 않은 이메일일 경우 새로 buyer를 생성합니다. 등록된 경우 jwt 토큰을 발행합니다.
+   *
+   * @param BuyerKakaoCredentialsDto BuyerKakaoStrategy에서 전달된 정보입니다.
+   */
+  async buyerKakaoOAuthLogin(BuyerKakaoCredentialsDto: {
+    email: string | undefined;
+    name: string | undefined;
+    accessToken: string;
+  }): Promise<{ accessToken: string }> {
+    const { email, name } = BuyerKakaoCredentialsDto;
+
+    if (email && name) {
+      const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email } });
+
+      if (!buyer) {
+        const buyerId = await this.prisma.buyer.create({
+          select: { id: true },
+          data: { email, name },
+        });
+        const accessToken = this.jwtService.sign(buyerId, {
+          secret: this.configService.get('JWT_SECRET_BUYER'),
+        });
+        return { accessToken };
+      }
+
+      return this.buyerLogin(buyer.id);
+    }
+
+    throw new AuthForbiddenException();
+  }
+
+  /**
    * seller의 로그인시 비밀번호가 올바른지 검사합니다.
    * passport의 validate로 호출됩니다.
    *
