@@ -103,8 +103,8 @@ export class AuthService {
    * @param BuyerGoogleCredentialsDto BuyerGoogleStrategy에서 전달된 정보입니다.
    */
   async buyerGoogleOAuthLogin(BuyerGoogleCredentialsDto: {
-    email: string | undefined;
-    name: string | undefined;
+    email?: string;
+    name?: string;
     accessToken: string;
   }): Promise<{ accessToken: string }> {
     const { email, name } = BuyerGoogleCredentialsDto;
@@ -122,10 +122,8 @@ export class AuthService {
         });
         return { accessToken };
       }
-
       return this.buyerLogin(buyer.id);
     }
-
     throw new AuthForbiddenException();
   }
 
@@ -136,8 +134,8 @@ export class AuthService {
    * @param BuyerKakaoCredentialsDto BuyerKakaoStrategy에서 전달된 정보입니다.
    */
   async buyerKakaoOAuthLogin(BuyerKakaoCredentialsDto: {
-    kakaoId: string | undefined;
-    name: string | undefined;
+    kakaoId?: string;
+    name?: string;
     accessToken: string;
   }): Promise<{ accessToken: string }> {
     const { kakaoId, name } = BuyerKakaoCredentialsDto;
@@ -155,10 +153,8 @@ export class AuthService {
         });
         return { accessToken };
       }
-
       return this.buyerLogin(buyer.id);
     }
-
     throw new AuthForbiddenException();
   }
 
