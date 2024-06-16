@@ -136,19 +136,19 @@ export class AuthService {
    * @param BuyerKakaoCredentialsDto BuyerKakaoStrategy에서 전달된 정보입니다.
    */
   async buyerKakaoOAuthLogin(BuyerKakaoCredentialsDto: {
-    email: string | undefined;
+    kakaoId: string | undefined;
     name: string | undefined;
     accessToken: string;
   }): Promise<{ accessToken: string }> {
-    const { email, name } = BuyerKakaoCredentialsDto;
+    const { kakaoId, name } = BuyerKakaoCredentialsDto;
 
-    if (email && name) {
-      const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email } });
+    if (kakaoId && name) {
+      const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email: `${kakaoId}` } });
 
       if (!buyer) {
         const buyerId = await this.prisma.buyer.create({
           select: { id: true },
-          data: { email, name },
+          data: { email: `${kakaoId}`, name },
         });
         const accessToken = this.jwtService.sign(buyerId, {
           secret: this.configService.get('JWT_SECRET_BUYER'),

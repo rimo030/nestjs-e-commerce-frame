@@ -1,5 +1,4 @@
 import { Profile, Strategy } from 'passport-kakao';
-import { v4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
@@ -13,22 +12,19 @@ export class BuyerKakaoStrategy extends PassportStrategy(Strategy, 'buyer-kakao'
     });
   }
 
-  /**
-   * @todo 카카오 이메일 조회 승인
-   */
   async validate(
     accessToken: string,
     refreshToken: string,
     profile: Profile,
   ): Promise<{
-    email: string | undefined;
+    kakaoId: string | undefined;
     name: string | undefined;
     accessToken: string;
   }> {
-    const { username, _json } = profile;
+    const { id, username } = profile;
 
     return {
-      email: _json.kakao_account.email ?? `${v4()}@kakao.com`,
+      kakaoId: id,
       name: username,
       accessToken,
     };
