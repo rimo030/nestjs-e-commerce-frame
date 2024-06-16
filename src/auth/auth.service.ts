@@ -86,7 +86,7 @@ export class AuthService {
       where: { email: authCredentialsDto.email },
     });
 
-    if (buyer) {
+    if (buyer && buyer.password) {
       const isRightPassword = await bcrypt.compare(authCredentialsDto.password, buyer.password);
       if (isRightPassword) {
         return { id: buyer.id };
@@ -94,6 +94,68 @@ export class AuthService {
       throw new SellerNotFoundException();
     }
     throw new SellerNotFoundException();
+  }
+
+  /**
+   * buyer의 구글 로그인을 처리합니다.
+   * 등록되지 않은 이메일일 경우 새로 buyer를 생성합니다. 등록된 경우 jwt 토큰을 발행합니다.
+   *
+   * @param BuyerGoogleCredentialsDto BuyerGoogleStrategy에서 전달된 정보입니다.
+   */
+  async buyerGoogleOAuthLogin(BuyerGoogleCredentialsDto: {
+    email?: string;
+    name?: string;
+    accessToken: string;
+  }): Promise<{ accessToken: string }> {
+    const { email, name } = BuyerGoogleCredentialsDto;
+
+    if (email && name) {
+      const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email } });
+
+      if (!buyer) {
+        const buyerId = await this.prisma.buyer.create({
+          select: { id: true },
+          data: { email, name },
+        });
+        const accessToken = this.jwtService.sign(buyerId, {
+          secret: this.configService.get('JWT_SECRET_BUYER'),
+        });
+        return { accessToken };
+      }
+      return this.buyerLogin(buyer.id);
+    }
+    throw new AuthForbiddenException();
+  }
+
+  /**
+   * buyer의 카카오 로그인을 처리합니다.
+   * 등록되지 않은 이메일일 경우 새로 buyer를 생성합니다. 등록된 경우 jwt 토큰을 발행합니다.
+   *
+   * @param BuyerKakaoCredentialsDto BuyerKakaoStrategy에서 전달된 정보입니다.
+   */
+  async buyerKakaoOAuthLogin(BuyerKakaoCredentialsDto: {
+    kakaoId?: string;
+    name?: string;
+    accessToken: string;
+  }): Promise<{ accessToken: string }> {
+    const { kakaoId, name } = BuyerKakaoCredentialsDto;
+
+    if (kakaoId && name) {
+      const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email: `${kakaoId}` } });
+
+      if (!buyer) {
+        const buyerId = await this.prisma.buyer.create({
+          select: { id: true },
+          data: { email: `${kakaoId}`, name },
+        });
+        const accessToken = this.jwtService.sign(buyerId, {
+          secret: this.configService.get('JWT_SECRET_BUYER'),
+        });
+        return { accessToken };
+      }
+      return this.buyerLogin(buyer.id);
+    }
+    throw new AuthForbiddenException();
   }
 
   /**

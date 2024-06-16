@@ -1,9 +1,11 @@
-import { Body, Controller, HttpCode, Post, UseGuards, Request } from '@nestjs/common';
+import { Body, Controller, HttpCode, Post, UseGuards, Request, Get } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthCredentialsDto } from '../dtos/auth-credentials.dto';
 import { CreateBuyerDto } from '../dtos/create-buyer.dto';
 import { CreateSellerDto } from '../dtos/create-seller.dto';
 import { AuthService } from './auth.service';
+import { BuyerGoogleOAuthGuard } from './guards/buyer-google-oauth.guard';
+import { BuyerKakaoOAuthGuard } from './guards/buyer-kakao-oauth.guard';
 import { BuyerLocalAuthGuard } from './guards/buyer-local.auth.guard';
 import { SellerLocalAuthGuard } from './guards/seller-local.auth.guard';
 
@@ -51,6 +53,28 @@ export class AuthController {
     @Request() req,
   ): Promise<{ data: { accessToken: string } }> {
     const accessToken = await this.authService.sellerLogin(req.user.id);
+    return { data: accessToken };
+  }
+
+  @Get('google')
+  @UseGuards(BuyerGoogleOAuthGuard)
+  async googleAuth() {}
+
+  @Get('google/callback')
+  @UseGuards(BuyerGoogleOAuthGuard)
+  async googleAuthRedirect(@Request() req) {
+    const accessToken = await this.authService.buyerGoogleOAuthLogin(req.user);
+    return { data: accessToken };
+  }
+
+  @Get('kakao')
+  @UseGuards(BuyerKakaoOAuthGuard)
+  async kakaoAuth() {}
+
+  @Get('kakao/callback')
+  @UseGuards(BuyerKakaoOAuthGuard)
+  async kakaoAuthCallback(@Request() req): Promise<{ data: { accessToken: string } }> {
+    const accessToken = await this.authService.buyerKakaoOAuthLogin(req.user);
     return { data: accessToken };
   }
 }

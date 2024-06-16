@@ -10,7 +10,9 @@ import { ProductModule } from 'src/modules/product.module';
 import { SellerModule } from 'src/modules/seller.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { BuyerGoogleStrategy } from './strategies/buyer-google-oauth.strategy';
 import { BuyerJwtStrategy } from './strategies/buyer-jwt.strategy';
+import { BuyerKakaoStrategy } from './strategies/buyer-kakao-oauth.strategy';
 import { BuyerLocalStrategy } from './strategies/buyer-local.strategy';
 import { SellerJwtStrategy } from './strategies/seller-jwt.strategy';
 import { SellerLocalStrategy } from './strategies/seller-local.strategy';
@@ -37,6 +39,14 @@ import { SellerLocalStrategy } from './strategies/seller-local.strategy';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, BuyerLocalStrategy, SellerLocalStrategy, BuyerJwtStrategy, SellerJwtStrategy],
+  providers: [
+    AuthService,
+    BuyerLocalStrategy,
+    SellerLocalStrategy,
+    BuyerJwtStrategy,
+    SellerJwtStrategy,
+    BuyerGoogleStrategy,
+    BuyerKakaoStrategy,
+  ],
 })
 export class AuthModule {}
