@@ -68,7 +68,7 @@ describe('Controller', () => {
       expect(savedBuyerId).toBeDefined();
       expect(savedBuyerId).not.toBe(null);
 
-      const { data } = await controller.buyerSignIn(testBuyer, { user: { id: savedBuyerId } });
+      const { data } = await controller.buyerSignIn(savedBuyerId, testBuyer);
       const decode = jwtService.decode(data.accessToken);
       expect(decode.id).toBe(savedBuyerId);
     });
