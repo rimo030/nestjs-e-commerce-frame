@@ -13,6 +13,7 @@ import {
   SellerNotFoundException,
   SellerUnauthrizedException,
 } from '../exceptions/auth.exception';
+import { BuyerLoginDto } from 'src/dtos/login-buyer.dto';
 
 @Injectable()
 export class AuthService {
@@ -20,32 +21,19 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) {}
+  ) { }
 
   /**
    * 구매자 회원가입 기능입니다.
    * buyer를 저장합니다. 비밀번호는 암호화 됩니다.
-   *
-   * @param createBuyerDto 저장할 buyer의 데이터 입니다.
    */
-  async buyerSignUp(createBuyerDto: CreateBuyerDto): Promise<{ id: number }> {
-    const { email, password, name, gender, age, phone } = createBuyerDto;
-    const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email } });
+  async buyerSignUp(createBuyerDto: CreateBuyerDto): Promise<BuyerLoginDto> {
+    const { id } = await this.createBuyer(createBuyerDto);
+    const { accessToken, refreshToken } = await this.buyerLogin(id);
 
-    if (buyer) {
-      throw new BuyerUnauthrizedException();
-    }
-
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const buyerId = await this.prisma.buyer.create({
-      select: { id: true },
-      data: { email, password: hashedPassword, name, gender, age, phone },
-    });
-
-    return buyerId;
+    return { id, accessToken, refreshToken };
   }
+
 
   /**
    * 판매자 회원가입 기능입니다.
@@ -59,13 +47,11 @@ export class AuthService {
       select: { id: true },
       where: { email },
     });
-
     if (seller) {
       throw new SellerUnauthrizedException();
     }
 
-    const salt = await bcrypt.genSalt();
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const hashedPassword = await this.hashPassword(password);
 
     const sellerId = await this.prisma.seller.create({
       select: { id: true },
@@ -184,12 +170,17 @@ export class AuthService {
    * buyer 로그인시 accessToken을 발급합니다.
    * @param id JWT의 페이로드가 될 buyer의 id 입니다.
    */
-  async buyerLogin(id: number): Promise<{ accessToken: string }> {
+  async buyerLogin(id: number): Promise<BuyerLoginDto> {
     const payload: { id: number } = { id };
+
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_SECRET_BUYER'),
     });
-    return { accessToken };
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_REFRESH_SECRET_BUYER'),
+    });
+
+    return { id, accessToken, refreshToken };
   }
 
   /**
@@ -267,4 +258,28 @@ export class AuthService {
     }
     return sellerId;
   }
+
+
+  private async createBuyer(createBuyerDto: CreateBuyerDto): Promise<{ id: number }> {
+    const { email, password, name, gender, age, phone } = createBuyerDto;
+    const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email } });
+    if (buyer) {
+      throw new BuyerUnauthrizedException();
+    }
+
+    const hashedPassword = await this.hashPassword(password);
+
+    const buyerId = await this.prisma.buyer.create({
+      select: { id: true },
+      data: { email, password: hashedPassword, name, gender, age, phone },
+    });
+
+    return buyerId;
+  }
+
+  private async hashPassword(password: string) {
+    const salt = await bcrypt.genSalt();
+    return await bcrypt.hash(password, salt);
+  }
+
 }

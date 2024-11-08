@@ -8,31 +8,33 @@ import { BuyerGoogleOAuthGuard } from './guards/buyer-google-oauth.guard';
 import { BuyerKakaoOAuthGuard } from './guards/buyer-kakao-oauth.guard';
 import { BuyerLocalAuthGuard } from './guards/buyer-local.auth.guard';
 import { SellerLocalAuthGuard } from './guards/seller-local.auth.guard';
+import { CommonDto } from 'src/dtos/common.dto';
+import { BuyerLoginDto } from 'src/dtos/login-buyer.dto';
+import { UserId } from 'src/decorators/user-id.decorator';
 
 @Controller('auth')
 @ApiTags('Auth API')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService) { }
 
   @HttpCode(201)
   @Post('/signup')
-  @ApiOperation({ summary: 'buyer 생성 API', description: 'buyer를 생성한다.' })
-  async buyerSignUp(@Body() createUserDto: CreateBuyerDto): Promise<{ data: { id: number; accessToken: string } }> {
-    const { id } = await this.authService.buyerSignUp(createUserDto);
-    const { accessToken } = await this.authService.buyerLogin(id);
-    return { data: { id, accessToken } };
+  @ApiOperation({ summary: 'buyer 생성 API', description: 'buyer 회원가입 기능' })
+  async buyerSignUp(@Body() createUserDto: CreateBuyerDto): Promise<CommonDto<BuyerLoginDto>> {
+    const data = await this.authService.buyerSignUp(createUserDto)
+    return { data, message: "회원가입이 완료 되었습니다." };
   }
 
   @UseGuards(BuyerLocalAuthGuard)
   @HttpCode(201)
   @Post('/signin')
-  @ApiOperation({ summary: 'buyer 로그인 API', description: 'buyer 비밀번호 매칭' })
+  @ApiOperation({ summary: 'buyer 로그인 API', description: 'buyer 로그인 기능' })
   async buyerSignIn(
+    @UserId() buyerId: number,
     @Body() authCredentialsDto: AuthCredentialsDto,
-    @Request() req,
-  ): Promise<{ data: { accessToken: string } }> {
-    const accessToken = await this.authService.buyerLogin(req.user.id);
-    return { data: accessToken };
+  ): Promise<CommonDto<BuyerLoginDto>> {
+    const data = await this.authService.buyerLogin(buyerId)
+    return { data, message: "로그인 되었습니다." };
   }
 
   @HttpCode(201)
@@ -58,7 +60,7 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(BuyerGoogleOAuthGuard)
-  async googleAuth() {}
+  async googleAuth() { }
 
   @Get('google/callback')
   @UseGuards(BuyerGoogleOAuthGuard)
@@ -69,7 +71,7 @@ export class AuthController {
 
   @Get('kakao')
   @UseGuards(BuyerKakaoOAuthGuard)
-  async kakaoAuth() {}
+  async kakaoAuth() { }
 
   @Get('kakao/callback')
   @UseGuards(BuyerKakaoOAuthGuard)
