@@ -27,6 +27,14 @@ export class BuyerEmailNotFoundException extends HttpException {
   }
 }
 
+
+export class BuyerRefreshUnauthrizedException extends HttpException {
+  constructor() {
+    super(`Invalid or expired buyer refresh token`, HttpStatus.UNAUTHORIZED);
+  }
+}
+
+
 /**
  * Seller
  */

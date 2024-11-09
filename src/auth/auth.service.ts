@@ -8,6 +8,7 @@ import { CreateBuyerDto } from '../dtos/create-buyer.dto';
 import { CreateSellerDto } from '../dtos/create-seller.dto';
 import {
   AuthForbiddenException,
+  BuyerRefreshUnauthrizedException,
   BuyerUnauthrizedException,
   SellerEmailNotFoundException,
   SellerNotFoundException,
@@ -81,6 +82,18 @@ export class AuthService {
     }
     throw new SellerNotFoundException();
   }
+
+
+  /**
+   * buyer의 refresh 토큰이 유효한지 검증한 뒤 새로운 토큰을 발급합니다.
+   * 
+   * @param refreshToken 
+   */
+  async buyerRefresh(refreshToken: string): Promise<BuyerLoginDto> {
+    const { id } = await this.verifyBuyerRefreshToken(refreshToken)
+    return await this.buyerLogin(id);
+  }
+
 
   /**
    * buyer의 구글 로그인을 처리합니다.
@@ -175,9 +188,12 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_SECRET_BUYER'),
+      expiresIn: this.configService.get('JWT_EXPIRATION_TIME')
     });
+
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_REFRESH_SECRET_BUYER'),
+      expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION_TIME')
     });
 
     return { id, accessToken, refreshToken };
@@ -280,6 +296,18 @@ export class AuthService {
   private async hashPassword(password: string) {
     const salt = await bcrypt.genSalt();
     return await bcrypt.hash(password, salt);
+  }
+
+  private async verifyBuyerRefreshToken(refreshToken: string): Promise<{ id: number }> {
+    try {
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: this.configService.get("JWT_REFRESH_SECRET_BUYER"),
+      });
+      return payload as { id: number };
+
+    } catch (error) {
+      throw new BuyerRefreshUnauthrizedException();
+    }
   }
 
 }

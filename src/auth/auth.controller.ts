@@ -38,6 +38,14 @@ export class AuthController {
   }
 
   @HttpCode(201)
+  @Post('/refresh')
+  @ApiOperation({ summary: 'buyer Refresh API', description: 'buyer 액세트 토큰 갱신 기능' })
+  async buyerRefresh(@Body() { refreshToken }: { refreshToken: string }): Promise<CommonDto<BuyerLoginDto>> {
+    const data = await this.authService.buyerRefresh(refreshToken)
+    return { data };
+  }
+
+  @HttpCode(201)
   @Post('/signup-seller')
   @ApiOperation({ summary: 'seller 생성 API', description: 'seller 생성한다.' })
   async sellerSignUp(@Body() createSellerDto: CreateSellerDto): Promise<{ data: { id: number; accessToken: string } }> {
