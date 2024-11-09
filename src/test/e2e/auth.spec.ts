@@ -7,6 +7,7 @@ import { test_seller_sign_in } from '../features/auth/test_seller_sign_in';
 import { test_seller_sign_up } from '../features/auth/test_seller_sign_up';
 import { test_buyer_sign_in } from '../features/auth/test_buyer_sign_in';
 import { test_buyer_sign_up } from '../features/auth/test_buyer_sign_up';
+import { test_buyer_refresh } from '../features/auth/test_buyer_sign_in copy';
 
 describe('Controller', () => {
   const PORT = randomInt(20000, 50000);
@@ -53,6 +54,24 @@ describe('Controller', () => {
       expect(response.data.id).toBeDefined();
       expect(response.data.accessToken).toBeDefined();
       expect(response.data.refreshToken).toBeDefined();
+    });
+
+
+
+    it(`구매자 RefreshToken이 유효한 경우 해당 토큰으로 access 토큰 갱신이 가능해야 한다.`, async () => {
+      const loginResponse = await test_buyer_sign_in(PORT, {
+        email: `${v4()}@gmail.com`,
+        password: v4().slice(0, 20),
+      });
+
+      const accessToken = loginResponse.data.accessToken
+      const refreshToken = loginResponse.data.refreshToken
+      expect(refreshToken).toBeDefined();
+
+
+      const refreshResponse = await test_buyer_refresh(PORT, refreshToken);
+      expect(refreshResponse.data.accessToken).toBeDefined();
+      expect(refreshResponse.data.refreshToken).toBeDefined();
     });
   });
 
