@@ -18,7 +18,6 @@ export async function test_buyer_refresh(
     });
 
     return response.data as Awaited<ReturnType<AuthController['buyerRefresh']>>;
-
   } catch (error) {
     console.error((error as any).response.data);
     throw new Error(`buyer 리프레쉬 에러: ${(error as Error).message}`);
