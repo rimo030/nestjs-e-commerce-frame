@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmptyString } from '../decorators/is-not-empty-string.decorator';
 import { AuthCredentialsRequestDto } from './auth-credentials.request.dto';
 
-export class CreateSellerDto
+export class CreateSellerRequestDto
   extends AuthCredentialsRequestDto
   implements Pick<Seller, 'name' | 'phone' | 'businessNumber'>
 {

@@ -2,7 +2,7 @@ import axios from 'axios';
 import { v4 } from 'uuid';
 import { AuthController } from 'src/auth/auth.controller';
 import { AuthCredentialsRequestDto } from 'src/dtos/auth-credentials.request.dto';
-import { CreateSellerDto } from 'src/dtos/create-seller.dto';
+import { CreateSellerRequestDto } from 'src/dtos/create-seller.dto';
 
 /**
  * 판매자의 회원 가입을 테스트하는 함수이다.
@@ -29,7 +29,7 @@ export async function test_seller_sign_up(
       name: v4().slice(0, 32),
       phone: v4().slice(0, 11),
       businessNumber: v4().slice(0, 100),
-    } satisfies CreateSellerDto,
+    } satisfies CreateSellerRequestDto,
   });
 
   return response.data as Awaited<ReturnType<AuthController['sellerSignUp']>>;

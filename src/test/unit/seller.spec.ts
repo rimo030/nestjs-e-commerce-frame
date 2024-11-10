@@ -5,7 +5,7 @@ import { AuthController } from 'src/auth/auth.controller';
 import { SellerController } from 'src/controllers/seller.controller';
 import { CreateProductBundleDto } from 'src/dtos/create-product-bundle.dto';
 import { CreateProductDto } from 'src/dtos/create-product.dto';
-import { CreateSellerDto } from 'src/dtos/create-seller.dto';
+import { CreateSellerRequestDto } from 'src/dtos/create-seller.dto';
 import { ProductUnauthrizedException } from 'src/exceptions/seller.exception';
 import { CategoryService } from 'src/services/category.service';
 import { CompanyService } from 'src/services/company.service';
@@ -58,7 +58,7 @@ describe('Seller Controller', () => {
      * seller 회원이어야 사용 가능하다.
      * 임의의 회원을 생성하여 사용한다.
      */
-    const testSeller: CreateSellerDto = {
+    const testSeller: CreateSellerRequestDto = {
       email: `${v4()}`.slice(0, 100) + '@gmail.com',
       password: 'mypassword1!',
       name: 'myname',

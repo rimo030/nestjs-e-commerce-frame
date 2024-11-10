@@ -4,7 +4,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
 import { CreateBuyerRequestDto } from 'src/dtos/create-buyer.dto';
-import { CreateSellerDto } from 'src/dtos/create-seller.dto';
+import { CreateSellerRequestDto } from 'src/dtos/create-seller.dto';
 import { test_seller_sign_up } from 'src/test/features/auth/test_seller_sign_up';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
@@ -17,7 +17,7 @@ describe('Controller', () => {
   let config: ConfigService;
 
   let testBuyer: CreateBuyerRequestDto;
-  let testSeller: CreateSellerDto;
+  let testSeller: CreateSellerRequestDto;
 
   beforeAll(async () => {
     const module = await Test.createTestingModule({
@@ -89,7 +89,7 @@ describe('Controller', () => {
       expect(savedSellerId).toBeDefined;
       expect(savedSellerId).not.toBe(null);
 
-      const { data } = await controller.sellerSignIn(testSeller, { user: { id: savedSellerId } });
+      const { data } = await controller.sellerSignIn(savedSellerId, testSeller);
       const decode = jwtService.decode(data.accessToken);
 
       expect(decode.id).toBe(savedSellerId);
