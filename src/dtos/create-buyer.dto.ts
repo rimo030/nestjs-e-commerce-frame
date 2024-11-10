@@ -4,9 +4,12 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsOptionalNumber } from 'src/decorators/is-optional-number.decorator';
 import { IsOptionalString } from 'src/decorators/is-optional-string.decorator';
 import { IsNotEmptyString } from '../decorators/is-not-empty-string.decorator';
-import { AuthCredentialsDto } from './auth-credentials.dto';
+import { AuthCredentialsRequestDto } from './auth-credentials.request.dto';
 
-export class CreateBuyerDto extends AuthCredentialsDto implements Pick<Buyer, 'name' | 'gender' | 'age' | 'phone'> {
+export class CreateBuyerDto
+  extends AuthCredentialsRequestDto
+  implements Pick<Buyer, 'name' | 'gender' | 'age' | 'phone'>
+{
   @ApiProperty({ type: String, description: '이름', required: true, example: 'myname' })
   @IsNotEmptyString(1, 128)
   name!: string;

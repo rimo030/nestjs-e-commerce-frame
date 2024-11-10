@@ -3,7 +3,7 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserId } from 'src/decorators/user-id.decorator';
 import { BuyerLoginResponse } from 'src/interfaces/buyer-login.response.interface';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
-import { AuthCredentialsDto } from '../dtos/auth-credentials.dto';
+import { AuthCredentialsRequestDto } from '../dtos/auth-credentials.request.dto';
 import { CreateBuyerDto } from '../dtos/create-buyer.dto';
 import { CreateSellerDto } from '../dtos/create-seller.dto';
 import { AuthService } from './auth.service';
@@ -31,7 +31,7 @@ export class AuthController {
   @ApiOperation({ summary: 'buyer 로그인 API', description: 'buyer 로그인 기능' })
   async buyerSignIn(
     @UserId() buyerId: number,
-    @Body() authCredentialsDto: AuthCredentialsDto,
+    @Body() authCredentialsRequestDto: AuthCredentialsRequestDto,
   ): Promise<CommonResponse<BuyerLoginResponse>> {
     const data = await this.authService.buyerLogin(buyerId);
     return { data, message: '로그인 되었습니다.' };
@@ -39,7 +39,7 @@ export class AuthController {
 
   @HttpCode(201)
   @Post('/refresh')
-  @ApiOperation({ summary: 'buyer Refresh API', description: 'buyer 액세트 토큰 갱신 기능' })
+  @ApiOperation({ summary: 'buyer Refresh API', description: 'buyer 액세스 토큰 갱신 기능' })
   async buyerRefresh(@Body() { refreshToken }: { refreshToken: string }): Promise<CommonResponse<BuyerLoginResponse>> {
     const data = await this.authService.buyerRefresh(refreshToken);
     return { data };
@@ -59,7 +59,7 @@ export class AuthController {
   @Post('/signin-seller')
   @ApiOperation({ summary: 'seller 로그인 API', description: 'seller 비밀번호 매칭' })
   async sellerSignIn(
-    @Body() authCredentialsDto: AuthCredentialsDto,
+    @Body() authCredentialsRequestDto: AuthCredentialsRequestDto,
     @Request() req,
   ): Promise<{ data: { accessToken: string } }> {
     const accessToken = await this.authService.sellerLogin(req.user.id);

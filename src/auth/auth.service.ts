@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { BuyerLoginResponse } from 'src/interfaces/buyer-login.response.interface';
 import { PrismaService } from 'src/services/prisma.service';
-import { AuthCredentialsDto } from '../dtos/auth-credentials.dto';
+import { AuthCredentialsRequestDto } from '../dtos/auth-credentials.request.dto';
 import { CreateBuyerDto } from '../dtos/create-buyer.dto';
 import { CreateSellerDto } from '../dtos/create-seller.dto';
 import {
@@ -66,7 +66,7 @@ export class AuthService {
    *
    * @param authCredentialsDto buyer의 이메일과 비밀번호 입니다.
    */
-  async validateBuyer(authCredentialsDto: AuthCredentialsDto): Promise<{ id: number }> {
+  async validateBuyer(authCredentialsDto: AuthCredentialsRequestDto): Promise<{ id: number }> {
     const buyer = await this.prisma.buyer.findUnique({
       select: { id: true, password: true },
       where: { email: authCredentialsDto.email },
@@ -160,7 +160,7 @@ export class AuthService {
    *
    * @param authCredentialsDto seller의 이메일과 비밀번호 입니다.
    */
-  async validateSeller(authCredentialsDto: AuthCredentialsDto): Promise<{ id: number }> {
+  async validateSeller(authCredentialsDto: AuthCredentialsRequestDto): Promise<{ id: number }> {
     const seller = await this.prisma.seller.findUnique({
       select: { id: true, password: true },
       where: { email: authCredentialsDto.email },

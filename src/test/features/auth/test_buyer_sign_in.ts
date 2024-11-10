@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { AuthController } from 'src/auth/auth.controller';
-import { AuthCredentialsDto } from 'src/dtos/auth-credentials.dto';
+import { AuthCredentialsRequestDto } from 'src/dtos/auth-credentials.request.dto';
 import { test_buyer_sign_up } from './test_buyer_sign_up';
 
 /**
@@ -13,18 +13,17 @@ import { test_buyer_sign_up } from './test_buyer_sign_up';
  */
 export async function test_buyer_sign_in(
   PORT: number,
-  option: AuthCredentialsDto,
+  option: AuthCredentialsRequestDto,
 ): Promise<ReturnType<AuthController['buyerSignIn']>> {
   try {
     await test_buyer_sign_up(PORT, option);
 
     const response = await axios(`http://localhost:${PORT}/auth/signin`, {
       method: 'POST',
-      data: option satisfies AuthCredentialsDto,
+      data: option satisfies AuthCredentialsRequestDto,
     });
 
     return response.data as Awaited<ReturnType<AuthController['buyerSignIn']>>;
-
   } catch (error) {
     console.error((error as any).response.data);
     throw new Error(`buyer 로그인 에러: ${(error as Error).message}`);

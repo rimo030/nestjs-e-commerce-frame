@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { v4 } from 'uuid';
 import { AuthController } from 'src/auth/auth.controller';
-import { AuthCredentialsDto } from 'src/dtos/auth-credentials.dto';
+import { AuthCredentialsRequestDto } from 'src/dtos/auth-credentials.request.dto';
 import { CreateSellerDto } from 'src/dtos/create-seller.dto';
 
 /**
@@ -18,7 +18,7 @@ import { CreateSellerDto } from 'src/dtos/create-seller.dto';
  */
 export async function test_seller_sign_up(
   PORT: number,
-  option?: AuthCredentialsDto,
+  option?: AuthCredentialsRequestDto,
 ): Promise<ReturnType<AuthController['sellerSignUp']>> {
   const response = await axios(`http://localhost:${PORT}/auth/signup-seller`, {
     headers: {},

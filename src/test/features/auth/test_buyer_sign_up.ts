@@ -1,9 +1,9 @@
 import axios from 'axios';
 import { v4 } from 'uuid';
 import { AuthController } from 'src/auth/auth.controller';
-import { AuthCredentialsDto } from 'src/dtos/auth-credentials.dto';
-import { CreateSellerDto } from 'src/dtos/create-seller.dto';
+import { AuthCredentialsRequestDto } from 'src/dtos/auth-credentials.request.dto';
 import { CreateBuyerDto } from 'src/dtos/create-buyer.dto';
+import { CreateSellerDto } from 'src/dtos/create-seller.dto';
 
 /**
  * 구매자의 회원 가입을 테스트하는 함수이다.
@@ -19,9 +19,8 @@ import { CreateBuyerDto } from 'src/dtos/create-buyer.dto';
  */
 export async function test_buyer_sign_up(
   PORT: number,
-  option?: AuthCredentialsDto,
+  option?: AuthCredentialsRequestDto,
 ): Promise<ReturnType<AuthController['buyerSignUp']>> {
-
   try {
     const response = await axios(`http://localhost:${PORT}/auth/signup`, {
       headers: {},
@@ -37,7 +36,6 @@ export async function test_buyer_sign_up(
     });
 
     return response.data as Awaited<ReturnType<AuthController['buyerSignUp']>>;
-
   } catch (error) {
     console.error((error as any).response.data);
     throw new Error(`buyer 회원가입 에러: ${(error as Error).message}`);
