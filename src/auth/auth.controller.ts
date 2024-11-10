@@ -8,9 +8,9 @@ import { BuyerGoogleOAuthGuard } from './guards/buyer-google-oauth.guard';
 import { BuyerKakaoOAuthGuard } from './guards/buyer-kakao-oauth.guard';
 import { BuyerLocalAuthGuard } from './guards/buyer-local.auth.guard';
 import { SellerLocalAuthGuard } from './guards/seller-local.auth.guard';
-import { CommonDto } from 'src/dtos/common.dto';
 import { BuyerLoginDto } from 'src/dtos/login-buyer.dto';
 import { UserId } from 'src/decorators/user-id.decorator';
+import { CommonResponse } from 'src/interfaces/common-response.interface';
 
 @Controller('auth')
 @ApiTags('Auth API')
@@ -20,7 +20,7 @@ export class AuthController {
   @HttpCode(201)
   @Post('/signup')
   @ApiOperation({ summary: 'buyer 생성 API', description: 'buyer 회원가입 기능' })
-  async buyerSignUp(@Body() createUserDto: CreateBuyerDto): Promise<CommonDto<BuyerLoginDto>> {
+  async buyerSignUp(@Body() createUserDto: CreateBuyerDto): Promise<CommonResponse<BuyerLoginDto>> {
     const data = await this.authService.buyerSignUp(createUserDto)
     return { data, message: "회원가입이 완료 되었습니다." };
   }
@@ -32,7 +32,7 @@ export class AuthController {
   async buyerSignIn(
     @UserId() buyerId: number,
     @Body() authCredentialsDto: AuthCredentialsDto,
-  ): Promise<CommonDto<BuyerLoginDto>> {
+  ): Promise<CommonResponse<BuyerLoginDto>> {
     const data = await this.authService.buyerLogin(buyerId)
     return { data, message: "로그인 되었습니다." };
   }
@@ -40,7 +40,7 @@ export class AuthController {
   @HttpCode(201)
   @Post('/refresh')
   @ApiOperation({ summary: 'buyer Refresh API', description: 'buyer 액세트 토큰 갱신 기능' })
-  async buyerRefresh(@Body() { refreshToken }: { refreshToken: string }): Promise<CommonDto<BuyerLoginDto>> {
+  async buyerRefresh(@Body() { refreshToken }: { refreshToken: string }): Promise<CommonResponse<BuyerLoginDto>> {
     const data = await this.authService.buyerRefresh(refreshToken)
     return { data };
   }
