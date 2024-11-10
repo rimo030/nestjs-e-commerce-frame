@@ -3,9 +3,10 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserId } from 'src/decorators/user-id.decorator';
 import { BuyerLoginResponse } from 'src/interfaces/buyer-login.response.interface';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
+import { SellerLoginResponse } from 'src/interfaces/seller-login.response.interface';
 import { AuthCredentialsRequestDto } from '../dtos/auth-credentials.request.dto';
 import { CreateBuyerRequestDto } from '../dtos/create-buyer.dto';
-import { CreateSellerDto } from '../dtos/create-seller.dto';
+import { CreateSellerRequestDto } from '../dtos/create-seller.dto';
 import { AuthService } from './auth.service';
 import { BuyerGoogleOAuthGuard } from './guards/buyer-google-oauth.guard';
 import { BuyerKakaoOAuthGuard } from './guards/buyer-kakao-oauth.guard';
@@ -47,11 +48,12 @@ export class AuthController {
 
   @HttpCode(201)
   @Post('/signup-seller')
-  @ApiOperation({ summary: 'seller 생성 API', description: 'seller 생성한다.' })
-  async sellerSignUp(@Body() createSellerDto: CreateSellerDto): Promise<{ data: { id: number; accessToken: string } }> {
-    const { id } = await this.authService.sellerSignUp(createSellerDto);
-    const { accessToken } = await this.authService.sellerLogin(id);
-    return { data: { id, accessToken } };
+  @ApiOperation({ summary: 'seller 생성 API', description: 'seller 회원가입 기능' })
+  async sellerSignUp(
+    @Body() createBuyerRequestDto: CreateSellerRequestDto,
+  ): Promise<CommonResponse<SellerLoginResponse>> {
+    const data = await this.authService.sellerSignUp(createBuyerRequestDto);
+    return { data, message: '회원가입이 완료 되었습니다.' };
   }
 
   @UseGuards(SellerLocalAuthGuard)
@@ -59,11 +61,21 @@ export class AuthController {
   @Post('/signin-seller')
   @ApiOperation({ summary: 'seller 로그인 API', description: 'seller 비밀번호 매칭' })
   async sellerSignIn(
+    @UserId() sellerId: number,
     @Body() authCredentialsRequestDto: AuthCredentialsRequestDto,
-    @Request() req,
-  ): Promise<{ data: { accessToken: string } }> {
-    const accessToken = await this.authService.sellerLogin(req.user.id);
-    return { data: accessToken };
+  ): Promise<CommonResponse<SellerLoginResponse>> {
+    const data = await this.authService.sellerLogin(sellerId);
+    return { data, message: '로그인 되었습니다.' };
+  }
+
+  @HttpCode(201)
+  @Post('/refresh-seller')
+  @ApiOperation({ summary: 'seller Refresh API', description: 'seller 액세스 토큰 갱신 기능' })
+  async sellerRefresh(
+    @Body() { refreshToken }: { refreshToken: string },
+  ): Promise<CommonResponse<SellerLoginResponse>> {
+    const data = await this.authService.sellerRefresh(refreshToken);
+    return { data };
   }
 
   @Get('google')

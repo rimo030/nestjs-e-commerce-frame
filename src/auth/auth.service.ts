@@ -3,10 +3,11 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { BuyerLoginResponse } from 'src/interfaces/buyer-login.response.interface';
+import { SellerLoginResponse } from 'src/interfaces/seller-login.response.interface';
 import { PrismaService } from 'src/services/prisma.service';
 import { AuthCredentialsRequestDto } from '../dtos/auth-credentials.request.dto';
 import { CreateBuyerRequestDto } from '../dtos/create-buyer.dto';
-import { CreateSellerDto } from '../dtos/create-seller.dto';
+import { CreateSellerRequestDto } from '../dtos/create-seller.dto';
 import {
   AuthForbiddenException,
   BuyerRefreshUnauthrizedException,
@@ -41,23 +42,12 @@ export class AuthService {
    *
    * @param createSellerDto 저장할 seller의 데이터 입니다.
    */
-  async sellerSignUp(createSellerDto: CreateSellerDto): Promise<{ id: number }> {
-    const { email, password, name, phone, businessNumber } = createSellerDto;
-    const seller = await this.prisma.seller.findUnique({
-      select: { id: true },
-      where: { email },
-    });
-    if (seller) {
-      throw new SellerUnauthrizedException();
-    }
 
-    const hashedPassword = await this.hashPassword(password);
+  async sellerSignUp(createSellerRequestDto: CreateSellerRequestDto): Promise<SellerLoginResponse> {
+    const { id } = await this.createSeller(createSellerRequestDto);
+    const { accessToken, refreshToken } = await this.sellerLogin(id);
 
-    const sellerId = await this.prisma.seller.create({
-      select: { id: true },
-      data: { email, password: hashedPassword, name, phone, businessNumber },
-    });
-    return sellerId;
+    return { id, accessToken, refreshToken };
   }
 
   /**
@@ -177,6 +167,16 @@ export class AuthService {
   }
 
   /**
+   * seller의 refresh 토큰이 유효한지 검증한 뒤 새로운 토큰을 발급합니다.
+   *
+   * @param refreshToken
+   */
+  async sellerRefresh(refreshToken: string): Promise<BuyerLoginResponse> {
+    const { id } = await this.verifySellerRefreshToken(refreshToken);
+    return await this.sellerLogin(id);
+  }
+
+  /**
    * buyer 로그인시 accessToken을 발급합니다.
    * @param id JWT의 페이로드가 될 buyer의 id 입니다.
    */
@@ -200,12 +200,19 @@ export class AuthService {
    * seller 로그인시 accessToken을 발급합니다.
    * @param id JWT의 페이로드가 될 seller의 id 입니다.
    */
-  async sellerLogin(id: number): Promise<{ accessToken: string }> {
+  async sellerLogin(id: number): Promise<SellerLoginResponse> {
     const payload: { id: number } = { id };
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_SECRET_SELLER'),
+      expiresIn: this.configService.get('JWT_EXPIRATION_TIME'),
     });
-    return { accessToken };
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: this.configService.get('JWT_REFRESH_SECRET_SELLER'),
+      expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION_TIME'),
+    });
+
+    return { id, accessToken, refreshToken };
   }
 
   /**
@@ -272,8 +279,8 @@ export class AuthService {
     return sellerId;
   }
 
-  private async createBuyer(createBuyerDto: CreateBuyerRequestDto): Promise<{ id: number }> {
-    const { email, password, name, gender, age, phone } = createBuyerDto;
+  private async createBuyer(createBuyerRequestDto: CreateBuyerRequestDto): Promise<{ id: number }> {
+    const { email, password, name, gender, age, phone } = createBuyerRequestDto;
     const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email } });
     if (buyer) {
       throw new BuyerUnauthrizedException();
@@ -302,6 +309,37 @@ export class AuthService {
       return payload as { id: number };
     } catch (error) {
       throw new BuyerRefreshUnauthrizedException();
+    }
+  }
+
+  private async createSeller(createSellerRequestDto: CreateSellerRequestDto): Promise<{ id: number }> {
+    const { email, password, name, phone, businessNumber } = createSellerRequestDto;
+    const seller = await this.prisma.seller.findUnique({
+      select: { id: true },
+      where: { email },
+    });
+
+    if (seller) {
+      throw new SellerUnauthrizedException();
+    }
+
+    const hashedPassword = await this.hashPassword(password);
+
+    const sellerId = await this.prisma.seller.create({
+      select: { id: true },
+      data: { email, password: hashedPassword, name, phone, businessNumber },
+    });
+    return sellerId;
+  }
+
+  private async verifySellerRefreshToken(refreshToken: string): Promise<{ id: number }> {
+    try {
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: this.configService.get('JWT_REFRESH_SECRET_SELLER'),
+      });
+      return payload as { id: number };
+    } catch (error) {
+      throw new SellerEmailNotFoundException();
     }
   }
 }
