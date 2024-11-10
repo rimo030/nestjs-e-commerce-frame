@@ -3,6 +3,10 @@ import { v4 } from 'uuid';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
+import { test_buyer_refresh } from '../features/auth/test_buyer_refresh';
+import { test_buyer_sign_in } from '../features/auth/test_buyer_sign_in';
+import { test_buyer_sign_up } from '../features/auth/test_buyer_sign_up';
+import { test_seller_refresh } from '../features/auth/test_seller_refresh';
 import { test_seller_sign_in } from '../features/auth/test_seller_sign_in';
 import { test_seller_sign_up } from '../features/auth/test_seller_sign_up';
 
@@ -25,11 +29,56 @@ describe('Controller', () => {
     await server.close();
   });
 
+  describe('Buyer 테스트', () => {
+    it('구매자 회원 가입에 성공해야 한다.', async () => {
+      const response = await test_buyer_sign_up(PORT);
+
+      expect(response.data.id).toBeDefined();
+      expect(response.data.accessToken).toBeDefined();
+      expect(response.data.refreshToken).toBeDefined();
+    });
+
+    it(`구매자 로그인에 성공해야 한다. 회원가입이 실패할 경우, 함께 실패한다.`, async () => {
+      const response = await test_buyer_sign_in(PORT, {
+        email: `${v4()}@gmail.com`,
+        password: v4().slice(0, 20),
+      });
+      expect(response.data).toBeDefined();
+    });
+
+    it(`구매자 로그인에 성공한 경우 AccessToken, RefreshToken이 발급되어야 한다.`, async () => {
+      const response = await test_buyer_sign_in(PORT, {
+        email: `${v4()}@gmail.com`,
+        password: v4().slice(0, 20),
+      });
+      expect(response.data.id).toBeDefined();
+      expect(response.data.accessToken).toBeDefined();
+      expect(response.data.refreshToken).toBeDefined();
+    });
+
+    it(`구매자 RefreshToken이 유효한 경우 해당 토큰으로 access 토큰 갱신이 가능해야 한다.`, async () => {
+      const loginResponse = await test_buyer_sign_in(PORT, {
+        email: `${v4()}@gmail.com`,
+        password: v4().slice(0, 20),
+      });
+
+      const accessToken = loginResponse.data.accessToken;
+      const refreshToken = loginResponse.data.refreshToken;
+      expect(refreshToken).toBeDefined();
+
+      const refreshResponse = await test_buyer_refresh(PORT, refreshToken);
+      expect(refreshResponse.data.accessToken).toBeDefined();
+      expect(refreshResponse.data.refreshToken).toBeDefined();
+    });
+  });
+
   describe('Seller 테스트', () => {
     it('판매자 회원 가입에 성공해야 한다.', async () => {
       const response = await test_seller_sign_up(PORT);
 
       expect(response.data.id).toBeDefined();
+      expect(response.data.accessToken).toBeDefined();
+      expect(response.data.refreshToken).toBeDefined();
     });
 
     it(`판매자 로그인에 성공해야 한다. 회원가입이 실패할 경우, 함께 실패한다.`, async () => {
@@ -38,8 +87,24 @@ describe('Controller', () => {
         password: v4().slice(0, 20),
       });
 
+      expect(response.data.id).toBeDefined();
       expect(response.data.accessToken).toBeDefined();
+      expect(response.data.refreshToken).toBeDefined();
       expect(typeof response.data.accessToken === 'string').toBe(true);
+    });
+
+    it(`판매자 RefreshToken이 유효한 경우 해당 토큰으로 access 토큰 갱신이 가능해야 한다.`, async () => {
+      const loginResponse = await test_seller_sign_in(PORT, {
+        email: `${v4()}@gmail.com`,
+        password: v4().slice(0, 20),
+      });
+
+      const refreshToken = loginResponse.data.refreshToken;
+      expect(refreshToken).toBeDefined();
+
+      const refreshResponse = await test_seller_refresh(PORT, refreshToken);
+      expect(refreshResponse.data.accessToken).toBeDefined();
+      expect(refreshResponse.data.refreshToken).toBeDefined();
     });
   });
 });

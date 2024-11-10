@@ -2,7 +2,7 @@ import { IsEmail, Matches } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmptyString } from 'src/decorators/is-not-empty-string.decorator';
 
-export class AuthCredentialsDto {
+export class AuthCredentialsRequestDto {
   @ApiProperty({ type: String, description: '이메일', required: true, example: 'myemail@gmail.com' })
   @IsEmail()
   email!: string;
