@@ -6,7 +6,7 @@ import { IsOptionalString } from 'src/decorators/is-optional-string.decorator';
 import { IsNotEmptyString } from '../decorators/is-not-empty-string.decorator';
 import { AuthCredentialsRequestDto } from './auth-credentials.request.dto';
 
-export class CreateBuyerDto
+export class CreateBuyerRequestDto
   extends AuthCredentialsRequestDto
   implements Pick<Buyer, 'name' | 'gender' | 'age' | 'phone'>
 {

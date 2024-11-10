@@ -4,7 +4,7 @@ import { UserId } from 'src/decorators/user-id.decorator';
 import { BuyerLoginResponse } from 'src/interfaces/buyer-login.response.interface';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { AuthCredentialsRequestDto } from '../dtos/auth-credentials.request.dto';
-import { CreateBuyerDto } from '../dtos/create-buyer.dto';
+import { CreateBuyerRequestDto } from '../dtos/create-buyer.dto';
 import { CreateSellerDto } from '../dtos/create-seller.dto';
 import { AuthService } from './auth.service';
 import { BuyerGoogleOAuthGuard } from './guards/buyer-google-oauth.guard';
@@ -20,8 +20,8 @@ export class AuthController {
   @HttpCode(201)
   @Post('/signup')
   @ApiOperation({ summary: 'buyer 생성 API', description: 'buyer 회원가입 기능' })
-  async buyerSignUp(@Body() createUserDto: CreateBuyerDto): Promise<CommonResponse<BuyerLoginResponse>> {
-    const data = await this.authService.buyerSignUp(createUserDto);
+  async buyerSignUp(@Body() createBuyerRequestDto: CreateBuyerRequestDto): Promise<CommonResponse<BuyerLoginResponse>> {
+    const data = await this.authService.buyerSignUp(createBuyerRequestDto);
     return { data, message: '회원가입이 완료 되었습니다.' };
   }
 

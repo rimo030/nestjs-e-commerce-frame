@@ -5,7 +5,7 @@ import { JwtService } from '@nestjs/jwt';
 import { BuyerLoginResponse } from 'src/interfaces/buyer-login.response.interface';
 import { PrismaService } from 'src/services/prisma.service';
 import { AuthCredentialsRequestDto } from '../dtos/auth-credentials.request.dto';
-import { CreateBuyerDto } from '../dtos/create-buyer.dto';
+import { CreateBuyerRequestDto } from '../dtos/create-buyer.dto';
 import { CreateSellerDto } from '../dtos/create-seller.dto';
 import {
   AuthForbiddenException,
@@ -28,8 +28,8 @@ export class AuthService {
    * 구매자 회원가입 기능입니다.
    * buyer를 저장합니다. 비밀번호는 암호화 됩니다.
    */
-  async buyerSignUp(createBuyerDto: CreateBuyerDto): Promise<BuyerLoginResponse> {
-    const { id } = await this.createBuyer(createBuyerDto);
+  async buyerSignUp(createBuyerRequestDto: CreateBuyerRequestDto): Promise<BuyerLoginResponse> {
+    const { id } = await this.createBuyer(createBuyerRequestDto);
     const { accessToken, refreshToken } = await this.buyerLogin(id);
 
     return { id, accessToken, refreshToken };
@@ -272,7 +272,7 @@ export class AuthService {
     return sellerId;
   }
 
-  private async createBuyer(createBuyerDto: CreateBuyerDto): Promise<{ id: number }> {
+  private async createBuyer(createBuyerDto: CreateBuyerRequestDto): Promise<{ id: number }> {
     const { email, password, name, gender, age, phone } = createBuyerDto;
     const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email } });
     if (buyer) {

@@ -2,8 +2,7 @@ import axios from 'axios';
 import { v4 } from 'uuid';
 import { AuthController } from 'src/auth/auth.controller';
 import { AuthCredentialsRequestDto } from 'src/dtos/auth-credentials.request.dto';
-import { CreateBuyerDto } from 'src/dtos/create-buyer.dto';
-import { CreateSellerDto } from 'src/dtos/create-seller.dto';
+import { CreateBuyerRequestDto } from 'src/dtos/create-buyer.dto';
 
 /**
  * 구매자의 회원 가입을 테스트하는 함수이다.
@@ -32,7 +31,7 @@ export async function test_buyer_sign_up(
         phone: v4().replaceAll('-', '').slice(0, 11),
         gender: Math.floor(Math.random() * 2),
         age: Math.floor(Math.random() * 100),
-      } satisfies CreateBuyerDto,
+      } satisfies CreateBuyerRequestDto,
     });
 
     return response.data as Awaited<ReturnType<AuthController['buyerSignUp']>>;
