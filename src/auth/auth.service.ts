@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { BuyerLoginResponse } from 'src/interfaces/buyer-login.response.interface';
 import { PrismaService } from 'src/services/prisma.service';
 import { AuthCredentialsDto } from '../dtos/auth-credentials.dto';
 import { CreateBuyerDto } from '../dtos/create-buyer.dto';
@@ -14,7 +15,6 @@ import {
   SellerNotFoundException,
   SellerUnauthrizedException,
 } from '../exceptions/auth.exception';
-import { BuyerLoginDto } from 'src/dtos/login-buyer.dto';
 
 @Injectable()
 export class AuthService {
@@ -22,19 +22,18 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
-  ) { }
+  ) {}
 
   /**
    * 구매자 회원가입 기능입니다.
    * buyer를 저장합니다. 비밀번호는 암호화 됩니다.
    */
-  async buyerSignUp(createBuyerDto: CreateBuyerDto): Promise<BuyerLoginDto> {
+  async buyerSignUp(createBuyerDto: CreateBuyerDto): Promise<BuyerLoginResponse> {
     const { id } = await this.createBuyer(createBuyerDto);
     const { accessToken, refreshToken } = await this.buyerLogin(id);
 
     return { id, accessToken, refreshToken };
   }
-
 
   /**
    * 판매자 회원가입 기능입니다.
@@ -83,17 +82,15 @@ export class AuthService {
     throw new SellerNotFoundException();
   }
 
-
   /**
    * buyer의 refresh 토큰이 유효한지 검증한 뒤 새로운 토큰을 발급합니다.
-   * 
-   * @param refreshToken 
+   *
+   * @param refreshToken
    */
-  async buyerRefresh(refreshToken: string): Promise<BuyerLoginDto> {
-    const { id } = await this.verifyBuyerRefreshToken(refreshToken)
+  async buyerRefresh(refreshToken: string): Promise<BuyerLoginResponse> {
+    const { id } = await this.verifyBuyerRefreshToken(refreshToken);
     return await this.buyerLogin(id);
   }
-
 
   /**
    * buyer의 구글 로그인을 처리합니다.
@@ -183,17 +180,17 @@ export class AuthService {
    * buyer 로그인시 accessToken을 발급합니다.
    * @param id JWT의 페이로드가 될 buyer의 id 입니다.
    */
-  async buyerLogin(id: number): Promise<BuyerLoginDto> {
+  async buyerLogin(id: number): Promise<BuyerLoginResponse> {
     const payload: { id: number } = { id };
 
     const accessToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_SECRET_BUYER'),
-      expiresIn: this.configService.get('JWT_EXPIRATION_TIME')
+      expiresIn: this.configService.get('JWT_EXPIRATION_TIME'),
     });
 
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.configService.get('JWT_REFRESH_SECRET_BUYER'),
-      expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION_TIME')
+      expiresIn: this.configService.get('JWT_REFRESH_EXPIRATION_TIME'),
     });
 
     return { id, accessToken, refreshToken };
@@ -275,7 +272,6 @@ export class AuthService {
     return sellerId;
   }
 
-
   private async createBuyer(createBuyerDto: CreateBuyerDto): Promise<{ id: number }> {
     const { email, password, name, gender, age, phone } = createBuyerDto;
     const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email } });
@@ -301,13 +297,11 @@ export class AuthService {
   private async verifyBuyerRefreshToken(refreshToken: string): Promise<{ id: number }> {
     try {
       const payload = this.jwtService.verify(refreshToken, {
-        secret: this.configService.get("JWT_REFRESH_SECRET_BUYER"),
+        secret: this.configService.get('JWT_REFRESH_SECRET_BUYER'),
       });
       return payload as { id: number };
-
     } catch (error) {
       throw new BuyerRefreshUnauthrizedException();
     }
   }
-
 }

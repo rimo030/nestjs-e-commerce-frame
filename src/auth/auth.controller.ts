@@ -1,5 +1,8 @@
 import { Body, Controller, HttpCode, Post, UseGuards, Request, Get } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { UserId } from 'src/decorators/user-id.decorator';
+import { BuyerLoginResponse } from 'src/interfaces/buyer-login.response.interface';
+import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { AuthCredentialsDto } from '../dtos/auth-credentials.dto';
 import { CreateBuyerDto } from '../dtos/create-buyer.dto';
 import { CreateSellerDto } from '../dtos/create-seller.dto';
@@ -8,21 +11,18 @@ import { BuyerGoogleOAuthGuard } from './guards/buyer-google-oauth.guard';
 import { BuyerKakaoOAuthGuard } from './guards/buyer-kakao-oauth.guard';
 import { BuyerLocalAuthGuard } from './guards/buyer-local.auth.guard';
 import { SellerLocalAuthGuard } from './guards/seller-local.auth.guard';
-import { BuyerLoginDto } from 'src/dtos/login-buyer.dto';
-import { UserId } from 'src/decorators/user-id.decorator';
-import { CommonResponse } from 'src/interfaces/common-response.interface';
 
 @Controller('auth')
 @ApiTags('Auth API')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @HttpCode(201)
   @Post('/signup')
   @ApiOperation({ summary: 'buyer 생성 API', description: 'buyer 회원가입 기능' })
-  async buyerSignUp(@Body() createUserDto: CreateBuyerDto): Promise<CommonResponse<BuyerLoginDto>> {
-    const data = await this.authService.buyerSignUp(createUserDto)
-    return { data, message: "회원가입이 완료 되었습니다." };
+  async buyerSignUp(@Body() createUserDto: CreateBuyerDto): Promise<CommonResponse<BuyerLoginResponse>> {
+    const data = await this.authService.buyerSignUp(createUserDto);
+    return { data, message: '회원가입이 완료 되었습니다.' };
   }
 
   @UseGuards(BuyerLocalAuthGuard)
@@ -32,16 +32,16 @@ export class AuthController {
   async buyerSignIn(
     @UserId() buyerId: number,
     @Body() authCredentialsDto: AuthCredentialsDto,
-  ): Promise<CommonResponse<BuyerLoginDto>> {
-    const data = await this.authService.buyerLogin(buyerId)
-    return { data, message: "로그인 되었습니다." };
+  ): Promise<CommonResponse<BuyerLoginResponse>> {
+    const data = await this.authService.buyerLogin(buyerId);
+    return { data, message: '로그인 되었습니다.' };
   }
 
   @HttpCode(201)
   @Post('/refresh')
   @ApiOperation({ summary: 'buyer Refresh API', description: 'buyer 액세트 토큰 갱신 기능' })
-  async buyerRefresh(@Body() { refreshToken }: { refreshToken: string }): Promise<CommonResponse<BuyerLoginDto>> {
-    const data = await this.authService.buyerRefresh(refreshToken)
+  async buyerRefresh(@Body() { refreshToken }: { refreshToken: string }): Promise<CommonResponse<BuyerLoginResponse>> {
+    const data = await this.authService.buyerRefresh(refreshToken);
     return { data };
   }
 
@@ -68,7 +68,7 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(BuyerGoogleOAuthGuard)
-  async googleAuth() { }
+  async googleAuth() {}
 
   @Get('google/callback')
   @UseGuards(BuyerGoogleOAuthGuard)
@@ -79,7 +79,7 @@ export class AuthController {
 
   @Get('kakao')
   @UseGuards(BuyerKakaoOAuthGuard)
-  async kakaoAuth() { }
+  async kakaoAuth() {}
 
   @Get('kakao/callback')
   @UseGuards(BuyerKakaoOAuthGuard)
