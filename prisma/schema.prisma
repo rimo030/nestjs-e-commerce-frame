@@ -27,12 +27,14 @@ model Buyer {
   createdAt   DateTime    @default(now()) @db.DateTime(6) @map("created_at")
   updatedAt   DateTime    @default(now()) @db.DateTime(6) @map("updated_at")
   deletedAt   DateTime?   @db.DateTime(6) @map("deleted_at")
-  email       String      @unique() @db.VarChar(128)
-  password    String?     @db.VarChar(512)
+  email       String?     @unique() @db.VarChar(128)
+  password    String?     @db.VarChar(512) 
   name        String      @db.VarChar(128)
   gender      Int?        @db.TinyInt
   age         Int?
   phone       String?     @db.VarChar(11)
+  oauthProvider String?   @db.VarChar(50) 
+  oauthId     String?     @db.VarChar(255) 
   boards      Board[]
   carts       Cart[]
   orders      Order[]
