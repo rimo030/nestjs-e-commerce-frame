@@ -1,3 +1,4 @@
+import axios, { AxiosError } from 'axios';
 import { randomInt } from 'crypto';
 import { v4 } from 'uuid';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
@@ -69,6 +70,20 @@ describe('Controller', () => {
       const refreshResponse = await test_buyer_refresh(PORT, refreshToken);
       expect(refreshResponse.data.accessToken).toBeDefined();
       expect(refreshResponse.data.refreshToken).toBeDefined();
+    });
+
+    it(`구매자가 Google oauth 로그인을 시도한 경우 구글 로그인 페이지로 리디렉션이 일어나는지 검증한다.`, async () => {
+      try {
+        await axios.get(`http://localhost:${PORT}/auth/google`, { maxRedirects: 0 });
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const axiosError = error as AxiosError;
+          expect(axiosError.response?.status).toBe(302);
+          expect(axiosError.response?.headers.location?.startsWith('https://accounts.google.com')).toBe(true);
+        } else {
+          throw error;
+        }
+      }
     });
   });
 
