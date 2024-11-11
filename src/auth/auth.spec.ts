@@ -3,9 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { Test } from '@nestjs/testing';
 import { AppModule } from 'src/app.module';
-import { CreateBuyerRequestDto } from 'src/dtos/create-buyer.dto';
+import { CreateBuyerRequestDto } from 'src/dtos/create-buyer.request.dto';
 import { CreateSellerRequestDto } from 'src/dtos/create-seller.dto';
-import { test_seller_sign_up } from 'src/test/features/auth/test_seller_sign_up';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 

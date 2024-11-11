@@ -1,11 +1,11 @@
 import { Body, Controller, HttpCode, Post, UseGuards, Request, Get } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserId } from 'src/decorators/user-id.decorator';
+import { CreateBuyerRequestDto } from 'src/dtos/create-buyer.request.dto';
 import { BuyerLoginResponse } from 'src/interfaces/buyer-login.response.interface';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { SellerLoginResponse } from 'src/interfaces/seller-login.response.interface';
 import { AuthCredentialsRequestDto } from '../dtos/auth-credentials.request.dto';
-import { CreateBuyerRequestDto } from '../dtos/create-buyer.dto';
 import { CreateSellerRequestDto } from '../dtos/create-seller.dto';
 import { AuthService } from './auth.service';
 import { BuyerGoogleOAuthGuard } from './guards/buyer-google-oauth.guard';

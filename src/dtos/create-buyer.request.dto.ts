@@ -8,7 +8,7 @@ import { AuthCredentialsRequestDto } from './auth-credentials.request.dto';
 
 export class CreateBuyerRequestDto
   extends AuthCredentialsRequestDto
-  implements Pick<Buyer, 'name' | 'gender' | 'age' | 'phone'>
+  implements Partial<Pick<Buyer, 'name' | 'gender' | 'age' | 'phone'>>
 {
   @ApiProperty({ type: String, description: '이름', required: true, example: 'myname' })
   @IsNotEmptyString(1, 128)
@@ -16,11 +16,11 @@ export class CreateBuyerRequestDto
 
   @ApiProperty({ type: Number, description: '성별(남자 0, 여자 1)', required: true, example: 1 })
   @IsOptionalNumber('int', { min: 0, max: 1 })
-  gender!: number | null;
+  gender?: number | null;
 
   @ApiProperty({ type: Number, description: '나이', required: true, example: 20 })
   @IsOptionalNumber('int')
-  age!: number | null;
+  age?: number | null;
 
   @ApiProperty({
     type: String,
@@ -30,5 +30,5 @@ export class CreateBuyerRequestDto
   })
   @Transform(({ value }) => value.replace(/-/g, ''))
   @IsOptionalString(11, 11)
-  phone!: string | null;
+  phone?: string | null;
 }

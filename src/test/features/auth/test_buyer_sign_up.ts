@@ -2,7 +2,7 @@ import axios from 'axios';
 import { v4 } from 'uuid';
 import { AuthController } from 'src/auth/auth.controller';
 import { AuthCredentialsRequestDto } from 'src/dtos/auth-credentials.request.dto';
-import { CreateBuyerRequestDto } from 'src/dtos/create-buyer.dto';
+import { CreateBuyerRequestDto } from 'src/dtos/create-buyer.request.dto';
 
 /**
  * 구매자의 회원 가입을 테스트하는 함수이다.
