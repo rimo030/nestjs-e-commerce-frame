@@ -2,16 +2,20 @@ import bcrypt from 'bcryptjs';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { BuyerGoogleCredentialsRequest } from 'src/interfaces/buyer-google-login.request.interface';
 import { BuyerLoginResponse } from 'src/interfaces/buyer-login.response.interface';
 import { SellerLoginResponse } from 'src/interfaces/seller-login.response.interface';
 import { PrismaService } from 'src/services/prisma.service';
+import { oauthProviderType } from 'src/types/oauth.provider.type';
+import { Partial } from 'src/types/partial-type';
 import { AuthCredentialsRequestDto } from '../dtos/auth-credentials.request.dto';
-import { CreateBuyerRequestDto } from '../dtos/create-buyer.dto';
+import { CreateBuyerRequestDto } from '../dtos/create-buyer.request.dto';
 import { CreateSellerRequestDto } from '../dtos/create-seller.dto';
 import {
   AuthForbiddenException,
   BuyerRefreshUnauthrizedException,
   BuyerUnauthrizedException,
+  OAuthNotFoundException,
   SellerEmailNotFoundException,
   SellerNotFoundException,
   SellerUnauthrizedException,
@@ -86,31 +90,15 @@ export class AuthService {
    * buyer의 구글 로그인을 처리합니다.
    * 등록되지 않은 이메일일 경우 새로 buyer를 생성합니다. 등록된 경우 jwt 토큰을 발행합니다.
    *
-   * @param BuyerGoogleCredentialsDto BuyerGoogleStrategy에서 전달된 정보입니다.
+   * @param buyerGoogleCredentialsReuqest BuyerGoogleStrategy에서 전달된 정보입니다.
    */
-  async buyerGoogleOAuthLogin(BuyerGoogleCredentialsDto: {
-    email?: string;
-    name?: string;
-    accessToken: string;
-  }): Promise<{ accessToken: string }> {
-    const { email, name } = BuyerGoogleCredentialsDto;
-
-    if (email && name) {
-      const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email } });
-
-      if (!buyer) {
-        const buyerId = await this.prisma.buyer.create({
-          select: { id: true },
-          data: { email, name },
-        });
-        const accessToken = this.jwtService.sign(buyerId, {
-          secret: this.configService.get('JWT_SECRET_BUYER'),
-        });
-        return { accessToken };
-      }
-      return this.buyerLogin(buyer.id);
+  async buyerGoogleOAuthLogin(
+    buyerGoogleCredentialsReuqest: BuyerGoogleCredentialsRequest,
+  ): Promise<BuyerLoginResponse> {
+    if (!buyerGoogleCredentialsReuqest.id) {
+      throw new OAuthNotFoundException();
     }
-    throw new AuthForbiddenException();
+    return await this.handleGoogleOAuthBuyerLogin(buyerGoogleCredentialsReuqest);
   }
 
   /**
@@ -173,7 +161,7 @@ export class AuthService {
    */
   async sellerRefresh(refreshToken: string): Promise<BuyerLoginResponse> {
     const { id } = await this.verifySellerRefreshToken(refreshToken);
-    return await this.sellerLogin(id);
+    return await this.buyerLogin(id);
   }
 
   /**
@@ -341,5 +329,48 @@ export class AuthService {
     } catch (error) {
       throw new SellerEmailNotFoundException();
     }
+  }
+
+  private async handleGoogleOAuthBuyerLogin(buyerGoogleCredentialsReuqest: BuyerGoogleCredentialsRequest) {
+    const { id, accessToken, email, name } = buyerGoogleCredentialsReuqest;
+
+    const buyer = await this.findOAuthBuyer(id, 'GOOGLE');
+    if (!buyer) {
+      return await this.createOAuthBuyerAndLogin({ email, name }, id, 'GOOGLE');
+    }
+    return await this.buyerLogin(buyer.id);
+  }
+
+  private async findOAuthBuyer(oauthId: string, oauthProvider: oauthProviderType): Promise<{ id: number } | null> {
+    return await this.prisma.buyer.findFirst({
+      select: { id: true },
+      where: { oauthId, oauthProvider },
+    });
+  }
+
+  private async createOAuthBuyerAndLogin(
+    createBuyerRequestDto: Partial<CreateBuyerRequestDto>,
+    oauthId: string,
+    oauthProvider: oauthProviderType,
+  ): Promise<BuyerLoginResponse> {
+    const { email, password, name, gender, age, phone } = createBuyerRequestDto;
+
+    const fallbackName = `${oauthId}_${oauthProvider}`;
+
+    const { id } = await this.prisma.buyer.create({
+      select: { id: true },
+      data: {
+        email: email ?? null,
+        password: password ?? null,
+        name: name ?? fallbackName,
+        gender: gender ?? null,
+        age: age ?? null,
+        phone: phone ?? null,
+        oauthId,
+        oauthProvider,
+      },
+    });
+
+    return await this.buyerLogin(id);
   }
 }

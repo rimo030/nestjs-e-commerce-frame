@@ -1,11 +1,11 @@
 import { Body, Controller, HttpCode, Post, UseGuards, Request, Get } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UserId } from 'src/decorators/user-id.decorator';
-import { CreateBuyerRequestDto } from 'src/dtos/create-buyer.request.dto';
 import { BuyerLoginResponse } from 'src/interfaces/buyer-login.response.interface';
 import { CommonResponse } from 'src/interfaces/common-response.interface';
 import { SellerLoginResponse } from 'src/interfaces/seller-login.response.interface';
 import { AuthCredentialsRequestDto } from '../dtos/auth-credentials.request.dto';
+import { CreateBuyerRequestDto } from '../dtos/create-buyer.request.dto';
 import { CreateSellerRequestDto } from '../dtos/create-seller.dto';
 import { AuthService } from './auth.service';
 import { BuyerGoogleOAuthGuard } from './guards/buyer-google-oauth.guard';
@@ -46,6 +46,19 @@ export class AuthController {
     return { data };
   }
 
+  @UseGuards(BuyerGoogleOAuthGuard)
+  @Get('google')
+  @ApiOperation({ summary: 'buyer google 로그인 API', description: 'buyer google oauth 기능' })
+  async googleAuth() {}
+
+  @UseGuards(BuyerGoogleOAuthGuard)
+  @Get('google/callback')
+  @ApiOperation({ summary: 'buyer google oauth 콜백 API', description: 'buyer google oauth 토큰 발급 기능' })
+  async googleAuthRedirect(@Request() req): Promise<CommonResponse<BuyerLoginResponse>> {
+    const data = await this.authService.buyerGoogleOAuthLogin(req.user);
+    return { data };
+  }
+
   @HttpCode(201)
   @Post('/signup-seller')
   @ApiOperation({ summary: 'seller 생성 API', description: 'seller 회원가입 기능' })
@@ -76,17 +89,6 @@ export class AuthController {
   ): Promise<CommonResponse<SellerLoginResponse>> {
     const data = await this.authService.sellerRefresh(refreshToken);
     return { data };
-  }
-
-  @Get('google')
-  @UseGuards(BuyerGoogleOAuthGuard)
-  async googleAuth() {}
-
-  @Get('google/callback')
-  @UseGuards(BuyerGoogleOAuthGuard)
-  async googleAuthRedirect(@Request() req) {
-    const accessToken = await this.authService.buyerGoogleOAuthLogin(req.user);
-    return { data: accessToken };
   }
 
   @Get('kakao')
