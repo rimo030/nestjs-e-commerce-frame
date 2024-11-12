@@ -33,8 +33,8 @@ model Buyer {
   gender      Int?        @db.TinyInt
   age         Int?
   phone       String?     @db.VarChar(11)
-  oauthProvider String?   @db.VarChar(50) 
-  oauthId     String?     @db.VarChar(255) 
+  oauthProvider String?   @db.VarChar(50) @map("oauth_provider")
+  oauthId     String?     @db.VarChar(255) @map("oauth_id")
   boards      Board[]
   carts       Cart[]
   orders      Order[]
