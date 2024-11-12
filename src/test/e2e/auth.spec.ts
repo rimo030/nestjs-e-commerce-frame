@@ -85,6 +85,22 @@ describe('Controller', () => {
         }
       }
     });
+
+    it(`구매자가 Kakao oauth 로그인을 시도한 경우 카카오 로그인 페이지로 리디렉션이 일어나는지 검증한다.`, async () => {
+      try {
+        await axios.get(`http://localhost:${PORT}/auth/kakao`, { maxRedirects: 0 });
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          const axiosError = error as AxiosError;
+          expect(axiosError.response?.status).toBe(302);
+          expect(axiosError.response?.headers.location?.startsWith('https://kauth.kakao.com/oauth/authorize')).toBe(
+            true,
+          );
+        } else {
+          throw error;
+        }
+      }
+    });
   });
 
   describe('Seller 테스트', () => {
