@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { BuyerGoogleCredentialsRequest } from 'src/interfaces/buyer-google-login.request.interface';
+import { BuyerKakaoCredentialsRequest } from 'src/interfaces/buyer-kakao-login.request.interface';
 import { BuyerLoginResponse } from 'src/interfaces/buyer-login.response.interface';
 import { SellerLoginResponse } from 'src/interfaces/seller-login.response.interface';
 import { PrismaService } from 'src/services/prisma.service';
@@ -105,31 +106,13 @@ export class AuthService {
    * buyer의 카카오 로그인을 처리합니다.
    * 등록되지 않은 이메일일 경우 새로 buyer를 생성합니다. 등록된 경우 jwt 토큰을 발행합니다.
    *
-   * @param BuyerKakaoCredentialsDto BuyerKakaoStrategy에서 전달된 정보입니다.
+   * @param buyerKakaoCredentialsDto BuyerKakaoStrategy에서 전달된 정보입니다.
    */
-  async buyerKakaoOAuthLogin(BuyerKakaoCredentialsDto: {
-    kakaoId?: string;
-    name?: string;
-    accessToken: string;
-  }): Promise<{ accessToken: string }> {
-    const { kakaoId, name } = BuyerKakaoCredentialsDto;
-
-    if (kakaoId && name) {
-      const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email: `${kakaoId}` } });
-
-      if (!buyer) {
-        const buyerId = await this.prisma.buyer.create({
-          select: { id: true },
-          data: { email: `${kakaoId}`, name },
-        });
-        const accessToken = this.jwtService.sign(buyerId, {
-          secret: this.configService.get('JWT_SECRET_BUYER'),
-        });
-        return { accessToken };
-      }
-      return this.buyerLogin(buyer.id);
+  async buyerKakaoOAuthLogin(buyerKakaoCredentialsDto: BuyerKakaoCredentialsRequest): Promise<BuyerLoginResponse> {
+    if (!buyerKakaoCredentialsDto.id) {
+      throw new OAuthNotFoundException();
     }
-    throw new AuthForbiddenException();
+    return await this.handleKakaoOAuthBuyerLogin(buyerKakaoCredentialsDto);
   }
 
   /**
@@ -337,6 +320,16 @@ export class AuthService {
     const buyer = await this.findOAuthBuyer(id, 'GOOGLE');
     if (!buyer) {
       return await this.createOAuthBuyerAndLogin({ email, name }, id, 'GOOGLE');
+    }
+    return await this.buyerLogin(buyer.id);
+  }
+
+  private async handleKakaoOAuthBuyerLogin(buyerKakaoCredentialsRequest: BuyerKakaoCredentialsRequest) {
+    const { id, accessToken, name } = buyerKakaoCredentialsRequest;
+
+    const buyer = await this.findOAuthBuyer(id, 'KAKAO');
+    if (!buyer) {
+      return await this.createOAuthBuyerAndLogin({ name }, id, 'KAKAO');
     }
     return await this.buyerLogin(buyer.id);
   }

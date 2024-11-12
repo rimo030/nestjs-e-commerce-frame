@@ -59,6 +59,18 @@ export class AuthController {
     return { data };
   }
 
+  @Get('kakao')
+  @UseGuards(BuyerKakaoOAuthGuard)
+  @ApiOperation({ summary: 'buyer kakao 로그인 API', description: 'buyer kakao oauth 기능' })
+  async kakaoAuth() {}
+
+  @Get('kakao/callback')
+  @UseGuards(BuyerKakaoOAuthGuard)
+  async kakaoAuthCallback(@Request() req): Promise<CommonResponse<BuyerLoginResponse>> {
+    const data = await this.authService.buyerKakaoOAuthLogin(req.user);
+    return { data };
+  }
+
   @HttpCode(201)
   @Post('/signup-seller')
   @ApiOperation({ summary: 'seller 생성 API', description: 'seller 회원가입 기능' })
@@ -89,16 +101,5 @@ export class AuthController {
   ): Promise<CommonResponse<SellerLoginResponse>> {
     const data = await this.authService.sellerRefresh(refreshToken);
     return { data };
-  }
-
-  @Get('kakao')
-  @UseGuards(BuyerKakaoOAuthGuard)
-  async kakaoAuth() {}
-
-  @Get('kakao/callback')
-  @UseGuards(BuyerKakaoOAuthGuard)
-  async kakaoAuthCallback(@Request() req): Promise<{ data: { accessToken: string } }> {
-    const accessToken = await this.authService.buyerKakaoOAuthLogin(req.user);
-    return { data: accessToken };
   }
 }
