@@ -6,6 +6,12 @@ export class AuthForbiddenException extends HttpException {
   }
 }
 
+export class OAuthNotFoundException extends HttpException {
+  constructor() {
+    super(`OAuth resource is not found.`, HttpStatus.NOT_FOUND);
+  }
+}
+
 /**
  * Buyer
  */

@@ -2,6 +2,7 @@ import { Profile, Strategy } from 'passport-google-oauth20';
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
+import { BuyerGoogleCredentialsRequest } from 'src/interfaces/buyer-google-login.request.interface';
 
 @Injectable()
 export class BuyerGoogleStrategy extends PassportStrategy(Strategy, 'buyer-google') {
@@ -14,20 +15,14 @@ export class BuyerGoogleStrategy extends PassportStrategy(Strategy, 'buyer-googl
     });
   }
 
-  async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: Profile,
-  ): Promise<{
-    email: string | undefined;
-    name: string | undefined;
-    accessToken: string;
-  }> {
-    const { emails, name } = profile;
+  async validate(accessToken: string, refreshToken: string, profile: Profile): Promise<BuyerGoogleCredentialsRequest> {
+    const { id, emails, name } = profile;
     return {
-      email: emails ? emails[0].value : emails,
-      name: name?.givenName,
+      id,
       accessToken,
+      refreshToken,
+      name: name?.givenName,
+      email: emails ? emails[0].value : emails,
     };
   }
 }
