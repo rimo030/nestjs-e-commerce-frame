@@ -62,9 +62,9 @@ export class AuthService {
    * @param authCredentialsDto buyer의 이메일과 비밀번호 입니다.
    */
   async validateBuyer(authCredentialsDto: AuthCredentialsRequestDto): Promise<{ id: number }> {
-    const buyer = await this.prisma.buyer.findUnique({
+    const buyer = await this.prisma.buyer.findFirst({
       select: { id: true, password: true },
-      where: { email: authCredentialsDto.email },
+      where: { email: authCredentialsDto.email, oauthProvider: null },
     });
 
     if (buyer && buyer.password) {
@@ -191,9 +191,9 @@ export class AuthService {
    * @param email 조회할 buyer의 이메일 입니다.
    */
   async findBuyerEmail(email: string): Promise<{ id: number }> {
-    const buyerId = await this.prisma.buyer.findUnique({
+    const buyerId = await this.prisma.buyer.findFirst({
       select: { id: true },
-      where: { email },
+      where: { email, oauthProvider: null },
     });
 
     if (!buyerId) {
@@ -252,7 +252,7 @@ export class AuthService {
 
   private async createBuyer(createBuyerRequestDto: CreateBuyerRequestDto): Promise<{ id: number }> {
     const { email, password, name, gender, age, phone } = createBuyerRequestDto;
-    const buyer = await this.prisma.buyer.findUnique({ select: { id: true }, where: { email } });
+    const buyer = await this.prisma.buyer.findFirst({ select: { id: true }, where: { email, oauthProvider: null } });
     if (buyer) {
       throw new BuyerUnauthrizedException();
     }
