@@ -1,5 +1,6 @@
 export interface BuyerKakaoCredentialsRequest {
   id: string;
-  name?: string | null;
   accessToken: string;
+  refreshToken: string;
+  name?: string | null;
 }

@@ -17,8 +17,9 @@ export class BuyerKakaoStrategy extends PassportStrategy(Strategy, 'buyer-kakao'
     const { id, username } = profile;
     return {
       id: `${id}`,
-      name: username,
       accessToken,
+      refreshToken,
+      name: username,
     };
   }
 }

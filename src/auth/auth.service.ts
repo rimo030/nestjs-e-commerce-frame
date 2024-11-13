@@ -315,7 +315,7 @@ export class AuthService {
   }
 
   private async handleGoogleOAuthBuyerLogin(buyerGoogleCredentialsReuqest: BuyerGoogleCredentialsRequest) {
-    const { id, accessToken, email, name } = buyerGoogleCredentialsReuqest;
+    const { id, accessToken, refreshToken, email, name } = buyerGoogleCredentialsReuqest;
 
     const buyer = await this.findOAuthBuyer(id, 'GOOGLE');
     if (!buyer) {
@@ -325,7 +325,7 @@ export class AuthService {
   }
 
   private async handleKakaoOAuthBuyerLogin(buyerKakaoCredentialsRequest: BuyerKakaoCredentialsRequest) {
-    const { id, accessToken, name } = buyerKakaoCredentialsRequest;
+    const { id, accessToken, refreshToken, name } = buyerKakaoCredentialsRequest;
 
     const buyer = await this.findOAuthBuyer(id, 'KAKAO');
     if (!buyer) {

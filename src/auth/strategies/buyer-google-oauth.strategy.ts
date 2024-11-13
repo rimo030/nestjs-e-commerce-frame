@@ -20,8 +20,9 @@ export class BuyerGoogleStrategy extends PassportStrategy(Strategy, 'buyer-googl
     return {
       id,
       accessToken,
-      email: emails ? emails[0].value : emails,
+      refreshToken,
       name: name?.givenName,
+      email: emails ? emails[0].value : emails,
     };
   }
 }
