@@ -7,8 +7,8 @@ import { BuyerKakaoCredentialsRequest } from 'src/interfaces/buyer-kakao-login.r
 import { BuyerLoginResponse } from 'src/interfaces/buyer-login.response.interface';
 import { SellerLoginResponse } from 'src/interfaces/seller-login.response.interface';
 import { PrismaService } from 'src/services/prisma.service';
+import { NullablePartial } from 'src/types/nullable_partial-type';
 import { oauthProviderType } from 'src/types/oauth.provider.type';
-import { Partial } from 'src/types/partial-type';
 import { AuthCredentialsRequestDto } from '../dtos/auth-credentials.request.dto';
 import { CreateBuyerRequestDto } from '../dtos/create-buyer.request.dto';
 import { CreateSellerRequestDto } from '../dtos/create-seller.dto';
@@ -342,7 +342,7 @@ export class AuthService {
   }
 
   private async createOAuthBuyerAndLogin(
-    createBuyerRequestDto: Partial<CreateBuyerRequestDto>,
+    createBuyerRequestDto: NullablePartial<CreateBuyerRequestDto>,
     oauthId: string,
     oauthProvider: oauthProviderType,
   ): Promise<BuyerLoginResponse> {
