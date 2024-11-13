@@ -44,10 +44,7 @@ export class AuthService {
   /**
    * 판매자 회원가입 기능입니다.
    * seller를 저장합니다. 비밀번호는 암호화 됩니다.
-   *
-   * @param createSellerDto 저장할 seller의 데이터 입니다.
    */
-
   async sellerSignUp(createSellerRequestDto: CreateSellerRequestDto): Promise<SellerLoginResponse> {
     const { id } = await this.createSeller(createSellerRequestDto);
     const { accessToken, refreshToken } = await this.sellerLogin(id);
@@ -72,7 +69,6 @@ export class AuthService {
       if (isRightPassword) {
         return { id: buyer.id };
       }
-      throw new SellerNotFoundException();
     }
     throw new SellerNotFoundException();
   }
@@ -132,7 +128,6 @@ export class AuthService {
       if (isRightPassword) {
         return { id: seller.id };
       }
-      throw new SellerNotFoundException();
     }
     throw new SellerNotFoundException();
   }
